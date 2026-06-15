@@ -75,10 +75,7 @@ public class MudaeCommands {
             }
             Character character = optChar.get();
 
-            // Guardamos como roll activo
-            activeRolls.put(player.getServerLevel().dimension().location().hashCode() + UUID.randomUUID(),
-                    new ActiveRoll(character, player.getUUID()));
-            // Usamos el id del personaje como clave para el claim
+            // Guardamos el roll activo usando el id del personaje como clave
             UUID rollKey = UUID.nameUUIDFromBytes(("roll_" + character.id()).getBytes());
             activeRolls.put(rollKey, new ActiveRoll(character, player.getUUID()));
 
@@ -145,7 +142,8 @@ public class MudaeCommands {
             return 0;
         }
 
-        ActiveRoll roll = rollEntry.getValue();
+        Map.Entry<UUID, ActiveRoll> entry = rollEntry.get();
+        ActiveRoll roll = entry.getValue();
         Character character = roll.character;
 
         if (data.hasCharacter(character.id())) {
@@ -154,7 +152,7 @@ public class MudaeCommands {
         }
 
         data.claim(character);
-        activeRolls.remove(rollEntry.getKey());
+        activeRolls.remove(entry.getKey());
         MudaeDataManager.get().savePlayer(player.getUUID());
 
         MutableComponent msg = Component.literal("").append(
