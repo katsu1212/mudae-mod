@@ -1,0 +1,44 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.78'
+    id 'java'
+}
+
+version = '1.0.0'
+group = 'com.mudaemod'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+neoForge {
+    version = '21.1.233'
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+    }
+
+    mods {
+        mudaemod {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // HTTP client para AniList API (incluido en JDK 11+, no necesita dependencia extra)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
