@@ -1,11 +1,59 @@
-# For mod developers
-If you're looking to start out with NeoForge, please check [the dedicated MDK organization](https://github.com/NeoForgeMDKs) for more information and the list of per-version MDKs.  
-This repository contains the source for the [MDK Mirrors](https://github.com/NeoForgeMDKs).  
+<div align="center">
 
-# Mirrors
-Each branch with a `1.*` name will get a mirror repository created automatically under the [NeoForgeMDKs](https://github.com/NeoForgeMDKs) organization. That mirror will be kept in constant sync with its upstream branch automatically.  
-The format of the repository name is `MDK-<mc version>-<plugin>`, where `plugin` is either [`NeoGradle`](https://github.com/neoforged/NeoGradle) (default), or [`ModDevGradle`](https://github.com/neoforged/moddevgradle) (if the branch name has the `-mdg` or `-legacy` suffix).  
-`Forge-` will be inserted between `MDK-` and `<mc version>` if the branch name has the `-legacy` suffix.
+# 🌸 Mudae Mod
 
-## Contributing
-PRs to the mirror repositories will not be accepted. Contributions should target this repository.
+**Coleccioná personajes de anime y manga en Minecraft, powered by AniList.**
+
+[![Download](https://img.shields.io/badge/⬇️%20Descargar%20Mod-NeoForge%201.21.1-FF69B4?style=for-the-badge&logo=minecraft&logoColor=white)](https://github.com/katsu1212/mudae-mod/releases/latest/download/mudaemod-1.0.0.jar)
+
+[![NeoForge](https://img.shields.io/badge/NeoForge-21.1.233-orange?style=flat-square)](https://neoforged.net)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?style=flat-square)](https://minecraft.net)
+[![Java](https://img.shields.io/badge/Java-21-blue?style=flat-square)](https://adoptium.net)
+
+</div>
+
+---
+
+## 🚀 Instalación
+
+1. Instalá **Minecraft 1.21.1**
+2. Instalá **[NeoForge 21.1.233](https://neoforged.net/)** (el installer lo hace automático)
+3. Hacé click en el botón rosa de arriba para bajar el mod
+4. Copiá `mudaemod-1.0.0.jar` a tu carpeta `mods/`
+   - Windows: `%AppData%\.minecraft\mods\`
+   - Linux/Mac: `~/.minecraft/mods/`
+5. ¡Abrí el juego y a jugar!
+
+---
+
+## 🎮 Comandos
+
+| Comando | Descripción |
+|---------|-------------|
+| `/w` | Invocar una waifu aleatoria |
+| `/h` | Invocar un husbando aleatorio |
+| `/marry` | Claimear el personaje activo (3 min de ventana) |
+| `/harem` | Ver tu colección de personajes |
+| `/kakera` | Ver tus kakera |
+
+---
+
+## ✨ Features
+
+- 🎲 **Rolls** con personajes reales de AniList (100k+ personajes)
+- 💍 **Sistema de claims** — competí con tus amigos por el mismo personaje
+- 📚 **Harem** — coleccioná y revisá tus personajes con click para ver imagen
+- 💎 **Kakera** — moneda que ganás al claimear
+- ⏳ **Cooldowns** — 10 rolls por hora, 1 claim cada 3 horas (igual que Mudae)
+- 🌐 **Multiplayer** — funciona en servidores, todos ven los rolls en el chat
+
+---
+
+## 🔧 Compilar desde el código
+
+```bash
+git clone https://github.com/katsu1212/mudae-mod
+cd mudae-mod
+./gradlew build
+# El JAR queda en build/libs/
+```
