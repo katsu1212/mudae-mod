@@ -39,7 +39,7 @@ public class AniListClient {
     private static Optional<Character> fetchCharacter(int id) {
         String query = """
                 {
-                  "query": "query ($id: Int) { Character(id: $id) { id name { full } image { large } media(sort: POPULARITY_DESC, perPage: 1) { nodes { title { romaji } } } } }",
+                  "query": "query ($id: Int) { Character(id: $id) { id name { full } image { large } favourites media(sort: POPULARITY_DESC, perPage: 1) { nodes { title { romaji } } } } }",
                   "variables": { "id": %d }
                 }
                 """.formatted(id);
@@ -72,11 +72,17 @@ public class AniListClient {
         String name = extractJson(json, "\"full\":\"", "\"");
         String image = extractJson(json, "\"large\":\"", "\"");
         String anime = extractJson(json, "\"romaji\":\"", "\"");
+        String favouritesStr = extractJson(json, "\"favourites\":", ",");
+        if (favouritesStr == null) favouritesStr = extractJson(json, "\"favourites\":", "}");
 
         if (name == null || name.isEmpty()) return Optional.empty();
         if (image == null || image.contains("default.jpg")) return Optional.empty();
 
-        return Optional.of(new Character(id, name, anime != null ? anime : "Original", image));
+        int favourites = 0;
+        try { if (favouritesStr != null) favourites = Integer.parseInt(favouritesStr.trim()); } catch (NumberFormatException ignored) {}
+        int kakera = Math.max(20, Math.min(2000, favourites / 50 + 20));
+
+        return Optional.of(new Character(id, name, anime != null ? anime : "Original", image, kakera));
     }
 
     private static String extractJson(String json, String startMarker, String endMarker) {

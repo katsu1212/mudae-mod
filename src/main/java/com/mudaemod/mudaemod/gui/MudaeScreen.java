@@ -92,7 +92,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
     }
 
     public void onCharacterReceived(CharacterResultPayload payload) {
-        this.currentCharacter = new Character(payload.id(), payload.name(), payload.animeName(), payload.imageUrl());
+        this.currentCharacter = new Character(payload.id(), payload.name(), payload.animeName(), payload.imageUrl(), payload.kakeraValue());
         this.playerKakera = payload.playerKakera();
         this.state = State.LOADING_IMAGE;
         this.currentImage = null;

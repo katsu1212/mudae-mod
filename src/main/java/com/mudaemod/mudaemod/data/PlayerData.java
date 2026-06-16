@@ -82,6 +82,7 @@ public class PlayerData {
             ct.putString("name", c.name());
             ct.putString("animeName", c.animeName());
             ct.putString("imageUrl", c.imageUrl());
+            ct.putInt("kakeraValue", c.kakeraValue());
             haremTag.add(ct);
         }
         tag.put("harem", haremTag);
@@ -102,7 +103,8 @@ public class PlayerData {
                 ct.getInt("id"),
                 ct.getString("name"),
                 ct.getString("animeName"),
-                ct.getString("imageUrl")
+                ct.getString("imageUrl"),
+                ct.getInt("kakeraValue")
             ));
         }
         return data;

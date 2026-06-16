@@ -44,7 +44,7 @@ public class MudaeServerHandler {
 
                 var resultPayload = new CharacterResultPayload(
                     character.id(), character.name(), character.animeName(),
-                    character.imageUrl(), data.getKakera()
+                    character.imageUrl(), data.getKakera(), character.kakeraValue()
                 );
 
                 // Send to ALL players so anyone near the altar can claim

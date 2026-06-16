@@ -12,7 +12,8 @@ public record CharacterResultPayload(
     String name,
     String animeName,
     String imageUrl,
-    int playerKakera
+    int playerKakera,
+    int kakeraValue
 ) implements CustomPacketPayload {
 
     public static final Type<CharacterResultPayload> TYPE =
@@ -25,6 +26,7 @@ public record CharacterResultPayload(
             ByteBufCodecs.STRING_UTF8, CharacterResultPayload::animeName,
             ByteBufCodecs.STRING_UTF8, CharacterResultPayload::imageUrl,
             ByteBufCodecs.INT,        CharacterResultPayload::playerKakera,
+            ByteBufCodecs.INT,        CharacterResultPayload::kakeraValue,
             CharacterResultPayload::new
         );
 
