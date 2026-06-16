@@ -1,6 +1,9 @@
 package com.mudaemod.mudaemod.event;
 
-import com.mudaemod.mudaemod.data.*;
+import com.mudaemod.mudaemod.data.CharacterDatabase;
+import com.mudaemod.mudaemod.data.GlobalMudaeData;
+import com.mudaemod.mudaemod.data.MudaeDataManager;
+import com.mudaemod.mudaemod.data.PlayerData;
 import com.mudaemod.mudaemod.network.handler.MudaeServerHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,7 +46,7 @@ public class ChatCommandHandler {
 
         GlobalMudaeData global = GlobalMudaeData.get(player.getServer());
         CharacterDatabase.Entry entry = CharacterDatabase.rollRandomExcluding(waifu, global.getClaimedIds());
-        Character character = new Character(entry.id(), entry.name(), entry.animeName(), entry.skinUUID(), entry.kakeraValue());
+        com.mudaemod.mudaemod.data.Character character = new com.mudaemod.mudaemod.data.Character(entry.id(), entry.name(), entry.animeName(), entry.skinUUID(), entry.kakeraValue());
 
         data.useRoll();
         mgr.savePlayer(player.getUUID());
@@ -90,7 +93,7 @@ public class ChatCommandHandler {
             return;
         }
 
-        Character character = new Character(
+        com.mudaemod.mudaemod.data.Character character = new com.mudaemod.mudaemod.data.Character(
             global.getActiveCharId(),
             global.getActiveCharName(),
             global.getActiveCharAnime(),

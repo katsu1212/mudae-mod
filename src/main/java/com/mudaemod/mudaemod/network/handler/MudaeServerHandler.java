@@ -4,7 +4,6 @@ import com.mudaemod.mudaemod.data.*;
 import com.mudaemod.mudaemod.network.BuyStatPayload;
 import com.mudaemod.mudaemod.network.HaremPayload;
 import com.mudaemod.mudaemod.network.SellPayload;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +23,7 @@ public class MudaeServerHandler {
             MudaeDataManager mgr = MudaeDataManager.get();
             PlayerData data = mgr.getPlayer(player.getUUID());
 
-            Character toSell = data.getHarem().stream()
+            com.mudaemod.mudaemod.data.Character toSell = data.getHarem().stream()
                 .filter(c -> c.id() == payload.characterId())
                 .findFirst().orElse(null);
 
