@@ -8,24 +8,24 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 public class MudaeNetworking {
 
     public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar reg = event.registrar("1");
+        PayloadRegistrar reg = event.registrar("2");
 
         reg.playToServer(
-            RollRequestPayload.TYPE,
-            RollRequestPayload.STREAM_CODEC,
-            MudaeServerHandler::handleRoll
+            SellPayload.TYPE,
+            SellPayload.STREAM_CODEC,
+            MudaeServerHandler::handleSell
         );
 
         reg.playToServer(
-            ClaimRequestPayload.TYPE,
-            ClaimRequestPayload.STREAM_CODEC,
-            MudaeServerHandler::handleClaim
+            BuyStatPayload.TYPE,
+            BuyStatPayload.STREAM_CODEC,
+            MudaeServerHandler::handleBuyStat
         );
 
         reg.playToClient(
-            CharacterResultPayload.TYPE,
-            CharacterResultPayload.STREAM_CODEC,
-            MudaeClientHandler::handleCharacterResult
+            HaremPayload.TYPE,
+            HaremPayload.STREAM_CODEC,
+            MudaeClientHandler::handleHarem
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.mudaemod.mudaemod.block;
 
 import com.mudaemod.mudaemod.gui.MudaeMenu;
+import com.mudaemod.mudaemod.network.handler.MudaeServerHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -85,6 +86,7 @@ public class MudaeBlock extends Block {
                 (id, inv, p) -> new MudaeMenu(id, inv),
                 Component.literal("Terminal de Mudae")
             ));
+            MudaeServerHandler.buildAndSendHarem(sp);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

@@ -402,6 +402,24 @@ public class CharacterDatabase {
         return pool.get(RANDOM.nextInt(pool.size()));
     }
 
+    public static Entry rollRandomExcluding(boolean waifu, java.util.Set<Integer> excludedIds) {
+        List<Entry> pool = waifu ? WAIFUS : HUSBANDOS;
+        List<Entry> available = pool.stream()
+            .filter(e -> !excludedIds.contains(e.id()))
+            .collect(java.util.stream.Collectors.toList());
+        if (available.isEmpty()) return pool.get(RANDOM.nextInt(pool.size()));
+        return available.get(RANDOM.nextInt(available.size()));
+    }
+
+    public static int getRank(int id) {
+        List<Entry> sorted = new ArrayList<>(ALL);
+        sorted.sort((a, b) -> Integer.compare(b.kakeraValue(), a.kakeraValue()));
+        for (int i = 0; i < sorted.size(); i++) {
+            if (sorted.get(i).id() == id) return i + 1;
+        }
+        return -1;
+    }
+
     public static List<Entry> getAll() { return ALL; }
     public static List<Entry> getWaifus() { return WAIFUS; }
     public static List<Entry> getHusbandos() { return HUSBANDOS; }

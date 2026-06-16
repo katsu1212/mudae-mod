@@ -67,8 +67,9 @@ jobs:
 
             ### Esta versión incluye
             - 367 personajes (174 waifus + 193 husbandos)
-            - Skins de personajes empaquetadas en el mod
-            - Modelos 3D giratorios
-            - Sistema de kakera y cooldowns
+            - Rolls por chat: `$w` waifu · `$h` husbando · `$claim` · `$kakera`
+            - 16 rolls/hora · 1 claim cada 2 horas · pool global compartida
+            - Terminal muestra tu harem con botón Vender
+            - Tienda de stats con kakera: Vida · Velocidad · Fuerza · Defensa
           files: build/libs/mudaemod-*.jar
           make_latest: true

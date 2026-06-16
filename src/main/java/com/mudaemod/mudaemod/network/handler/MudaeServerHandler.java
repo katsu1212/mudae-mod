@@ -1,103 +1,118 @@
 package com.mudaemod.mudaemod.network.handler;
 
-import com.mudaemod.mudaemod.data.ActiveRoll;
-import com.mudaemod.mudaemod.data.Character;
-import com.mudaemod.mudaemod.data.CharacterDatabase;
-import com.mudaemod.mudaemod.data.MudaeDataManager;
-import com.mudaemod.mudaemod.data.PlayerData;
-import com.mudaemod.mudaemod.network.CharacterResultPayload;
-import com.mudaemod.mudaemod.network.ClaimRequestPayload;
-import com.mudaemod.mudaemod.network.RollRequestPayload;
+import com.mudaemod.mudaemod.data.*;
+import com.mudaemod.mudaemod.network.BuyStatPayload;
+import com.mudaemod.mudaemod.network.HaremPayload;
+import com.mudaemod.mudaemod.network.SellPayload;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MudaeServerHandler {
 
-    public static void handleRoll(RollRequestPayload payload, IPayloadContext ctx) {
+    public static void handleSell(SellPayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
+            MudaeDataManager mgr = MudaeDataManager.get();
+            PlayerData data = mgr.getPlayer(player.getUUID());
 
-            PlayerData data = MudaeDataManager.get().getPlayer(player.getUUID());
+            Character toSell = data.getHarem().stream()
+                .filter(c -> c.id() == payload.characterId())
+                .findFirst().orElse(null);
 
-            if (!data.canRoll()) {
-                long secs = data.getRollCooldownRemaining() / 1000;
-                player.sendSystemMessage(Component.literal(
-                    String.format("⏳ Sin rolls. Recarga en %dm %ds.", secs / 60, secs % 60)));
+            if (toSell == null) {
+                player.sendSystemMessage(Component.literal("❌ No tenés ese personaje."));
                 return;
             }
 
-            data.useRoll();
-            MudaeDataManager.get().savePlayer(player.getUUID());
+            data.removeFromHarem(toSell.id());
+            data.addKakera(toSell.kakeraValue());
+            GlobalMudaeData.get(player.getServer()).unclaimCharacter(toSell.id());
+            mgr.savePlayer(player.getUUID());
 
-            // Roll from curated character database (guaranteed skin)
-            CharacterDatabase.Entry entry = CharacterDatabase.rollRandom(payload.waifu());
+            player.sendSystemMessage(Component.literal(
+                "💰 Vendiste a " + toSell.name() + " por 💎 " + toSell.kakeraValue() + " kakera. Vuelve al pool."));
 
-            Character character = new Character(
-                entry.id(), entry.name(), entry.animeName(), entry.skinUUID(), entry.kakeraValue());
-
-            UUID rollKey = UUID.nameUUIDFromBytes(("roll_" + character.id()).getBytes());
-            MudaeDataManager.get().setActiveRoll(rollKey, new ActiveRoll(character, player.getUUID()));
-
-            var resultPayload = new CharacterResultPayload(
-                character.id(), character.name(), character.animeName(),
-                entry.skinUUID(), data.getKakera(), character.kakeraValue()
-            );
-
-            for (ServerPlayer p : player.getServer().getPlayerList().getPlayers()) {
-                PacketDistributor.sendToPlayer(p, resultPayload);
-            }
-
-            player.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("🎲 ")
-                    .append(Component.literal(player.getName().getString()).withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
-                    .append(Component.literal(" invocó a ").withStyle(s -> s.withColor(0xFFFFFF)))
-                    .append(Component.literal(character.name()).withStyle(s -> s.withColor(0xFFD700).withBold(true)))
-                    .append(Component.literal(" de " + character.animeName() + " — ¡claimea con 💍!").withStyle(s -> s.withColor(0xADD8E6))),
-                false
-            );
+            buildAndSendHarem(player);
         });
     }
 
-    public static void handleClaim(ClaimRequestPayload payload, IPayloadContext ctx) {
+    public static void handleBuyStat(BuyStatPayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
+            int idx = payload.statIndex();
+            if (idx < 0 || idx >= 4) return;
 
-            PlayerData data = MudaeDataManager.get().getPlayer(player.getUUID());
+            MudaeDataManager mgr = MudaeDataManager.get();
+            PlayerData data = mgr.getPlayer(player.getUUID());
 
-            if (!data.canClaim()) {
-                player.sendSystemMessage(Component.literal("💔 Ya claimedaste recientemente. Esperá para el próximo."));
+            if (data.getStatLevels()[idx] >= PlayerData.STAT_MAX) {
+                player.sendSystemMessage(Component.literal("❌ " + PlayerData.STAT_NAMES[idx] + " ya está al máximo (5/5)."));
+                return;
+            }
+            if (data.getKakera() < PlayerData.STAT_COSTS[idx]) {
+                player.sendSystemMessage(Component.literal(
+                    "❌ Kakera insuficiente. Necesitás 💎 " + PlayerData.STAT_COSTS[idx] + "."));
                 return;
             }
 
-            UUID rollKey = UUID.nameUUIDFromBytes(("roll_" + payload.characterId()).getBytes());
-            ActiveRoll roll = MudaeDataManager.get().getActiveRoll(rollKey);
+            data.upgradeStat(idx);
+            mgr.savePlayer(player.getUUID());
+            applyStats(player, data);
 
-            if (roll == null || roll.isExpired()) {
-                player.sendSystemMessage(Component.literal("❌ El personaje ya no está disponible (venció el tiempo)."));
-                return;
-            }
+            player.sendSystemMessage(Component.literal(
+                "✨ " + PlayerData.STAT_NAMES[idx] + " subió a nivel " + data.getStatLevels()[idx] + "/5!"));
 
-            if (data.hasCharacter(payload.characterId())) {
-                player.sendSystemMessage(Component.literal("❌ Ya tenés a " + roll.character.name() + " en tu harem."));
-                return;
-            }
-
-            data.claim(roll.character);
-            MudaeDataManager.get().removeActiveRoll(rollKey);
-            MudaeDataManager.get().savePlayer(player.getUUID());
-
-            player.getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("💍 ")
-                    .append(Component.literal(player.getName().getString()).withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
-                    .append(Component.literal(" se casó con ").withStyle(s -> s.withColor(0xFFFFFF)))
-                    .append(Component.literal(roll.character.name()).withStyle(s -> s.withColor(0xFF69B4).withBold(true)))
-                    .append(Component.literal(" de " + roll.character.animeName() + "!").withStyle(s -> s.withColor(0xADD8E6))),
-                false
-            );
+            buildAndSendHarem(player);
         });
+    }
+
+    public static void buildAndSendHarem(ServerPlayer player) {
+        PlayerData data = MudaeDataManager.get().getPlayer(player.getUUID());
+        List<HaremPayload.HaremEntry> entries = data.getHarem().stream()
+            .map(c -> new HaremPayload.HaremEntry(c.id(), c.name(), c.animeName(), c.kakeraValue()))
+            .collect(Collectors.toList());
+        int[] stats = data.getStatLevels();
+        PacketDistributor.sendToPlayer(player,
+            new HaremPayload(entries, data.getKakera(), stats[0], stats[1], stats[2], stats[3]));
+    }
+
+    public static void applyStats(ServerPlayer player, PlayerData data) {
+        int[] lvls = data.getStatLevels();
+
+        applyModifier(player, Attributes.MAX_HEALTH,
+            ResourceLocation.fromNamespaceAndPath("mudaemod", "vida"),
+            lvls[0] * 4.0, AttributeModifier.Operation.ADD_VALUE);
+
+        applyModifier(player, Attributes.MOVEMENT_SPEED,
+            ResourceLocation.fromNamespaceAndPath("mudaemod", "velocidad"),
+            lvls[1] * 0.02, AttributeModifier.Operation.ADD_VALUE);
+
+        applyModifier(player, Attributes.ATTACK_DAMAGE,
+            ResourceLocation.fromNamespaceAndPath("mudaemod", "fuerza"),
+            lvls[2] * 2.0, AttributeModifier.Operation.ADD_VALUE);
+
+        applyModifier(player, Attributes.ARMOR,
+            ResourceLocation.fromNamespaceAndPath("mudaemod", "defensa"),
+            lvls[3] * 2.0, AttributeModifier.Operation.ADD_VALUE);
+    }
+
+    private static void applyModifier(ServerPlayer player,
+            net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+            ResourceLocation id, double amount, AttributeModifier.Operation op) {
+        var instance = player.getAttribute(attr);
+        if (instance == null) return;
+        instance.removeModifier(id);
+        if (amount > 0) {
+            instance.addTransientModifier(new AttributeModifier(id, amount, op));
+        }
     }
 }

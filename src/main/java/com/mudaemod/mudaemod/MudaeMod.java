@@ -1,12 +1,15 @@
 package com.mudaemod.mudaemod;
 
 import com.mudaemod.mudaemod.block.MudaeBlock;
-import com.mudaemod.mudaemod.command.MudaeCommands;
 import com.mudaemod.mudaemod.data.MudaeDataManager;
+import com.mudaemod.mudaemod.data.PlayerData;
+import com.mudaemod.mudaemod.event.ChatCommandHandler;
 import com.mudaemod.mudaemod.gui.MudaeMenu;
 import com.mudaemod.mudaemod.network.MudaeNetworking;
+import com.mudaemod.mudaemod.network.handler.MudaeServerHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -16,7 +19,8 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.ServerChatEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -61,12 +65,16 @@ public class MudaeMod {
 
         modEventBus.addListener(MudaeNetworking::register);
 
-        NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener((ServerStartingEvent e) ->
             MudaeDataManager.get().init(e.getServer()));
-    }
 
-    private void onRegisterCommands(RegisterCommandsEvent event) {
-        MudaeCommands.register(event.getDispatcher());
+        NeoForge.EVENT_BUS.addListener(ChatCommandHandler::onChat);
+
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
+            if (e.getEntity() instanceof ServerPlayer sp) {
+                PlayerData data = MudaeDataManager.get().getPlayer(sp.getUUID());
+                MudaeServerHandler.applyStats(sp, data);
+            }
+        });
     }
 }
