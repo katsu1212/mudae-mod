@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MudaeDataManager {
 
     private static MudaeDataManager instance;
     private final Map<UUID, PlayerData> players = new HashMap<>();
+    private final Map<UUID, ActiveRoll> activeRolls = new ConcurrentHashMap<>();
     private File saveDir;
 
     private MudaeDataManager() {}
@@ -38,13 +40,25 @@ public class MudaeDataManager {
 
     public void savePlayer(UUID id) {
         PlayerData data = players.get(id);
-        if (data == null) return;
+        if (data == null || saveDir == null) return;
         File file = new File(saveDir, id + ".nbt");
         try {
             NbtIo.write(data.save(), file.toPath());
         } catch (IOException e) {
             MudaeMod.LOGGER.error("Error saving player data for {}", id, e);
         }
+    }
+
+    public void setActiveRoll(UUID key, ActiveRoll roll) {
+        activeRolls.put(key, roll);
+    }
+
+    public ActiveRoll getActiveRoll(UUID key) {
+        return activeRolls.get(key);
+    }
+
+    public void removeActiveRoll(UUID key) {
+        activeRolls.remove(key);
     }
 
     private PlayerData loadFromDisk(UUID id) {
