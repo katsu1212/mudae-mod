@@ -24,7 +24,7 @@ public class PlayerData {
     // stat indices: 0=vida, 1=velocidad, 2=fuerza, 3=defensa, 4=vel.minería
     private int[] statLevels = new int[]{0, 0, 0, 0, 0};
 
-    public static final int[] STAT_COSTS  = {400, 500, 700, 450, 300};
+    public static final int[] STAT_COSTS  = {2100, 2650, 3700, 2400, 1600};
     public static final int   STAT_MAX    = 5;
     public static final String[] STAT_NAMES = {"Vida", "Velocidad", "Fuerza", "Defensa", "Vel. Minería"};
 
@@ -101,7 +101,7 @@ public class PlayerData {
 
     // Cada nivel cuesta un 50% más que el anterior
     public static int getStatCost(int statIndex, int currentLevel) {
-        return (int)(STAT_COSTS[statIndex] * Math.pow(1.5, currentLevel));
+        return (int)(STAT_COSTS[statIndex] * Math.pow(1.33, currentLevel));
     }
 
     public boolean upgradeStat(int statIndex) {
