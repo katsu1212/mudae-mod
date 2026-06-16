@@ -1,13 +1,14 @@
 package com.mudaemod.mudaemod.network;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mudaemod.mudaemod.MudaeMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -15,8 +16,10 @@ import java.util.concurrent.CompletableFuture;
 public class SkinLoader {
 
     /**
-     * Creates a fake player to render in the GUI.
-     * Priority: bundled skin PNG in mod assets → Mojang UUID skin → default
+     * Creates a fake player for rendering.
+     * If the Entry has a texture URL (starts with "http"), injects it directly
+     * into the GameProfile so Minecraft loads it without a UUID lookup.
+     * Otherwise falls back to UUID-based skin loading.
      */
     public static CompletableFuture<RemotePlayer> createPlayer(String skinUUID, String characterName, int characterId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -24,22 +27,24 @@ public class SkinLoader {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.level == null) return null;
 
-                // Check for a bundled skin shipped inside the mod jar
-                ResourceLocation bundled = ResourceLocation.fromNamespaceAndPath(
-                    "mudaemod", "textures/skins/" + characterId + ".png");
+                GameProfile profile;
 
-                if (mc.getResourceManager().getResource(bundled).isPresent()) {
-                    GameProfile profile = new GameProfile(UUID.randomUUID(), characterName);
-                    MudaeMod.LOGGER.info("[Mudae] Usando skin empaquetada para '{}' (id={})", characterName, characterId);
-                    return new MudaeFakePlayer(mc.level, profile, bundled);
+                if (skinUUID.startsWith("http")) {
+                    // Direct texture URL — inject into GameProfile textures property
+                    profile = new GameProfile(UUID.randomUUID(), characterName);
+                    String json = "{\"textures\":{\"SKIN\":{\"url\":\"" + skinUUID + "\"}}}";
+                    String encoded = Base64.getEncoder().encodeToString(json.getBytes());
+                    profile.getProperties().put("textures", new Property("textures", encoded));
+                    MudaeMod.LOGGER.info("[Mudae] Skin via URL para '{}'", characterName);
+                } else {
+                    // UUID — let Mojang's SkinManager fetch it
+                    UUID uuid = UUID.fromString(skinUUID);
+                    profile = new GameProfile(uuid, characterName);
+                    MudaeMod.LOGGER.info("[Mudae] Skin via UUID para '{}' ({})", characterName, skinUUID);
                 }
 
-                // Fallback: use Mojang's skin manager with the stored UUID
-                UUID uuid = UUID.fromString(skinUUID);
-                GameProfile profile = new GameProfile(uuid, characterName);
                 RemotePlayer player = new RemotePlayer(mc.level, profile);
                 mc.getSkinManager().getOrLoad(profile);
-                MudaeMod.LOGGER.info("[Mudae] Skin via Mojang para '{}' ({})", characterName, skinUUID);
                 return player;
 
             } catch (Exception e) {
