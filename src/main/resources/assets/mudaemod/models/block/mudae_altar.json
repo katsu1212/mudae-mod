@@ -1,5 +1,5 @@
 {
-  "credit": "Mudae Mod - ATM Terminal (2 bloques alto)",
+  "credit": "Mudae Mod - ATM Terminal con textura anime",
   "ambientocclusion": true,
   "textures": {
     "body":     "minecraft:block/iron_block",
@@ -7,6 +7,8 @@
     "screen":   "minecraft:block/cyan_concrete",
     "keys":     "minecraft:block/light_gray_concrete",
     "accent":   "minecraft:block/purple_concrete",
+    "anime":    "mudaemod:block/atm_side",
+    "back":     "mudaemod:block/atm_back",
     "particle": "minecraft:block/iron_block"
   },
   "elements": [
@@ -16,9 +18,9 @@
       "to": [14, 16, 14],
       "faces": {
         "north": { "texture": "#body", "uv": [0, 0, 12, 16] },
-        "south": { "texture": "#body", "uv": [0, 0, 12, 16] },
-        "east":  { "texture": "#body", "uv": [0, 0, 10, 16] },
-        "west":  { "texture": "#body", "uv": [0, 0, 10, 16] },
+        "south": { "texture": "#back", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#anime", "uv": [0, 8, 16, 16] },
+        "west":  { "texture": "#anime", "uv": [0, 8, 16, 16] },
         "up":    { "texture": "#body", "uv": [0, 0, 12, 10] },
         "down":  { "texture": "#dark", "uv": [0, 0, 12, 10] }
       }
@@ -29,9 +31,9 @@
       "to": [14, 32, 14],
       "faces": {
         "north": { "texture": "#body", "uv": [0, 0, 12, 16] },
-        "south": { "texture": "#body", "uv": [0, 0, 12, 16] },
-        "east":  { "texture": "#body", "uv": [0, 0, 10, 16] },
-        "west":  { "texture": "#body", "uv": [0, 0, 10, 16] },
+        "south": { "texture": "#back", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#anime", "uv": [0, 0, 16, 8] },
+        "west":  { "texture": "#anime", "uv": [0, 0, 16, 8] },
         "up":    { "texture": "#dark", "uv": [0, 0, 12, 10] },
         "down":  { "texture": "#body", "uv": [0, 0, 12, 10] }
       }
