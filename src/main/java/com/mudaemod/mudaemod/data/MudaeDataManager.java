@@ -63,6 +63,24 @@ public class MudaeDataManager {
         activeRolls.remove(key);
     }
 
+    /** Busca en jugadores cargados y luego en disco quién tiene el personaje. */
+    public UUID findOwnerOf(int charId) {
+        for (Map.Entry<UUID, PlayerData> e : players.entrySet())
+            if (e.getValue().hasCharacter(charId)) return e.getKey();
+        if (saveDir == null) return null;
+        File[] files = saveDir.listFiles((d, n) -> n.endsWith(".nbt"));
+        if (files == null) return null;
+        for (File f : files) {
+            try {
+                UUID uuid = UUID.fromString(f.getName().replace(".nbt", ""));
+                if (players.containsKey(uuid)) continue;
+                CompoundTag tag = NbtIo.read(f.toPath());
+                if (tag != null && PlayerData.load(tag).hasCharacter(charId)) return uuid;
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
     private PlayerData loadFromDisk(UUID id) {
         if (saveDir == null) return null;
         File file = new File(saveDir, id + ".nbt");

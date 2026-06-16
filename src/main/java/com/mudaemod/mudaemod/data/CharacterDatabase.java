@@ -2028,6 +2028,29 @@ public class CharacterDatabase {
         return null;
     }
 
+    /** Busqueda exacta primero, luego parcial (case-insensitive). */
+    public static Character searchByName(String query) {
+        String q = query.toLowerCase().trim();
+        // Exacto
+        for (Character c : ALL)
+            if (c.name().toLowerCase().equals(q)) return c;
+        // Starts with
+        for (Character c : ALL)
+            if (c.name().toLowerCase().startsWith(q)) return c;
+        // Contains
+        for (Character c : ALL)
+            if (c.name().toLowerCase().contains(q)) return c;
+        return null;
+    }
+
+    public static List<Character> searchAllByName(String query) {
+        String q = query.toLowerCase().trim();
+        List<Character> results = new ArrayList<>();
+        for (Character c : ALL)
+            if (c.name().toLowerCase().contains(q)) results.add(c);
+        return results;
+    }
+
     public static int getRank(int id) {
         Character c = getById(id); return c != null ? c.getRank() : 1;
     }
