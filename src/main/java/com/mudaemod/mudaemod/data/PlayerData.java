@@ -60,7 +60,7 @@ public class PlayerData {
     public void claim(Character character) {
         harem.add(character);
         lastClaimTime = System.currentTimeMillis();
-        kakera += 5;
+        kakera += character.kakeraValue();
     }
 
     public boolean hasCharacter(int characterId) {

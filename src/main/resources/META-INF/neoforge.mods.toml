@@ -4,11 +4,11 @@ license = "MIT"
 
 [[mods]]
     modId = "mudaemod"
-    version = "1.0.0"
+    version = "1.3"
     displayName = "Mudae Mod"
     description = '''
-Collect anime/manga characters powered by AniList API.
-Use /w or /h to roll for waifus and husbandos!
+Colecciona personajes de anime y manga en Minecraft.
+Click derecho en la Terminal de Mudae para invocar waifus y husbandos!
 '''
 
 [[dependencies.mudaemod]]
