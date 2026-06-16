@@ -1,3 +1,6 @@
 {
-  "parent": "mudaemod:block/mudae_altar"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "mudaemod:block/atm_item"
+  }
 }
