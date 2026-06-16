@@ -17,7 +17,8 @@ public class ChatCommandHandler {
 
         if (!lower.equals("$w") && !lower.equals("$waifu")
             && !lower.equals("$h") && !lower.equals("$husbando")
-            && !lower.equals("$claim") && !lower.equals("$kakera")) {
+            && !lower.equals("$claim") && !lower.equals("$kakera")
+            && !lower.equals("$debug")) {
             return;
         }
 
@@ -29,6 +30,7 @@ public class ChatCommandHandler {
             case "$h", "$husbando"   -> handleRoll(player, false);
             case "$claim"            -> handleClaim(player);
             case "$kakera"           -> handleKakera(player);
+            case "$debug"            -> handleDebug(player);
         }
     }
 
@@ -118,6 +120,16 @@ public class ChatCommandHandler {
                     .withStyle(s -> s.withColor(0xADD8E6))),
             false
         );
+    }
+
+    private static void handleDebug(ServerPlayer player) {
+        MudaeDataManager mgr = MudaeDataManager.get();
+        PlayerData data = mgr.getPlayer(player.getUUID());
+        data.resetCooldowns();
+        data.addKakera(99999);
+        mgr.savePlayer(player.getUUID());
+        player.sendSystemMessage(Component.literal(
+            "[DEBUG] Rolls y claim reseteados. +99999 kakera."));
     }
 
     private static void handleKakera(ServerPlayer player) {

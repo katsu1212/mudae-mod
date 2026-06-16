@@ -93,6 +93,12 @@ public class PlayerData {
         return harem.stream().anyMatch(c -> c.id() == characterId);
     }
 
+    public void resetCooldowns() {
+        this.rollsRemaining = 16;
+        this.lastRollTime = 0;
+        this.lastClaimTime = 0;
+    }
+
     public boolean upgradeStat(int statIndex) {
         if (statIndex < 0 || statIndex >= 4) return false;
         if (statLevels[statIndex] >= STAT_MAX) return false;
