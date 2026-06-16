@@ -87,7 +87,7 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0xFFFFAA).withBold(true)))
                     .append(Component.literal(" ✦ " + c.animeName())
                         .withStyle(s -> s.withColor(0xFFD700))));
-                broadcast(server, Component.literal("  💎 " + ka + " kakera  |  Rank 5  ←  $claim")
+                broadcast(server, Component.literal("  💎 " + ka + " kakera  |  Top " + c.getId() + "  ←  $claim")
                     .withStyle(s -> s.withColor(0xFFAA00).withBold(true)));
                 broadcast(server, Component.literal("✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦")
                     .withStyle(s -> s.withColor(0xFFD700).withBold(true)));
@@ -104,7 +104,7 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0xFF77FF).withBold(true)))
                     .append(Component.literal(" de " + c.animeName())
                         .withStyle(s -> s.withColor(0xCC44FF)))
-                    .append(Component.literal("  |  💎 " + ka + "  |  Rank 4  ←  $claim")
+                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId() + "  ←  $claim")
                         .withStyle(s -> s.withColor(0xAA22DD))));
             }
             case 3 -> {
@@ -118,7 +118,7 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0x55FFFF).withBold(true)))
                     .append(Component.literal(" de " + c.animeName())
                         .withStyle(s -> s.withColor(0x55DDDD)))
-                    .append(Component.literal("  |  💎 " + ka + "  |  Rank 3  ←  $claim")
+                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId() + "  ←  $claim")
                         .withStyle(s -> s.withColor(0x44BBCC))));
             }
             default -> {
@@ -132,7 +132,7 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0xFFD700).withBold(true)))
                     .append(Component.literal(" de " + c.animeName())
                         .withStyle(s -> s.withColor(0xADD8E6)))
-                    .append(Component.literal("  |  💎 " + ka + "  |  Rank " + rank + "  ←  $claim")
+                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId() + "  ←  $claim")
                         .withStyle(s -> s.withColor(0xAA55FF))));
             }
         }
@@ -215,21 +215,13 @@ public class ChatCommandHandler {
             case 2 -> 0xADD8E6;
             default -> 0xAAAAAA;
         };
-        String rankLabel = switch (c.getRank()) {
-            case 5 -> "⭐ Legendario";
-            case 4 -> "✨ Raro";
-            case 3 -> "💫 Poco común";
-            case 2 -> "Común";
-            default -> "Muy común";
-        };
-
         player.sendSystemMessage(Component.literal("─────────────────────────")
             .withStyle(s -> s.withColor(rankColor)));
         player.sendSystemMessage(Component.literal("  " + c.name())
             .withStyle(s -> s.withColor(rankColor).withBold(true))
             .append(Component.literal("  —  " + c.animeName())
                 .withStyle(s -> s.withColor(0xCCCCCC).withBold(false))));
-        player.sendSystemMessage(Component.literal("  💎 " + c.kakeraValue() + " kakera   |   " + rankLabel)
+        player.sendSystemMessage(Component.literal("  💎 " + c.kakeraValue() + " kakera   |   Top " + c.getId())
             .withStyle(s -> s.withColor(rankColor)));
 
         // Estado: ¿reclamado?

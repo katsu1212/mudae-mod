@@ -44,7 +44,7 @@ public class MudaeCommands {
                .append(Component.literal(c.name()).withStyle(s -> s
                     .withColor(0xFFD700)
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Component.literal("📺 " + c.animeName() + "\n💎 " + c.kakeraValue() + " kakera")))))
+                        Component.literal("📺 " + c.animeName() + "\n💎 " + c.kakeraValue() + " kakera  |  Top " + c.id())))))
                .append(Component.literal(" — " + c.animeName() + "\n").withStyle(s -> s.withColor(0xADD8E6)));
         }
 
