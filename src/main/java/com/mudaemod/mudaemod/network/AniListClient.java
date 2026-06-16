@@ -80,7 +80,10 @@ public class AniListClient {
 
         int favourites = 0;
         try { if (favouritesStr != null) favourites = Integer.parseInt(favouritesStr.trim()); } catch (NumberFormatException ignored) {}
-        int kakera = Math.max(20, Math.min(2000, favourites / 50 + 20));
+        // When favourites > 0 use real value (capped at 2000); otherwise fallback to id-based variety
+        int kakera = favourites > 0
+            ? Math.max(20, Math.min(2000, favourites / 10 + 20))
+            : (20 + (id % 80));
 
         return Optional.of(new Character(id, name, anime != null ? anime : "Original", image, kakera));
     }
