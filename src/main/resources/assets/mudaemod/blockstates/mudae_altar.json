@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "mudaemod:block/mudae_altar" }
+    "facing=north": { "model": "mudaemod:block/mudae_altar" },
+    "facing=south": { "model": "mudaemod:block/mudae_altar", "y": 180 },
+    "facing=east":  { "model": "mudaemod:block/mudae_altar", "y": 90  },
+    "facing=west":  { "model": "mudaemod:block/mudae_altar", "y": 270 }
   }
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AFA",
+    "FEF",
+    "AFA"
+  ],
+  "key": {
+    "A": { "item": "minecraft:amethyst_block" },
+    "F": { "item": "minecraft:amethyst_shard" },
+    "E": { "item": "minecraft:ender_eye" }
+  },
+  "result": {
+    "id": "mudaemod:mudae_altar",
+    "count": 1
+  }
+}
