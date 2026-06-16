@@ -1,71 +1,125 @@
 {
-  "credit": "Mudae Mod - Terminal de Mudae",
+  "credit": "Mudae Mod - ATM Terminal (2 bloques alto)",
   "ambientocclusion": true,
   "textures": {
-    "screen":   "minecraft:block/black_concrete",
-    "body":     "minecraft:block/amethyst_block",
-    "metal":    "minecraft:block/iron_block",
-    "glow":     "minecraft:block/crying_obsidian",
-    "particle": "minecraft:block/amethyst_block"
+    "body":     "minecraft:block/iron_block",
+    "dark":     "minecraft:block/black_concrete",
+    "screen":   "minecraft:block/cyan_concrete",
+    "keys":     "minecraft:block/light_gray_concrete",
+    "accent":   "minecraft:block/purple_concrete",
+    "particle": "minecraft:block/iron_block"
   },
   "elements": [
     {
-      "comment": "Monitor casing (back)",
-      "from": [2, 7, 2],
-      "to": [14, 16, 5],
+      "comment": "Cuerpo principal inferior (bloque 1)",
+      "from": [2, 0, 4],
+      "to": [14, 16, 14],
       "faces": {
-        "north": { "texture": "#body", "uv": [0, 0, 12, 9] },
-        "south": { "texture": "#body", "uv": [0, 0, 12, 9] },
-        "east":  { "texture": "#body", "uv": [0, 0, 3, 9] },
-        "west":  { "texture": "#body", "uv": [0, 0, 3, 9] },
-        "up":    { "texture": "#body", "uv": [0, 0, 12, 3] },
-        "down":  { "texture": "#body", "uv": [0, 0, 12, 3] }
+        "north": { "texture": "#body", "uv": [0, 0, 12, 16] },
+        "south": { "texture": "#body", "uv": [0, 0, 12, 16] },
+        "east":  { "texture": "#body", "uv": [0, 0, 10, 16] },
+        "west":  { "texture": "#body", "uv": [0, 0, 10, 16] },
+        "up":    { "texture": "#body", "uv": [0, 0, 12, 10] },
+        "down":  { "texture": "#dark", "uv": [0, 0, 12, 10] }
       }
     },
     {
-      "comment": "Screen glass bezel",
-      "from": [3, 8, 1],
-      "to": [13, 15, 2],
+      "comment": "Cuerpo principal superior (bloque 2)",
+      "from": [2, 16, 4],
+      "to": [14, 32, 14],
       "faces": {
-        "north": { "texture": "#glow", "uv": [0, 0, 10, 7] },
-        "south": { "texture": "#body", "uv": [0, 0, 10, 7] },
-        "east":  { "texture": "#body", "uv": [0, 0, 1, 7] },
-        "west":  { "texture": "#body", "uv": [0, 0, 1, 7] },
-        "up":    { "texture": "#body", "uv": [0, 0, 10, 1] },
-        "down":  { "texture": "#body", "uv": [0, 0, 10, 1] }
+        "north": { "texture": "#body", "uv": [0, 0, 12, 16] },
+        "south": { "texture": "#body", "uv": [0, 0, 12, 16] },
+        "east":  { "texture": "#body", "uv": [0, 0, 10, 16] },
+        "west":  { "texture": "#body", "uv": [0, 0, 10, 16] },
+        "up":    { "texture": "#dark", "uv": [0, 0, 12, 10] },
+        "down":  { "texture": "#body", "uv": [0, 0, 12, 10] }
       }
     },
     {
-      "comment": "Screen (front face - the actual display)",
-      "from": [4, 9, 0],
-      "to": [12, 14, 1],
+      "comment": "Franja de acento superior",
+      "from": [2, 29, 3],
+      "to": [14, 32, 5],
       "faces": {
-        "north": { "texture": "#screen", "uv": [0, 0, 8, 5] },
-        "south": { "texture": "#glow",   "uv": [0, 0, 8, 5] }
+        "north": { "texture": "#accent", "uv": [0, 0, 12, 3] },
+        "up":    { "texture": "#accent", "uv": [0, 0, 12, 2] },
+        "east":  { "texture": "#accent", "uv": [0, 0, 2, 3] },
+        "west":  { "texture": "#accent", "uv": [0, 0, 2, 3] }
       }
     },
     {
-      "comment": "Stand neck",
-      "from": [6, 2, 2],
-      "to": [10, 7, 4],
+      "comment": "Camara/sensor superior",
+      "from": [6, 28, 3],
+      "to": [10, 30, 4],
       "faces": {
-        "north": { "texture": "#metal", "uv": [0, 0, 4, 5] },
-        "south": { "texture": "#metal", "uv": [0, 0, 4, 5] },
-        "east":  { "texture": "#metal", "uv": [0, 0, 2, 5] },
-        "west":  { "texture": "#metal", "uv": [0, 0, 2, 5] }
+        "north": { "texture": "#dark", "uv": [0, 0, 4, 2] }
       }
     },
     {
-      "comment": "Stand base",
-      "from": [3, 0, 1],
-      "to": [13, 2, 6],
+      "comment": "Marco pantalla",
+      "from": [3, 18, 3],
+      "to": [13, 28, 4],
       "faces": {
-        "north": { "texture": "#metal", "uv": [0, 0, 10, 2] },
-        "south": { "texture": "#metal", "uv": [0, 0, 10, 2] },
-        "east":  { "texture": "#metal", "uv": [0, 0, 5, 2] },
-        "west":  { "texture": "#metal", "uv": [0, 0, 5, 2] },
-        "up":    { "texture": "#metal", "uv": [0, 0, 10, 5] },
-        "down":  { "texture": "#metal", "uv": [0, 0, 10, 5] }
+        "north": { "texture": "#dark", "uv": [0, 0, 10, 10] },
+        "south": { "texture": "#body", "uv": [0, 0, 10, 10] },
+        "east":  { "texture": "#dark", "uv": [0, 0, 1, 10] },
+        "west":  { "texture": "#dark", "uv": [0, 0, 1, 10] },
+        "up":    { "texture": "#dark", "uv": [0, 0, 10, 1] },
+        "down":  { "texture": "#dark", "uv": [0, 0, 10, 1] }
+      }
+    },
+    {
+      "comment": "Pantalla (display)",
+      "from": [4, 19, 2],
+      "to": [12, 27, 3],
+      "faces": {
+        "north": { "texture": "#screen", "uv": [0, 0, 8, 8] }
+      }
+    },
+    {
+      "comment": "Teclado numerico",
+      "from": [3, 9, 3],
+      "to": [13, 17, 4],
+      "faces": {
+        "north": { "texture": "#keys", "uv": [0, 0, 10, 8] },
+        "south": { "texture": "#body", "uv": [0, 0, 10, 8] },
+        "up":    { "texture": "#keys", "uv": [0, 0, 10, 1] }
+      }
+    },
+    {
+      "comment": "Botones del teclado (decorativo)",
+      "from": [4, 10, 2],
+      "to": [12, 16, 3],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 8, 6] }
+      }
+    },
+    {
+      "comment": "Ranura dispensadora (abajo)",
+      "from": [4, 5, 3],
+      "to": [12, 7, 4],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 8, 2] },
+        "up":    { "texture": "#dark", "uv": [0, 0, 8, 1] }
+      }
+    },
+    {
+      "comment": "Ranura tarjeta",
+      "from": [5, 7, 3],
+      "to": [11, 8, 4],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 6, 1] }
+      }
+    },
+    {
+      "comment": "Franja de acento inferior",
+      "from": [2, 0, 3],
+      "to": [14, 3, 5],
+      "faces": {
+        "north": { "texture": "#accent", "uv": [0, 0, 12, 3] },
+        "down":  { "texture": "#accent", "uv": [0, 0, 12, 2] },
+        "east":  { "texture": "#accent", "uv": [0, 0, 2, 3] },
+        "west":  { "texture": "#accent", "uv": [0, 0, 2, 3] }
       }
     }
   ]

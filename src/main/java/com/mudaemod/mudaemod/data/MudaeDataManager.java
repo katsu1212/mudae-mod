@@ -4,6 +4,7 @@ import com.mudaemod.mudaemod.MudaeMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +28,8 @@ public class MudaeDataManager {
     }
 
     public void init(MinecraftServer server) {
-        saveDir = new File(server.getServerDirectory().toFile(), "mudae_data");
+        // Guardar dentro de la carpeta del mundo para que sea por-mundo
+        saveDir = server.getWorldPath(LevelResource.ROOT).resolve("mudae_data").toFile();
         saveDir.mkdirs();
     }
 

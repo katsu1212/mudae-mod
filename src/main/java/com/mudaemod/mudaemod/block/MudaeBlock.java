@@ -29,12 +29,8 @@ public class MudaeBlock extends Block {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    // Shapes orientadas al norte — se rotan automáticamente en getShape
-    private static final VoxelShape SHAPE_NORTH = Shapes.or(
-        Block.box(3, 0, 1, 13, 2, 6),   // base
-        Block.box(6, 2, 2, 10, 7, 4),   // cuello
-        Block.box(2, 7, 0, 14, 16, 5)   // monitor
-    );
+    // Forma de ATM — cuerpo principal centrado
+    private static final VoxelShape SHAPE_NORTH = Block.box(2, 0, 4, 14, 16, 14);
 
     public MudaeBlock() {
         super(Properties.of()
@@ -59,22 +55,10 @@ public class MudaeBlock extends Block {
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         return switch (state.getValue(FACING)) {
-            case SOUTH -> Shapes.or(
-                Block.box(3, 0, 10, 13, 2, 15),
-                Block.box(6, 2, 12, 10, 7, 14),
-                Block.box(2, 7, 11, 14, 16, 16)
-            );
-            case EAST -> Shapes.or(
-                Block.box(10, 0, 3, 15, 2, 13),
-                Block.box(12, 2, 6, 14, 7, 10),
-                Block.box(11, 7, 2, 16, 16, 14)
-            );
-            case WEST -> Shapes.or(
-                Block.box(1, 0, 3, 6, 2, 13),
-                Block.box(2, 2, 6, 4, 7, 10),
-                Block.box(0, 7, 2, 5, 16, 14)
-            );
-            default -> SHAPE_NORTH;
+            case SOUTH -> Block.box(2, 0, 2, 14, 16, 12);
+            case EAST  -> Block.box(2, 0, 2, 12, 16, 14);
+            case WEST  -> Block.box(4, 0, 2, 14, 16, 14);
+            default    -> SHAPE_NORTH;
         };
     }
 
