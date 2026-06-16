@@ -146,8 +146,8 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
         g.fill(x + 5, y + H - 46, x + W - 5, y + H - 5, 0xBB0D0D20);
         g.hLine(x + 5, x + W - 6, y + H - 46, COLOR_DIVIDER);
 
-        renderTooltip(g, mx, my);
         super.render(g, mx, my, delta);
+        renderClaimTooltip(g, mx, my);
 
         renderContent(g, x, y);
     }
@@ -251,7 +251,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
         g.drawString(font, "✨ ¡Sé el primero en clickear Claim!", tx, ty + 76, 0xFFFFAA44, false);
     }
 
-    private void renderTooltip(GuiGraphics g, int mx, int my) {
+    private void renderClaimTooltip(GuiGraphics g, int mx, int my) {
         if (claimBtn != null && claimBtn.isHovered()) {
             g.renderTooltip(font, Component.literal("Claimear este personaje para tu harem"), mx, my);
         }
