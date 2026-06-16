@@ -53,8 +53,9 @@ public class MudaeServerHandler {
             MudaeDataManager mgr = MudaeDataManager.get();
             PlayerData data = mgr.getPlayer(player.getUUID());
 
-            if (data.getStatLevels()[idx] >= PlayerData.STAT_MAX) {
-                player.sendSystemMessage(Component.literal("❌ " + PlayerData.STAT_NAMES[idx] + " ya está al máximo (5/5)."));
+            if (data.getStatLevels()[idx] >= PlayerData.STAT_MAX[idx]) {
+                int max = PlayerData.STAT_MAX[idx];
+                player.sendSystemMessage(Component.literal("❌ " + PlayerData.STAT_NAMES[idx] + " ya está al máximo (" + max + "/" + max + ")."));
                 return;
             }
             int cost = PlayerData.getStatCost(idx, data.getStatLevels()[idx]);

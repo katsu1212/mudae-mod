@@ -24,8 +24,8 @@ public class PlayerData {
     // stat indices: 0=vida, 1=velocidad, 2=fuerza, 3=defensa, 4=vel.minería
     private int[] statLevels = new int[]{0, 0, 0, 0, 0};
 
-    public static final int[] STAT_COSTS  = {2100, 2650, 3700, 2400, 1600};
-    public static final int   STAT_MAX    = 5;
+    public static final int[] STAT_COSTS  = {400, 500, 700, 450, 300};
+    public static final int[] STAT_MAX    = {10, 10, 5, 5, 10};
     public static final String[] STAT_NAMES = {"Vida", "Velocidad", "Fuerza", "Defensa", "Vel. Minería"};
 
     public PlayerData(UUID playerId) {
@@ -101,12 +101,12 @@ public class PlayerData {
 
     // Cada nivel cuesta un 50% más que el anterior
     public static int getStatCost(int statIndex, int currentLevel) {
-        return (int)(STAT_COSTS[statIndex] * Math.pow(1.33, currentLevel));
+        return (int)(STAT_COSTS[statIndex] * Math.pow(1.1, currentLevel));
     }
 
     public boolean upgradeStat(int statIndex) {
         if (statIndex < 0 || statIndex >= 5) return false;
-        if (statLevels[statIndex] >= STAT_MAX) return false;
+        if (statLevels[statIndex] >= STAT_MAX[statIndex]) return false;
         int cost = getStatCost(statIndex, statLevels[statIndex]);
         if (!spendKakera(cost)) return false;
         statLevels[statIndex]++;

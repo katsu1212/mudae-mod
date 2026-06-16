@@ -189,7 +189,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
             int ry = startY + i * 38;
             int lv = statLevels[i];
             int cost = PlayerData.getStatCost(i, lv);
-            boolean maxed = lv >= PlayerData.STAT_MAX;
+            boolean maxed = lv >= PlayerData.STAT_MAX[i];
 
             g.fill(x + 8, ry, x + W - 8, ry + 32, 0x33000000);
             g.hLine(x + 8, x + W - 9, ry, COLOR_DIVIDER);
@@ -200,15 +200,17 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
             // Desc
             g.drawString(font, descs[i], x + 14, ry + 16, COLOR_GRAY, false);
 
-            // Level bar (5 pips)
-            for (int p = 0; p < 5; p++) {
-                int px = x + 155 + p * 14;
+            // Level bar (pip count = max for this stat)
+            int maxLv = PlayerData.STAT_MAX[i];
+            int pipW = maxLv <= 5 ? 14 : 8;
+            for (int p = 0; p < maxLv; p++) {
+                int px = x + 155 + p * (pipW + 1);
                 int py2 = ry + 8;
-                g.fill(px, py2, px + 10, py2 + 8, p < lv ? COLOR_GREEN : 0xFF333355);
-                g.hLine(px, px + 9, py2, COLOR_BORDER);
-                g.hLine(px, px + 9, py2 + 7, COLOR_BORDER);
+                g.fill(px, py2, px + pipW - 1, py2 + 8, p < lv ? COLOR_GREEN : 0xFF333355);
+                g.hLine(px, px + pipW - 2, py2, COLOR_BORDER);
+                g.hLine(px, px + pipW - 2, py2 + 7, COLOR_BORDER);
                 g.vLine(px, py2, py2 + 8, COLOR_BORDER);
-                g.vLine(px + 9, py2, py2 + 8, COLOR_BORDER);
+                g.vLine(px + pipW - 1, py2, py2 + 8, COLOR_BORDER);
             }
 
             // Buy button
@@ -278,7 +280,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
             : new int[]{0, 0, 0, 0, 0};
 
         for (int i = 0; i < 5; i++) {
-            if (statLevels[i] >= PlayerData.STAT_MAX) continue;
+            if (statLevels[i] >= PlayerData.STAT_MAX[i]) continue;
             int ry = startY + i * 38;
             int btnX = x + W - 62;
             int btnY2 = ry + 8;
