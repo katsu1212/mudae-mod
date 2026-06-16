@@ -21,12 +21,12 @@ public class PlayerData {
     private long lastClaimTime = 0;
     private int rollsRemaining = 16;
 
-    // stat indices: 0=vida, 1=velocidad, 2=fuerza, 3=defensa
-    private int[] statLevels = new int[]{0, 0, 0, 0};
+    // stat indices: 0=vida, 1=velocidad, 2=fuerza, 3=defensa, 4=vel.minería
+    private int[] statLevels = new int[]{0, 0, 0, 0, 0};
 
-    public static final int[] STAT_COSTS  = {500, 800, 1000, 700};
+    public static final int[] STAT_COSTS  = {1000, 800, 1200, 900, 700};
     public static final int   STAT_MAX    = 5;
-    public static final String[] STAT_NAMES = {"Vida", "Velocidad", "Fuerza", "Defensa"};
+    public static final String[] STAT_NAMES = {"Vida", "Velocidad", "Fuerza", "Defensa", "Vel. Minería"};
 
     public PlayerData(UUID playerId) {
         this.playerId = playerId;
@@ -133,7 +133,12 @@ public class PlayerData {
         data.rollsRemaining = tag.getInt("rollsRemaining");
         if (tag.contains("statLevels")) {
             int[] loaded = tag.getIntArray("statLevels");
-            if (loaded.length == 4) data.statLevels = loaded;
+            if (loaded.length >= 4) {
+                // migrate from 4-stat saves to 5-stat
+                int[] s = new int[5];
+                System.arraycopy(loaded, 0, s, 0, Math.min(loaded.length, 5));
+                data.statLevels = s;
+            }
         }
 
         ListTag haremTag = tag.getList("harem", Tag.TAG_COMPOUND);

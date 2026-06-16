@@ -175,51 +175,51 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
     }
 
     private void renderTiendaTab(GuiGraphics g, int x, int y, int mx, int my) {
-        int[] statLevels = new int[]{0, 0, 0, 0};
+        int[] statLevels = new int[]{0, 0, 0, 0, 0};
         if (haremData != null) {
-            statLevels = new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef()};
+            statLevels = new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef(), haremData.statMina()};
         }
 
-        String[] icons   = {"❤", "⚡", "⚔", "🛡"};
-        String[] descs   = {"+4 HP / nivel", "+0.02 vel / nivel", "+2 atk / nivel", "+2 armor / nivel"};
+        String[] icons = {"❤", "⚡", "⚔", "🛡", "⛏"};
+        String[] descs = {"+1 corazon / nivel", "+0.01 vel / nivel", "+0.5 atk / nivel", "+1 armor / nivel", "+1 vel.mineria / nivel"};
 
         int startY = y + LIST_Y_START;
-        for (int i = 0; i < 4; i++) {
-            int ry = startY + i * 46;
+        for (int i = 0; i < 5; i++) {
+            int ry = startY + i * 37;
             int lv = statLevels[i];
             int cost = PlayerData.STAT_COSTS[i];
             boolean maxed = lv >= PlayerData.STAT_MAX;
 
-            g.fill(x + 8, ry, x + W - 8, ry + 40, 0x33000000);
+            g.fill(x + 8, ry, x + W - 8, ry + 32, 0x33000000);
             g.hLine(x + 8, x + W - 9, ry, COLOR_DIVIDER);
 
             // Stat name + icon
-            g.drawString(font, icons[i] + " " + PlayerData.STAT_NAMES[i], x + 14, ry + 5, COLOR_GOLD, false);
+            g.drawString(font, icons[i] + " " + PlayerData.STAT_NAMES[i], x + 14, ry + 4, COLOR_GOLD, false);
 
             // Desc
-            g.drawString(font, descs[i], x + 14, ry + 18, COLOR_GRAY, false);
+            g.drawString(font, descs[i], x + 14, ry + 16, COLOR_GRAY, false);
 
             // Level bar (5 pips)
             for (int p = 0; p < 5; p++) {
-                int px = x + 160 + p * 16;
-                int py2 = ry + 10;
-                g.fill(px, py2, px + 12, py2 + 10, p < lv ? COLOR_GREEN : 0xFF333355);
-                g.hLine(px, px + 11, py2, COLOR_BORDER);
-                g.hLine(px, px + 11, py2 + 9, COLOR_BORDER);
-                g.vLine(px, py2, py2 + 10, COLOR_BORDER);
-                g.vLine(px + 11, py2, py2 + 10, COLOR_BORDER);
+                int px = x + 155 + p * 14;
+                int py2 = ry + 8;
+                g.fill(px, py2, px + 10, py2 + 8, p < lv ? COLOR_GREEN : 0xFF333355);
+                g.hLine(px, px + 9, py2, COLOR_BORDER);
+                g.hLine(px, px + 9, py2 + 7, COLOR_BORDER);
+                g.vLine(px, py2, py2 + 8, COLOR_BORDER);
+                g.vLine(px + 9, py2, py2 + 8, COLOR_BORDER);
             }
 
             // Buy button
-            int btnX = x + W - 70;
-            int btnY2 = ry + 12;
+            int btnX = x + W - 62;
+            int btnY2 = ry + 8;
             if (!maxed) {
-                boolean hover = mx >= btnX && mx < btnX + 60 && my >= btnY2 && my < btnY2 + 16;
-                g.fill(btnX, btnY2, btnX + 60, btnY2 + 16, hover ? 0xFF3366AA : COLOR_BUY);
-                g.drawCenteredString(font, "💎" + cost, btnX + 30, btnY2 + 4, COLOR_WHITE);
+                boolean hover = mx >= btnX && mx < btnX + 54 && my >= btnY2 && my < btnY2 + 16;
+                g.fill(btnX, btnY2, btnX + 54, btnY2 + 16, hover ? 0xFF3366AA : COLOR_BUY);
+                g.drawCenteredString(font, "💎" + cost, btnX + 27, btnY2 + 4, COLOR_WHITE);
             } else {
-                g.fill(btnX, btnY2, btnX + 60, btnY2 + 16, 0xFF222233);
-                g.drawCenteredString(font, "MAX", btnX + 30, btnY2 + 4, COLOR_GRAY);
+                g.fill(btnX, btnY2, btnX + 54, btnY2 + 16, 0xFF222233);
+                g.drawCenteredString(font, "MAX", btnX + 27, btnY2 + 4, COLOR_GRAY);
             }
         }
     }
@@ -273,15 +273,15 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
     private boolean handleTiendaClick(double mx, double my, int x, int y) {
         int startY = y + LIST_Y_START;
         int[] statLevels = haremData != null
-            ? new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef()}
-            : new int[]{0, 0, 0, 0};
+            ? new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef(), haremData.statMina()}
+            : new int[]{0, 0, 0, 0, 0};
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             if (statLevels[i] >= PlayerData.STAT_MAX) continue;
-            int ry = startY + i * 46;
-            int btnX = x + W - 70;
-            int btnY2 = ry + 12;
-            if (mx >= btnX && mx < btnX + 60 && my >= btnY2 && my < btnY2 + 16) {
+            int ry = startY + i * 37;
+            int btnX = x + W - 62;
+            int btnY2 = ry + 8;
+            if (mx >= btnX && mx < btnX + 54 && my >= btnY2 && my < btnY2 + 16) {
                 PacketDistributor.sendToServer(new BuyStatPayload(i));
                 return true;
             }

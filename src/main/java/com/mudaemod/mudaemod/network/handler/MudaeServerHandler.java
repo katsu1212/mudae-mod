@@ -82,27 +82,36 @@ public class MudaeServerHandler {
             .collect(Collectors.toList());
         int[] stats = data.getStatLevels();
         PacketDistributor.sendToPlayer(player,
-            new HaremPayload(entries, data.getKakera(), stats[0], stats[1], stats[2], stats[3]));
+            new HaremPayload(entries, data.getKakera(), stats[0], stats[1], stats[2], stats[3], stats[4]));
     }
 
     public static void applyStats(ServerPlayer player, PlayerData data) {
         int[] lvls = data.getStatLevels();
 
+        // 1000 kakera = 1 corazón (2 HP)
         applyModifier(player, Attributes.MAX_HEALTH,
             ResourceLocation.fromNamespaceAndPath("mudaemod", "vida"),
-            lvls[0] * 4.0, AttributeModifier.Operation.ADD_VALUE);
+            lvls[0] * 2.0, AttributeModifier.Operation.ADD_VALUE);
 
+        // +0.01 velocidad/nivel (~10% del valor base 0.1)
         applyModifier(player, Attributes.MOVEMENT_SPEED,
             ResourceLocation.fromNamespaceAndPath("mudaemod", "velocidad"),
-            lvls[1] * 0.02, AttributeModifier.Operation.ADD_VALUE);
+            lvls[1] * 0.01, AttributeModifier.Operation.ADD_VALUE);
 
+        // +0.5 daño de ataque/nivel
         applyModifier(player, Attributes.ATTACK_DAMAGE,
             ResourceLocation.fromNamespaceAndPath("mudaemod", "fuerza"),
-            lvls[2] * 2.0, AttributeModifier.Operation.ADD_VALUE);
+            lvls[2] * 0.5, AttributeModifier.Operation.ADD_VALUE);
 
+        // +1 armor/nivel
         applyModifier(player, Attributes.ARMOR,
             ResourceLocation.fromNamespaceAndPath("mudaemod", "defensa"),
-            lvls[3] * 2.0, AttributeModifier.Operation.ADD_VALUE);
+            lvls[3] * 1.0, AttributeModifier.Operation.ADD_VALUE);
+
+        // +1.0 eficiencia de minería/nivel
+        applyModifier(player, Attributes.MINING_EFFICIENCY,
+            ResourceLocation.fromNamespaceAndPath("mudaemod", "mineria"),
+            lvls[4] * 1.0, AttributeModifier.Operation.ADD_VALUE);
     }
 
     private static void applyModifier(ServerPlayer player,
