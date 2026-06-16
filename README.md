@@ -8,7 +8,7 @@ Tirá rolls, clameá waifus y husbandos, y construí tu harem — todo desde una
 
 <br>
 
-[![Download](https://img.shields.io/badge/⬇️%20DESCARGAR%20MOD-v1.3-FF69B4?style=for-the-badge&logoColor=white&labelColor=1a1a2e)](https://github.com/katsu1212/mudae-mod/releases/latest/download/mudaemod-1.3.jar)
+[![Download](https://img.shields.io/badge/⬇️%20DESCARGAR%20MOD-v1.3-FF69B4?style=for-the-badge&logoColor=white&labelColor=1a1a2e)](https://github.com/katsu1212/mudae-mod/releases/download/v1.3/mudaemod-1.3.jar)
 
 <br>
 
