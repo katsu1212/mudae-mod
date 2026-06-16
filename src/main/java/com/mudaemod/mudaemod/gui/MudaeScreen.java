@@ -1,48 +1,61 @@
 package com.mudaemod.mudaemod.gui;
 
+import com.mojang.math.Axis;
 import com.mudaemod.mudaemod.data.Character;
-import com.mudaemod.mudaemod.network.CharacterImageLoader;
-import com.mudaemod.mudaemod.network.CharacterImageLoader.ImageInfo;
 import com.mudaemod.mudaemod.network.CharacterResultPayload;
 import com.mudaemod.mudaemod.network.ClaimRequestPayload;
 import com.mudaemod.mudaemod.network.RollRequestPayload;
+import com.mudaemod.mudaemod.network.SkinLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
 public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
-    private enum State { IDLE, ROLLING, LOADING_IMAGE, DONE, ERROR }
+    private enum State { IDLE, ROLLING, DONE, ERROR }
 
-    private static final int W = 280;
+    private static final int W = 310;
     private static final int H = 220;
-    private static final int MAX_IMG_W = 120;
-    private static final int MAX_IMG_H = 150;
+
+    // Model display box (left column)
+    private static final int MODEL_BOX_X = 5;
+    private static final int MODEL_BOX_Y = 28;
+    private static final int MODEL_BOX_W = 128;
+    private static final int MODEL_BOX_H = 128;
+    private static final int MODEL_FEET_X = 69; // center of model box
+    private static final int MODEL_FEET_Y = 185; // feet Y relative to topPos
 
     // Colors
-    private static final int COLOR_BG       = 0xF21A1A2E;
-    private static final int COLOR_HEADER   = 0xF2111130;
-    private static final int COLOR_BORDER   = 0xFFFF69B4;
-    private static final int COLOR_DIVIDER  = 0x88FF69B4;
-    private static final int COLOR_BTN_BG   = 0xCC2A2A4E;
-    private static final int COLOR_BTN_ROLL = 0xFF7B3F91;
-    private static final int COLOR_TITLE    = 0xFFFF69B4;
-    private static final int COLOR_GOLD     = 0xFFFFD700;
-    private static final int COLOR_BLUE     = 0xFFADD8E6;
-    private static final int COLOR_PURPLE   = 0xFFAA55FF;
-    private static final int COLOR_GRAY     = 0xFF888888;
-    private static final int COLOR_WHITE    = 0xFFFFFFFF;
+    private static final int COLOR_BG      = 0xF21A1A2E;
+    private static final int COLOR_HEADER  = 0xF2111130;
+    private static final int COLOR_BORDER  = 0xFFFF69B4;
+    private static final int COLOR_DIVIDER = 0x88FF69B4;
+    private static final int COLOR_TITLE   = 0xFFFF69B4;
+    private static final int COLOR_GOLD    = 0xFFFFD700;
+    private static final int COLOR_BLUE    = 0xFFADD8E6;
+    private static final int COLOR_PURPLE  = 0xFFAA55FF;
+    private static final int COLOR_GRAY    = 0xFF888888;
+    private static final int COLOR_WHITE   = 0xFFFFFFFF;
 
     private State state = State.IDLE;
     private Character currentCharacter = null;
-    private ImageInfo currentImage = null;
+    private RemotePlayer fakePlayer = null;
     private int playerKakera = 0;
+
+    // Slot machine spin animation
+    private float spinAngle = 0f;
+    private float spinSpeed = 0f;
 
     private Button rollWaifuBtn;
     private Button rollHusbandoBtn;
@@ -71,14 +84,16 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
         claimBtn = addRenderableWidget(Button.builder(
             Component.literal("💍 ¡Claim!"), b -> doClaim())
-            .pos(x + 193, btnY).size(79, 22).build());
+            .pos(x + 224, btnY).size(78, 22).build());
         claimBtn.active = false;
     }
 
     private void doRoll(boolean waifu) {
         state = State.ROLLING;
         currentCharacter = null;
-        currentImage = null;
+        fakePlayer = null;
+        spinSpeed = 20f; // fast spin during roll
+        spinAngle = 0f;
         claimBtn.active = false;
         rollWaifuBtn.active = false;
         rollHusbandoBtn.active = false;
@@ -92,22 +107,24 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
     }
 
     public void onCharacterReceived(CharacterResultPayload payload) {
-        this.currentCharacter = new Character(payload.id(), payload.name(), payload.animeName(), payload.imageUrl(), payload.kakeraValue());
+        this.currentCharacter = new Character(
+            payload.id(), payload.name(), payload.animeName(), payload.imageUrl(), payload.kakeraValue());
         this.playerKakera = payload.playerKakera();
-        this.state = State.LOADING_IMAGE;
-        this.currentImage = null;
+        this.state = State.DONE;
+        this.fakePlayer = null;
         rollWaifuBtn.active = true;
         rollHusbandoBtn.active = true;
         claimBtn.active = true;
 
-        CharacterImageLoader.load(payload.id(), payload.imageUrl(), info -> {
-            this.currentImage = info;
-            if (this.state == State.LOADING_IMAGE) this.state = State.DONE;
-        });
+        // Load skin via Minecraft's own SkinManager — no custom HTTP, always works
+        SkinLoader.createPlayerForCharacter(payload.name()).thenAccept(player ->
+            Minecraft.getInstance().execute(() -> this.fakePlayer = player)
+        );
     }
 
     public void onRollError() {
         this.state = State.ERROR;
+        this.spinSpeed = 0f;
         rollWaifuBtn.active = true;
         rollHusbandoBtn.active = true;
     }
@@ -117,38 +134,41 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
         int x = this.leftPos;
         int y = this.topPos;
 
+        // Update spin animation
+        if (state == State.ROLLING) {
+            spinAngle += spinSpeed;
+        } else if (state == State.DONE) {
+            // Decelerate from fast roll spin to slow idle spin
+            spinSpeed = spinSpeed > 1.5f ? spinSpeed * 0.93f : 1.5f;
+            spinAngle += spinSpeed;
+        }
+
         // Background
         g.fill(x, y, x + W, y + H, COLOR_BG);
         g.fill(x, y, x + W, y + 24, COLOR_HEADER);
 
-        // Border (2px double border effect)
+        // Border
         g.hLine(x, x + W - 1, y, COLOR_BORDER);
-        g.hLine(x, x + W - 1, y + 1, 0x44FF69B4);
         g.hLine(x, x + W - 1, y + H - 1, COLOR_BORDER);
-        g.hLine(x, x + W - 1, y + H - 2, 0x44FF69B4);
         g.vLine(x, y, y + H, COLOR_BORDER);
-        g.vLine(x + 1, y, y + H, 0x44FF69B4);
         g.vLine(x + W - 1, y, y + H, COLOR_BORDER);
-        g.vLine(x + W - 2, y, y + H, 0x44FF69B4);
 
         // Title
         g.drawCenteredString(font, "✨  TERMINAL DE MUDAE  ✨", x + W / 2, y + 7, COLOR_TITLE);
 
-        // Kakera display (top right)
+        // Kakera display
         String kStr = "💎 " + playerKakera;
-        g.fill(x + W - font.width(kStr) - 16, y + 4, x + W - 5, y + 18, 0x66000000);
         g.drawString(font, kStr, x + W - font.width(kStr) - 10, y + 7, COLOR_PURPLE, false);
 
-        // Divider
+        // Divider under header
         g.hLine(x + 5, x + W - 6, y + 24, COLOR_DIVIDER);
 
-        // Button area background (makes buttons much more visible)
+        // Button area background
         g.fill(x + 5, y + H - 46, x + W - 5, y + H - 5, 0xBB0D0D20);
         g.hLine(x + 5, x + W - 6, y + H - 46, COLOR_DIVIDER);
 
         super.render(g, mx, my, delta);
         renderClaimTooltip(g, mx, my);
-
         renderContent(g, x, y);
     }
 
@@ -164,9 +184,12 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
                 g.drawCenteredString(font, "para invocar un personaje de anime!", centerX, centerY + 5, COLOR_GRAY);
             }
             case ROLLING -> {
-                g.drawCenteredString(font, "⏳ Invocando desde AniList...", centerX, centerY, COLOR_GOLD);
+                renderModelBox(g, x, y);
+                // Spinning placeholder silhouette
+                g.drawCenteredString(font, "⏳", x + MODEL_BOX_X + MODEL_BOX_W / 2, y + MODEL_BOX_Y + MODEL_BOX_H / 2 - 4, COLOR_GOLD);
+                g.drawCenteredString(font, "Invocando...", x + MODEL_BOX_X + MODEL_BOX_W / 2, y + MODEL_BOX_Y + MODEL_BOX_H / 2 + 12, COLOR_GOLD);
             }
-            case LOADING_IMAGE, DONE -> renderCharacter(g, x, y, contentY, contentH);
+            case DONE -> renderCharacter(g, x, y, contentY);
             case ERROR -> {
                 g.drawCenteredString(font, "❌ No se pudo obtener un personaje.", centerX, centerY - 7, 0xFFFF5555);
                 g.drawCenteredString(font, "Intentá de nuevo.", centerX, centerY + 8, COLOR_GRAY);
@@ -174,81 +197,99 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
         }
     }
 
-    private void renderCharacter(GuiGraphics g, int x, int y, int contentY, int contentH) {
+    private void renderModelBox(GuiGraphics g, int x, int y) {
+        int bx = x + MODEL_BOX_X;
+        int by = y + MODEL_BOX_Y;
+
+        // Dark inner background for model display
+        g.fill(bx, by, bx + MODEL_BOX_W, by + MODEL_BOX_H, 0x55000000);
+        g.fill(bx + 1, by + 1, bx + MODEL_BOX_W - 1, by + MODEL_BOX_H - 1, 0x221A1A4E);
+
+        // Pink glow border
+        g.hLine(bx, bx + MODEL_BOX_W - 1, by, COLOR_BORDER);
+        g.hLine(bx, bx + MODEL_BOX_W - 1, by + MODEL_BOX_H - 1, COLOR_BORDER);
+        g.vLine(bx, by, by + MODEL_BOX_H, COLOR_BORDER);
+        g.vLine(bx + MODEL_BOX_W - 1, by, by + MODEL_BOX_H, COLOR_BORDER);
+
+        // Corner accents
+        g.fill(bx, by, bx + 4, by + 4, COLOR_BORDER);
+        g.fill(bx + MODEL_BOX_W - 4, by, bx + MODEL_BOX_W, by + 4, COLOR_BORDER);
+        g.fill(bx, by + MODEL_BOX_H - 4, bx + 4, by + MODEL_BOX_H, COLOR_BORDER);
+        g.fill(bx + MODEL_BOX_W - 4, by + MODEL_BOX_H - 4, bx + MODEL_BOX_W, by + MODEL_BOX_H, COLOR_BORDER);
+    }
+
+    private void renderCharacter(GuiGraphics g, int x, int y, int contentY) {
         if (currentCharacter == null) return;
 
-        int imgX = x + 12;
-        int imgY = contentY + 4;
+        renderModelBox(g, x, y);
 
-        if (state == State.DONE && currentImage != null) {
-            // Scale image to fit within MAX_IMG bounds, preserving aspect ratio
-            float aspect = (float) currentImage.width() / currentImage.height();
-            int drawW, drawH;
-            if (aspect > (float) MAX_IMG_W / MAX_IMG_H) {
-                drawW = MAX_IMG_W;
-                drawH = (int) (MAX_IMG_W / aspect);
-            } else {
-                drawH = MAX_IMG_H;
-                drawW = (int) (MAX_IMG_H * aspect);
+        // --- 3D rotating player model ---
+        if (fakePlayer != null) {
+            try {
+                // Sync tick for walking animation
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.player != null) fakePlayer.tickCount = mc.player.tickCount;
+
+                // Camera: flip upright (ZP 180°) + slight downward tilt
+                Quaternionf camera = Axis.ZP.rotationDegrees(180.0f);
+                camera.mul(Axis.XP.rotationDegrees(10.0f));
+
+                // Entity: Y-axis spin
+                Quaternionf entitySpin = Axis.YP.rotationDegrees(spinAngle);
+
+                InventoryScreen.renderEntityInInventory(
+                    g,
+                    (float)(x + MODEL_BOX_X + MODEL_BOX_W / 2),
+                    (float)(y + MODEL_FEET_Y),
+                    45,                   // scale
+                    new Vector3f(0, 0.5f, 0),
+                    camera,
+                    entitySpin,
+                    fakePlayer
+                );
+            } catch (Exception e) {
+                // Fallback if rendering fails
+                g.drawCenteredString(font, "?", x + MODEL_BOX_X + MODEL_BOX_W / 2,
+                    y + MODEL_BOX_Y + MODEL_BOX_H / 2, COLOR_GRAY);
             }
-
-            // Shadow under image
-            g.fill(imgX + 3, imgY + 3, imgX + drawW + 3, imgY + drawH + 3, 0x66000000);
-            // Pink border around image
-            g.fill(imgX - 2, imgY - 2, imgX + drawW + 2, imgY + drawH + 2, COLOR_BORDER);
-            g.fill(imgX - 1, imgY - 1, imgX + drawW + 1, imgY + drawH + 1, 0xFF1A1A2E);
-
-            // Draw image scaled
-            g.pose().pushPose();
-            float scaleX = (float) drawW / currentImage.width();
-            float scaleY = (float) drawH / currentImage.height();
-            g.pose().scale(scaleX, scaleY, 1f);
-            g.blit(currentImage.location(),
-                (int)(imgX / scaleX), (int)(imgY / scaleY),
-                0f, 0f,
-                currentImage.width(), currentImage.height(),
-                currentImage.width(), currentImage.height());
-            g.pose().popPose();
-
-            imgX += drawW + 14;
         } else {
-            // Loading placeholder with spinner feel
-            g.fill(imgX, imgY, imgX + MAX_IMG_W, imgY + MAX_IMG_H, 0x44FFFFFF);
-            g.fill(imgX + 1, imgY + 1, imgX + MAX_IMG_W - 1, imgY + MAX_IMG_H - 1, 0x221A1A3E);
-            g.fill(imgX - 2, imgY - 2, imgX + MAX_IMG_W + 2, imgY + MAX_IMG_H + 2, COLOR_BORDER);
-            g.fill(imgX - 1, imgY - 1, imgX + MAX_IMG_W + 1, imgY + MAX_IMG_H + 1, 0xFF1A1A2E);
-            g.fill(imgX, imgY, imgX + MAX_IMG_W, imgY + MAX_IMG_H, 0x331A1A3E);
-            g.drawCenteredString(font, "⏳ Cargando", imgX + MAX_IMG_W / 2, imgY + MAX_IMG_H / 2 - 4, COLOR_GRAY);
-            imgX += MAX_IMG_W + 14;
+            // Skin still loading — show spinner
+            g.drawCenteredString(font, "⟳ cargando skin",
+                x + MODEL_BOX_X + MODEL_BOX_W / 2,
+                y + MODEL_BOX_Y + MODEL_BOX_H / 2, COLOR_GRAY);
         }
 
-        // Info panel
-        int tx = imgX;
-        int ty = contentY + 4;
-        int maxW = x + W - tx - 10;
+        // Vertical divider between model and info
+        g.vLine(x + MODEL_BOX_X + MODEL_BOX_W + 3, y + 28, y + H - 48, COLOR_DIVIDER);
 
-        // Name
+        // --- Info panel (right of model) ---
+        int tx = x + MODEL_BOX_X + MODEL_BOX_W + 10;
+        int ty = contentY + 4;
+        int maxW = W - (MODEL_BOX_X + MODEL_BOX_W + 14);
+
+        // Character name
         String name = currentCharacter.name();
         if (font.width(name) > maxW) name = font.plainSubstrByWidth(name, maxW - 8) + "…";
         g.drawString(font, name, tx, ty, COLOR_GOLD, false);
 
-        // Anime
+        // Anime source
         String anime = currentCharacter.animeName();
-        if (font.width("📺 " + anime) > maxW) anime = font.plainSubstrByWidth(anime, maxW - 20) + "…";
-        g.drawString(font, "📺 " + anime, tx, ty + 16, COLOR_BLUE, false);
+        String animeLabel = "📺 " + anime;
+        if (font.width(animeLabel) > maxW) animeLabel = "📺 " + font.plainSubstrByWidth(anime, maxW - 22) + "…";
+        g.drawString(font, animeLabel, tx, ty + 16, COLOR_BLUE, false);
 
-        // Kakera value
-        g.fill(tx - 2, ty + 33, tx + 100, ty + 47, 0x66000000);
+        // Kakera value badge
+        g.fill(tx - 2, ty + 33, tx + 112, ty + 47, 0x66000000);
         g.drawString(font, "💎 +" + currentCharacter.kakeraValue() + " kakera", tx, ty + 36, COLOR_PURPLE, false);
 
-        // Claim window
+        // Claim timer hint
         g.drawString(font, "⏳ 3 min para claimear", tx, ty + 55, COLOR_GRAY, false);
 
-        // Divider line
-        g.hLine(tx, tx + maxW, ty + 70, COLOR_DIVIDER);
+        // Decorative divider
+        g.hLine(tx, tx + maxW - 4, ty + 70, COLOR_DIVIDER);
 
-        // Hint
-        g.drawString(font, "✨ ¡Sé el primero en clickear Claim!", tx, ty + 76, 0xFFFFAA44, false);
+        // Call to action
+        g.drawString(font, "💍 ¡Sé el primero en Claim!", tx, ty + 78, 0xFFFFAA44, false);
     }
 
     private void renderClaimTooltip(GuiGraphics g, int mx, int my) {
