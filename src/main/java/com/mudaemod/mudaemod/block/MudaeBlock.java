@@ -34,11 +34,10 @@ public class MudaeBlock extends Block {
 
     public MudaeBlock() {
         super(Properties.of()
-            .strength(3.5f, 6.0f)
+            .strength(1.0f, 1.0f)
             .sound(SoundType.AMETHYST)
             .lightLevel(s -> 6)
-            .noOcclusion()
-            .requiresCorrectToolForDrops());
+            .noOcclusion());
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 

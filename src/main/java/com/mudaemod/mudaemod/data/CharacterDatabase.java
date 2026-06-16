@@ -3,676 +3,1743 @@ package com.mudaemod.mudaemod.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
-/**
- * Curated list of popular anime characters with verified Minecraft skin UUIDs.
- * UUIDs were looked up via Mojang API for players named after these characters.
- * Only characters whose MC usernames actually exist are included.
- */
 public class CharacterDatabase {
 
-    public record Entry(int id, String name, String animeName, int kakeraValue, boolean waifu, String skinUUID) {}
+    private static final List<Character> ALL = new ArrayList<>();
 
-    private static final Random RANDOM = new Random();
-
-    // ── WAIFUS ──────────────────────────────────────────────────────────────────
-    private static final List<Entry> WAIFUS = List.of(
-        new Entry(1,   "Rem",        "Re:Zero",                          2000, true, "9ad71b71-6c7f-47bd-b6f3-e975770f212c"),
-        new Entry(2,   "Asuna",      "Sword Art Online",                 1500, true, "00ca8f7b-ed67-4e24-9d69-1a206f1c1823"),
-        new Entry(3,   "Emilia",     "Re:Zero",                          1200, true, "7a9a6cea-aea3-45e8-851b-e494524c2466"),
-        new Entry(4,   "Ram",        "Re:Zero",                           800, true, "4adc9ee2-ed57-41a7-9441-80b26c542464"),
-        new Entry(5,   "Mikasa",     "Attack on Titan",                  1800, true, "291ad9cf-693d-486d-9013-f72ef2a1f7e9"),
-        new Entry(6,   "Nezuko",     "Demon Slayer",                     1600, true, "8a92c641-6c12-410c-9953-c201f77a88ff"),
-        new Entry(7,   "Hinata",     "Naruto",                           1000, true, "a5eb8dd2-69a7-49e1-ad4e-521c50e1a2a4"),
-        new Entry(8,   "Nami",       "One Piece",                         800, true, "d253df1a-0069-4c79-bfae-6454fd9e0bce"),
-        new Entry(9,   "Robin",      "One Piece",                         900, true, "8c5f0eff-ddb3-413f-9bf2-0fb7843b2cce"),
-        new Entry(10,  "Aqua",       "KonoSuba",                          700, true, "1b9aceed-2c6a-431c-b025-dfb90ea880ca"),
-        new Entry(11,  "Megumin",    "KonoSuba",                         1400, true, "9ef0758a-1f50-4de3-acf0-227bfaf15ea3"),
-        new Entry(12,  "Darkness",   "KonoSuba",                          600, true, "ae912f52-5c42-4823-ae54-f81f07277f6d"),
-        new Entry(13,  "Wiz",        "KonoSuba",                          500, true, "a98464ff-a83e-478d-afaa-c41a54f3a703"),
-        new Entry(14,  "Erza",       "Fairy Tail",                        900, true, "823915a0-9446-4745-b10c-5dba75ea187a"),
-        new Entry(15,  "Lucy",       "Fairy Tail",                        700, true, "d543d5f4-5a64-4317-ba1d-ae2240156ef4"),
-        new Entry(16,  "Winry",      "Fullmetal Alchemist",               600, true, "2ab40856-e3ba-4db0-bb89-9048dc16d2c0"),
-        new Entry(17,  "Rukia",      "Bleach",                            800, true, "8a573338-5bb3-4571-898b-f83fb12967e7"),
-        new Entry(18,  "Tatsumaki",  "One Punch Man",                    1000, true, "7f7d4bd9-a3b7-4a80-9562-70987d718d1e"),
-        new Entry(19,  "Madoka",     "Puella Magi Madoka Magica",         800, true, "578ddc8a-745c-4c1a-8e91-fc5a7aae285a"),
-        new Entry(20,  "Homura",     "Puella Magi Madoka Magica",        1200, true, "dba5e4fe-b6d2-42f7-9067-5ca6931cb3db"),
-        new Entry(21,  "Mami",       "Puella Magi Madoka Magica",         700, true, "44072e9e-77c1-4afd-9c7d-39d5cb143fa0"),
-        new Entry(22,  "Sayaka",     "Puella Magi Madoka Magica",         600, true, "5239d473-2722-4181-8551-4f80e804b1ce"),
-        new Entry(23,  "Kyoko",      "Puella Magi Madoka Magica",         700, true, "f332713e-709f-45ff-9bf0-f0c20884a446"),
-        new Entry(24,  "Taiga",      "Toradora",                         1100, true, "07c95c7c-2570-4326-93dc-47d029c69fb7"),
-        new Entry(25,  "Kurisu",     "Steins;Gate",                      1500, true, "d4bb0bb0-a988-4591-9567-0023f46a89bd"),
-        new Entry(26,  "Haruhi",     "The Melancholy of Haruhi Suzumiya", 900, true, "841e2dfa-ca49-489c-8cf3-b0b726b195fe"),
-        new Entry(27,  "Violet",     "Violet Evergarden",                1200, true, "809b980d-269a-4072-8d04-ba9bdaaeab05"),
-        new Entry(28,  "Anya",       "Spy x Family",                     1800, true, "944a5891-ca8c-411f-b2c8-8befbda2ebd4"),
-        new Entry(29,  "Yor",        "Spy x Family",                     1000, true, "e3ccac2e-ad37-43e6-86d3-7df133dda708"),
-        new Entry(30,  "Sinon",      "Sword Art Online",                  700, true, "ae4207dd-7a93-4bed-8061-27cf450433b9"),
-        new Entry(31,  "Raphtalia",  "The Rising of the Shield Hero",    1200, true, "31a95c5d-9513-4f73-b647-bd709a6e8cfb"),
-        new Entry(32,  "Filo",       "The Rising of the Shield Hero",     500, true, "fb26064a-0400-4b72-9e2c-d6181600d603"),
-        new Entry(33,  "Mitsuri",    "Demon Slayer",                      700, true, "2a3d3edb-63e0-498d-891a-c0f0072647e9"),
-        new Entry(34,  "Kanao",      "Demon Slayer",                      600, true, "54f0a62a-3c1f-4f67-b60f-684701a38b83"),
-        new Entry(35,  "Shinobu",    "Demon Slayer",                      800, true, "5c91163e-fce4-481c-a177-aeba8fd82c16"),
-        new Entry(36,  "Uraraka",    "My Hero Academia",                  900, true, "80299fdb-51b1-4d4b-9269-2d1ee5ad1b04"),
-        new Entry(37,  "Power",      "Chainsaw Man",                     1400, true, "370e31b1-43a2-4da1-bfa5-9b011f3e12c4"),
-        new Entry(38,  "Makima",     "Chainsaw Man",                     1300, true, "80159d75-449a-4813-aa74-717bcf3b9fea"),
-        new Entry(39,  "Mio",        "K-On!",                             800, true, "43f79582-18a2-4710-883f-f3ac68b5ac72"),
-        new Entry(40,  "Rikka",      "Chuunibyou",                        700, true, "23552906-e1f3-49a8-893c-b42818434776"),
-        new Entry(41,  "Konata",     "Lucky Star",                        600, true, "1315f2a7-c674-4631-9e84-043e111f56c9"),
-        new Entry(42,  "Hori",       "Horimiya",                          800, true, "cb6a8f43-1557-43e6-baed-7619499035ba"),
-        new Entry(43,  "Kaori",      "Your Lie in April",                1000, true, "779afe26-ee4a-4bc2-8e6a-0329faa85c07"),
-        new Entry(44,  "Asuka",      "Neon Genesis Evangelion",          1000, true, "64bbc554-6178-429d-a6a0-1035fc07a4b8"),
-        new Entry(45,  "Saber",      "Fate/stay night",                  1200, true, "33420443-5364-4215-b168-b4142eaed4fe"),
-        new Entry(46,  "Hestia",     "DanMachi",                          900, true, "65fc2540-b010-4841-9f8c-27d9bfe46ca8"),
-        new Entry(47,  "Erina",      "Food Wars",                         700, true, "2e8929a6-07cf-4b1a-a5d4-f0b680d6464e"),
-        new Entry(48,  "Noelle",     "Black Clover",                      600, true, "cd092927-d2e8-40dc-b2d4-a27ef9e495c0"),
-        new Entry(49,  "Misaka",     "A Certain Scientific Railgun",     1100, true, "2371ed45-3ec7-49d3-9388-319ce5d589e3"),
-        new Entry(50,  "Albedo",     "Overlord",                          900, true, "ef29acab-e7ff-4c7e-9b32-6a749353fd94"),
-        new Entry(51,  "Touka",      "Tokyo Ghoul",                       700, true, "07448352-23af-4f76-950c-081774febba0"),
-        new Entry(52,  "Rize",       "Tokyo Ghoul",                       700, true, "d6241427-0a8d-47af-98b9-9bffe0395949"),
-        new Entry(53,  "Nagisa",     "Clannad",                           800, true, "9d2bf4c8-ad43-451a-978d-057d082c4c93"),
-        new Entry(54,  "Nobara",     "Jujutsu Kaisen",                    800, true, "68b35fca-3224-4771-b92c-910fe0cf4b26"),
-        new Entry(55,  "Kaguya",     "Kaguya-sama: Love is War",         1000, true, "a6fa4dde-3ad0-4b6e-bec9-c7b9dfb1e315"),
-        new Entry(56,  "Chika",      "Kaguya-sama: Love is War",          700, true, "754ba114-cbda-4043-bab8-58ea7623ff43"),
-        new Entry(57,  "Yumeko",     "Kakegurui",                         900, true, "184f83b6-d5c8-46d1-a9ec-6cd0645d834e"),
-        new Entry(58,  "Kanna",      "Miss Kobayashi's Dragon Maid",      700, true, "2599765b-b5e3-48d2-97d7-0fbf6953c827"),
-        new Entry(59,  "Tohru",      "Miss Kobayashi's Dragon Maid",      800, true, "5460cb64-5124-470a-9f10-9cdab95fbbe4"),
-        new Entry(60,  "Lucoa",      "Miss Kobayashi's Dragon Maid",      800, true, "53542e0a-5f92-4944-ba5a-202d9cd7911c"),
-        new Entry(61,  "Elma",       "Miss Kobayashi's Dragon Maid",      600, true, "6a7b18ec-7648-478b-977f-e0b7a66a9e28"),
-        new Entry(62,  "Zero Two",   "Darling in the FranXX",            1800, true, "c437b0e5-7fb0-468f-aa5c-536d1b361eb3"),
-        new Entry(63,  "Yoko",       "Gurren Lagann",                     700, true, "50b67eb7-f124-415a-a7e5-883d4629493e"),
-        new Entry(64,  "Ryuko",      "Kill la Kill",                      900, true, "be27249a-49b9-4a5c-be34-1172b8da8d6d"),
-        new Entry(65,  "Satsuki",    "Kill la Kill",                      800, true, "390046e5-44a7-4716-abeb-5c5fed19a680"),
-        new Entry(66,  "Miku",       "Vocaloid",                         1000, true, "7a64b4f8-4995-4704-aeb8-2c9bf0629bef"),
-        new Entry(67,  "Ochako",     "My Hero Academia",                  800, true, "8651cc11-9620-4d01-90ff-1cf3eafb0e03"),
-        new Entry(68,  "Nejire",     "My Hero Academia",                  600, true, "826c10ec-e6cf-4943-9f5a-c0c7202c45ee"),
-        new Entry(69,  "Momo",       "My Hero Academia",                  700, true, "599ec515-b661-4f70-a509-e50fb07fdc4a"),
-        new Entry(70,  "Kyoka",      "My Hero Academia",                  600, true, "91a457a4-4869-4adc-946a-2bfd96518a5a"),
-        new Entry(71,  "Marin",      "My Dress-Up Darling",              1000, true, "0c15128a-62f9-4054-8b3e-c785e1344c40"),
-        new Entry(72,  "Ichika",     "Darling in the FranXX",             600, true, "53b52c73-12b7-472e-9113-7799eaf6fe52"),
-        new Entry(73,  "Daki",       "Demon Slayer",                      700, true, "59d46542-718e-439f-b1f5-12afb37a6a52"),
-        new Entry(74,  "Kokoro",     "Darling in the FranXX",             600, true, "1be8579c-2c80-47b2-b5bc-1e0b5c82ffde"),
-        new Entry(75,  "Rin",        "Fate/stay night",                  1300, true, "fade0001-dead-4000-beef-00000000004b"),
-        new Entry(76,  "Sakura M",   "Fate/stay night",                   800, true, "fade0001-dead-4000-beef-00000000004c"),
-        new Entry(77,  "Illyasviel", "Fate/stay night",                   800, true, "fade0001-dead-4000-beef-00000000004d"),
-        new Entry(78,  "Mirajane",   "Fairy Tail",                       1000, true, "fade0001-dead-4000-beef-00000000004e"),
-        new Entry(79,  "Juvia",      "Fairy Tail",                        700, true, "fade0001-dead-4000-beef-00000000004f"),
-        new Entry(80,  "Wendy",      "Fairy Tail",                        600, true, "fade0001-dead-4000-beef-000000000050"),
-        new Entry(81,  "Cana",       "Fairy Tail",                        600, true, "fade0001-dead-4000-beef-000000000051"),
-        new Entry(82,  "Sakura",     "Naruto",                            700, true, "fade0001-dead-4000-beef-000000000052"),
-        new Entry(83,  "Tsunade",    "Naruto",                            900, true, "fade0001-dead-4000-beef-000000000053"),
-        new Entry(84,  "Temari",     "Naruto",                            700, true, "fade0001-dead-4000-beef-000000000054"),
-        new Entry(85,  "Ino",        "Naruto",                            600, true, "fade0001-dead-4000-beef-000000000055"),
-        new Entry(86,  "Konan",      "Naruto",                            700, true, "fade0001-dead-4000-beef-000000000056"),
-        new Entry(87,  "Kushina",    "Naruto",                            800, true, "fade0001-dead-4000-beef-000000000057"),
-        new Entry(88,  "Boa Hancock","One Piece",                        1500, true, "fade0001-dead-4000-beef-000000000058"),
-        new Entry(89,  "Vivi",       "One Piece",                         700, true, "fade0001-dead-4000-beef-000000000059"),
-        new Entry(90,  "Perona",     "One Piece",                         600, true, "fade0001-dead-4000-beef-00000000005a"),
-        new Entry(91,  "Yamato",     "One Piece",                         900, true, "fade0001-dead-4000-beef-00000000005b"),
-        new Entry(92,  "Orihime",    "Bleach",                            900, true, "fade0001-dead-4000-beef-00000000005c"),
-        new Entry(93,  "Yoruichi",   "Bleach",                           1000, true, "fade0001-dead-4000-beef-00000000005d"),
-        new Entry(94,  "Rangiku",    "Bleach",                            800, true, "fade0001-dead-4000-beef-00000000005e"),
-        new Entry(95,  "Android 18", "Dragon Ball",                      1100, true, "fade0001-dead-4000-beef-00000000005f"),
-        new Entry(96,  "Bulma",      "Dragon Ball",                       800, true, "fade0001-dead-4000-beef-000000000060"),
-        new Entry(97,  "Videl",      "Dragon Ball",                       600, true, "fade0001-dead-4000-beef-000000000061"),
-        new Entry(98,  "Caulifla",   "Dragon Ball Super",                 700, true, "fade0001-dead-4000-beef-000000000062"),
-        new Entry(99,  "Maki Z",     "Jujutsu Kaisen",                   800, true, "fade0001-dead-4000-beef-000000000063"),
-        new Entry(100, "Mei Mei",    "Jujutsu Kaisen",                   700, true, "fade0001-dead-4000-beef-000000000064"),
-        new Entry(200, "Mimosa",     "Black Clover",                      600, true, "fade0001-dead-4000-beef-000000000065"),
-        new Entry(201, "Vanessa",    "Black Clover",                      600, true, "fade0001-dead-4000-beef-000000000066"),
-        new Entry(202, "Toga",       "My Hero Academia",                 1000, true, "fade0001-dead-4000-beef-000000000067"),
-        new Entry(203, "Mina",       "My Hero Academia",                  700, true, "fade0001-dead-4000-beef-000000000068"),
-        new Entry(204, "Midnight",   "My Hero Academia",                  700, true, "fade0001-dead-4000-beef-000000000069"),
-        new Entry(205, "Shalltear",  "Overlord",                          800, true, "fade0001-dead-4000-beef-00000000006a"),
-        new Entry(206, "Ais",        "DanMachi",                         1000, true, "fade0001-dead-4000-beef-00000000006b"),
-        new Entry(207, "C.C.",       "Code Geass",                       1200, true, "fade0001-dead-4000-beef-00000000006c"),
-        new Entry(208, "Kallen",     "Code Geass",                        900, true, "fade0001-dead-4000-beef-00000000006d"),
-        new Entry(209, "Euphemia",   "Code Geass",                        700, true, "fade0001-dead-4000-beef-00000000006e"),
-        new Entry(210, "Miku N",     "Quintessential Quintuplets",        900, true, "fade0001-dead-4000-beef-00000000006f"),
-        new Entry(211, "Nino",       "Quintessential Quintuplets",        800, true, "fade0001-dead-4000-beef-000000000070"),
-        new Entry(212, "Ichika N",   "Quintessential Quintuplets",        700, true, "fade0001-dead-4000-beef-000000000071"),
-        new Entry(213, "Yotsuba",    "Quintessential Quintuplets",        700, true, "fade0001-dead-4000-beef-000000000072"),
-        new Entry(214, "Itsuki",     "Quintessential Quintuplets",        800, true, "fade0001-dead-4000-beef-000000000073"),
-        new Entry(215, "Mai",        "Bunny Girl Senpai",                1400, true, "fade0001-dead-4000-beef-000000000074"),
-        new Entry(216, "Hitagi",     "Monogatari",                       1200, true, "fade0001-dead-4000-beef-000000000075"),
-        new Entry(217, "Kagome",     "Inuyasha",                          800, true, "fade0001-dead-4000-beef-000000000076"),
-        new Entry(218, "Sango",      "Inuyasha",                          600, true, "fade0001-dead-4000-beef-000000000077"),
-        new Entry(219, "Faye",       "Cowboy Bebop",                      700, true, "fade0001-dead-4000-beef-000000000078"),
-        new Entry(220, "Revy",       "Black Lagoon",                      700, true, "fade0001-dead-4000-beef-000000000079"),
-        new Entry(221, "Riza",       "Fullmetal Alchemist",               900, true, "fade0001-dead-4000-beef-00000000007a"),
-        new Entry(222, "Lust",       "Fullmetal Alchemist",               700, true, "fade0001-dead-4000-beef-00000000007b"),
-        new Entry(223, "Yui",        "K-On!",                             700, true, "fade0001-dead-4000-beef-00000000007c"),
-        new Entry(224, "Azusa",      "K-On!",                             700, true, "fade0001-dead-4000-beef-00000000007d"),
-        new Entry(225, "Ritsu",      "K-On!",                             600, true, "fade0001-dead-4000-beef-00000000007e"),
-        new Entry(226, "Chitoge",    "Nisekoi",                           800, true, "fade0001-dead-4000-beef-00000000007f"),
-        new Entry(227, "Kosaki",     "Nisekoi",                           700, true, "fade0001-dead-4000-beef-000000000080"),
-        new Entry(228, "Kanade",     "Angel Beats",                      1000, true, "fade0001-dead-4000-beef-000000000081"),
-        new Entry(229, "Tomoyo",     "Clannad",                           700, true, "fade0001-dead-4000-beef-000000000082"),
-        new Entry(230, "Kyou",       "Clannad",                           700, true, "fade0001-dead-4000-beef-000000000083"),
-        new Entry(231, "Roxy",       "Mushoku Tensei",                    900, true, "fade0001-dead-4000-beef-000000000084"),
-        new Entry(232, "Eris MT",    "Mushoku Tensei",                    800, true, "fade0001-dead-4000-beef-000000000085"),
-        new Entry(233, "Sylphiette", "Mushoku Tensei",                    700, true, "fade0001-dead-4000-beef-000000000086"),
-        new Entry(234, "Frieren",    "Frieren",                          1500, true, "fade0001-dead-4000-beef-000000000087"),
-        new Entry(235, "Fern",       "Frieren",                           900, true, "fade0001-dead-4000-beef-000000000088"),
-        new Entry(236, "Bocchi",     "Bocchi the Rock",                  1100, true, "fade0001-dead-4000-beef-000000000089"),
-        new Entry(237, "Nijika",     "Bocchi the Rock",                   700, true, "fade0001-dead-4000-beef-00000000008a"),
-        new Entry(238, "Ryo",        "Bocchi the Rock",                   800, true, "fade0001-dead-4000-beef-00000000008b"),
-        new Entry(239, "Chisato",    "Lycoris Recoil",                   1000, true, "fade0001-dead-4000-beef-00000000008c"),
-        new Entry(240, "Takina",     "Lycoris Recoil",                    800, true, "fade0001-dead-4000-beef-00000000008d"),
-        new Entry(241, "Ai Hoshino", "Oshi no Ko",                       1200, true, "fade0001-dead-4000-beef-00000000008e"),
-        new Entry(242, "Rei Ayanami","Neon Genesis Evangelion",           900, true, "fade0001-dead-4000-beef-00000000008f"),
-        new Entry(243, "Misato",     "Neon Genesis Evangelion",           700, true, "fade0001-dead-4000-beef-000000000090"),
-        new Entry(244, "Kyoko K",    "Danganronpa",                       900, true, "fade0001-dead-4000-beef-000000000091"),
-        new Entry(245, "Chiaki",     "Danganronpa",                       800, true, "fade0001-dead-4000-beef-000000000092"),
-        new Entry(246, "Junko",      "Danganronpa",                      1000, true, "fade0001-dead-4000-beef-000000000093"),
-        new Entry(247, "Elizabeth",  "Seven Deadly Sins",                 800, true, "fade0001-dead-4000-beef-000000000094"),
-        new Entry(248, "Diane",      "Seven Deadly Sins",                 700, true, "fade0001-dead-4000-beef-000000000095"),
-        new Entry(249, "Merlin",     "Seven Deadly Sins",                 800, true, "fade0001-dead-4000-beef-000000000096"),
-        new Entry(250, "Alice SAO",  "Sword Art Online",                  800, true, "fade0001-dead-4000-beef-000000000097"),
-        new Entry(251, "Miyuki S",   "Mahouka Koukou",                    800, true, "fade0001-dead-4000-beef-000000000098"),
-        new Entry(252, "Chizuru",    "Rent-a-Girlfriend",                1000, true, "fade0001-dead-4000-beef-000000000099"),
-        new Entry(253, "Rias",       "High School DxD",                  1100, true, "fade0001-dead-4000-beef-00000000009a"),
-        new Entry(254, "Akeno",      "High School DxD",                   900, true, "fade0001-dead-4000-beef-00000000009b"),
-        new Entry(255, "Koneko",     "High School DxD",                   800, true, "fade0001-dead-4000-beef-00000000009c"),
-        new Entry(256, "Holo",       "Spice and Wolf",                   1200, true, "fade0001-dead-4000-beef-00000000009d"),
-        new Entry(257, "Tohru H",    "Fruits Basket",                     900, true, "fade0001-dead-4000-beef-00000000009e"),
-        new Entry(258, "Louise",     "Zero no Tsukaima",                  700, true, "fade0001-dead-4000-beef-00000000009f"),
-        new Entry(259, "Shana",      "Shakugan no Shana",                 900, true, "fade0001-dead-4000-beef-0000000000a0"),
-        new Entry(260, "Beatrice",   "Re:Zero",                          1000, true, "fade0001-dead-4000-beef-0000000000a1"),
-        new Entry(261, "Echidna",    "Re:Zero",                           900, true, "fade0001-dead-4000-beef-0000000000a2"),
-        new Entry(262, "Rio",        "Bunny Girl Senpai",                 700, true, "fade0001-dead-4000-beef-0000000000a3"),
-        new Entry(263, "Mikuru",     "The Melancholy of Haruhi Suzumiya", 700, true, "fade0001-dead-4000-beef-0000000000a4"),
-        new Entry(264, "Yuki Nagato","The Melancholy of Haruhi Suzumiya", 800, true, "fade0001-dead-4000-beef-0000000000a5"),
-        new Entry(265, "Komi",       "Komi Can't Communicate",            900, true, "fade0001-dead-4000-beef-0000000000a6"),
-        new Entry(266, "Annie",      "Attack on Titan",                   900, true, "fade0001-dead-4000-beef-0000000000a7"),
-        new Entry(267, "Historia",   "Attack on Titan",                   800, true, "fade0001-dead-4000-beef-0000000000a8"),
-        new Entry(268, "Sasha",      "Attack on Titan",                   800, true, "fade0001-dead-4000-beef-0000000000a9"),
-        new Entry(269, "Neferpitou", "Hunter x Hunter",                   700, true, "fade0001-dead-4000-beef-0000000000aa"),
-        new Entry(270, "Malty",      "The Rising of the Shield Hero",     600, true, "fade0001-dead-4000-beef-0000000000ab"),
-        new Entry(271, "Suzuha",     "Steins;Gate",                       700, true, "fade0001-dead-4000-beef-0000000000ac"),
-        new Entry(272, "Faris",      "Steins;Gate",                       600, true, "fade0001-dead-4000-beef-0000000000ad"),
-        new Entry(273, "Shion",      "That Time I Got Reincarnated as a Slime", 700, true, "fade0001-dead-4000-beef-0000000000ae"),
-        new Entry(274, "Milim",      "That Time I Got Reincarnated as a Slime", 800, true, "fade0001-dead-4000-beef-0000000000af"),
-        new Entry(275, "Atri",       "ATRI -My Dear Moments-",            800, true, "fade0001-dead-4000-beef-0000000000b0"),
-        new Entry(276, "Myne",       "Ascendance of a Bookworm",          700, true, "fade0001-dead-4000-beef-0000000000b1"),
-        new Entry(277, "Chtholly",   "SukaSuka",                          800, true, "fade0001-dead-4000-beef-0000000000b2"),
-        new Entry(278, "Victorique",  "Gosick",                           900, true, "fade0001-dead-4000-beef-0000000000b3"),
-        new Entry(279, "Nao",        "Charlotte",                         700, true, "fade0001-dead-4000-beef-0000000000b4"),
-        new Entry(280, "Saber",      "Fate/Apocrypha",                    900, true, "fade0001-dead-4000-beef-0000000000b5"),
-        new Entry(281, "Astolfo",    "Fate/Apocrypha",                    700, true, "fade0001-dead-4000-beef-0000000000b6"),
-        new Entry(282, "Mordred",    "Fate/Apocrypha",                    900, true, "fade0001-dead-4000-beef-0000000000b7"),
-        // ── Nuevas waifus ──────────────────────────────────────────────────────────
-        new Entry(501, "Kagome",     "Inuyasha",                           700, true, "fade0001-dead-4000-beef-0000000001f5"),
-        new Entry(502, "Sango",      "Inuyasha",                           600, true, "fade0001-dead-4000-beef-0000000001f6"),
-        new Entry(503, "Kikyo",      "Inuyasha",                           600, true, "fade0001-dead-4000-beef-0000000001f7"),
-        new Entry(504, "Asuka",      "Evangelion",                        1100, true, "fade0001-dead-4000-beef-0000000001f8"),
-        new Entry(505, "Rei",        "Evangelion",                        1100, true, "fade0001-dead-4000-beef-0000000001f9"),
-        new Entry(506, "Misato",     "Evangelion",                         600, true, "fade0001-dead-4000-beef-0000000001fa"),
-        new Entry(507, "Akame",      "Akame ga Kill",                     1000, true, "fade0001-dead-4000-beef-0000000001fb"),
-        new Entry(508, "Mine",       "Akame ga Kill",                      700, true, "fade0001-dead-4000-beef-0000000001fc"),
-        new Entry(509, "Leone",      "Akame ga Kill",                      700, true, "fade0001-dead-4000-beef-0000000001fd"),
-        new Entry(510, "Esdeath",    "Akame ga Kill",                     1300, true, "fade0001-dead-4000-beef-0000000001fe"),
-        new Entry(511, "Tohka",      "Date A Live",                        900, true, "fade0001-dead-4000-beef-0000000001ff"),
-        new Entry(512, "Kurumi",     "Date A Live",                       1200, true, "fade0001-dead-4000-beef-000000000200"),
-        new Entry(513, "Origami",    "Date A Live",                        800, true, "fade0001-dead-4000-beef-000000000201"),
-        new Entry(514, "Yoshino",    "Date A Live",                        700, true, "fade0001-dead-4000-beef-000000000202"),
-        new Entry(515, "Akeno",      "High School DxD",                   1100, true, "fade0001-dead-4000-beef-000000000203"),
-        new Entry(516, "Koneko",     "High School DxD",                    900, true, "fade0001-dead-4000-beef-000000000204"),
-        new Entry(517, "Asia",       "High School DxD",                    700, true, "fade0001-dead-4000-beef-000000000205"),
-        new Entry(518, "Xenovia",    "High School DxD",                    800, true, "fade0001-dead-4000-beef-000000000206"),
-        new Entry(519, "Shalltear",  "Overlord",                          1000, true, "fade0001-dead-4000-beef-000000000207"),
-        new Entry(520, "Shion",      "Tensura",                            800, true, "fade0001-dead-4000-beef-000000000208"),
-        new Entry(521, "Milim",      "Tensura",                           1100, true, "fade0001-dead-4000-beef-000000000209"),
-        new Entry(522, "Shuna",      "Tensura",                            700, true, "fade0001-dead-4000-beef-00000000020a"),
-        new Entry(523, "Charlotte",  "Black Clover",                       800, true, "fade0001-dead-4000-beef-00000000020b"),
-        new Entry(524, "Mimosa",     "Black Clover",                       600, true, "fade0001-dead-4000-beef-00000000020c"),
-        new Entry(525, "Vanessa",    "Black Clover",                       700, true, "fade0001-dead-4000-beef-00000000020d"),
-        new Entry(526, "Shiro",      "No Game No Life",                   1300, true, "fade0001-dead-4000-beef-00000000020e"),
-        new Entry(527, "Jibril",     "No Game No Life",                   1100, true, "fade0001-dead-4000-beef-00000000020f"),
-        new Entry(528, "Steph",      "No Game No Life",                    500, true, "fade0001-dead-4000-beef-000000000210"),
-        new Entry(529, "Ais",        "DanMachi",                          1000, true, "fade0001-dead-4000-beef-000000000211"),
-        new Entry(530, "Freya",      "DanMachi",                           900, true, "fade0001-dead-4000-beef-000000000212"),
-        new Entry(531, "Ryuu",       "DanMachi",                           700, true, "fade0001-dead-4000-beef-000000000213"),
-        new Entry(532, "Usagi",      "Sailor Moon",                        900, true, "fade0001-dead-4000-beef-000000000214"),
-        new Entry(533, "Rei Hino",   "Sailor Moon",                        700, true, "fade0001-dead-4000-beef-000000000215"),
-        new Entry(534, "Ami",        "Sailor Moon",                        600, true, "fade0001-dead-4000-beef-000000000216"),
-        new Entry(535, "Makoto",     "Sailor Moon",                        600, true, "fade0001-dead-4000-beef-000000000217"),
-        new Entry(536, "Minako",     "Sailor Moon",                        700, true, "fade0001-dead-4000-beef-000000000218"),
-        new Entry(537, "Sakura K",   "Cardcaptor Sakura",                  800, true, "fade0001-dead-4000-beef-000000000219"),
-        new Entry(538, "Kohaku",     "Dr. Stone",                          700, true, "fade0001-dead-4000-beef-00000000021a"),
-        new Entry(539, "Maki",       "Fire Force",                         700, true, "fade0001-dead-4000-beef-00000000021b"),
-        new Entry(540, "Tamaki",     "Fire Force",                         900, true, "fade0001-dead-4000-beef-00000000021b2"),
-        new Entry(541, "Hibana",     "Fire Force",                         800, true, "fade0001-dead-4000-beef-00000000021c2"),
-        new Entry(542, "Tsuyu",      "My Hero Academia",                   800, true, "fade0001-dead-4000-beef-00000000021d"),
-        new Entry(543, "Mirko",      "My Hero Academia",                   900, true, "fade0001-dead-4000-beef-00000000021e"),
-        new Entry(544, "Mount Lady", "My Hero Academia",                   800, true, "fade0001-dead-4000-beef-00000000021f"),
-        new Entry(545, "Fubuki",     "One Punch Man",                      900, true, "fade0001-dead-4000-beef-000000000220"),
-        new Entry(546, "Botan",      "Yu Yu Hakusho",                      600, true, "fade0001-dead-4000-beef-000000000221"),
-        new Entry(547, "Yukina",     "Yu Yu Hakusho",                      700, true, "fade0001-dead-4000-beef-000000000222"),
-        new Entry(548, "Kaoru",      "Rurouni Kenshin",                    500, true, "fade0001-dead-4000-beef-000000000223"),
-        new Entry(549, "Bulma",      "Dragon Ball",                        800, true, "fade0001-dead-4000-beef-000000000224"),
-        new Entry(550, "Chi-Chi",    "Dragon Ball",                        500, true, "fade0001-dead-4000-beef-000000000225"),
-        new Entry(551, "Videl",      "Dragon Ball Z",                      600, true, "fade0001-dead-4000-beef-000000000226"),
-        new Entry(552, "Maka",       "Soul Eater",                         700, true, "fade0001-dead-4000-beef-000000000227"),
-        new Entry(553, "Blair",      "Soul Eater",                         600, true, "fade0001-dead-4000-beef-000000000228"),
-        new Entry(554, "Tsubaki",    "Soul Eater",                         500, true, "fade0001-dead-4000-beef-000000000229"),
-        new Entry(555, "Cana",       "Fairy Tail",                         500, true, "fade0001-dead-4000-beef-00000000022a"),
-        new Entry(556, "Levy",       "Fairy Tail",                         500, true, "fade0001-dead-4000-beef-00000000022b"),
-        new Entry(557, "Ultear",     "Fairy Tail",                         600, true, "fade0001-dead-4000-beef-00000000022c"),
-        new Entry(558, "Misa",       "Death Note",                         800, true, "fade0001-dead-4000-beef-00000000022d"),
-        new Entry(559, "Yui H",      "Angel Beats",                        700, true, "fade0001-dead-4000-beef-00000000022e"),
-        new Entry(560, "Kanade",     "Angel Beats",                        900, true, "fade0001-dead-4000-beef-00000000022f"),
-        new Entry(561, "Emma",       "Promised Neverland",                 800, true, "fade0001-dead-4000-beef-000000000230"),
-        new Entry(562, "Ai Hoshino", "Oshi no Ko",                        1400, true, "fade0001-dead-4000-beef-000000000231"),
-        new Entry(563, "Ruby Hoshino","Oshi no Ko",                       1000, true, "fade0001-dead-4000-beef-000000000232"),
-        new Entry(564, "Kana Arima", "Oshi no Ko",                         800, true, "fade0001-dead-4000-beef-000000000233"),
-        new Entry(565, "Roxy",       "Mushoku Tensei",                    1100, true, "fade0001-dead-4000-beef-000000000234"),
-        new Entry(566, "Sylphie",    "Mushoku Tensei",                     900, true, "fade0001-dead-4000-beef-000000000235"),
-        new Entry(567, "Eris G",     "Mushoku Tensei",                     800, true, "fade0001-dead-4000-beef-000000000236"),
-        new Entry(568, "Merlin",     "Seven Deadly Sins",                  900, true, "fade0001-dead-4000-beef-000000000237"),
-        new Entry(569, "Diane",      "Seven Deadly Sins",                  700, true, "fade0001-dead-4000-beef-000000000238"),
-        new Entry(570, "Elizabeth",  "Seven Deadly Sins",                  700, true, "fade0001-dead-4000-beef-000000000239"),
-        new Entry(571, "Jolyne",     "JoJo's Bizarre Adventure",          1200, true, "fade0001-dead-4000-beef-00000000023a"),
-        new Entry(572, "Trish",      "JoJo's Bizarre Adventure",           700, true, "fade0001-dead-4000-beef-00000000023b"),
-        new Entry(573, "Morgiana",   "Magi",                               900, true, "fade0001-dead-4000-beef-00000000023c"),
-        new Entry(574, "Casca",      "Berserk",                            700, true, "fade0001-dead-4000-beef-00000000023d"),
-        new Entry(575, "Ruka",       "Rent-a-Girlfriend",                  700, true, "fade0001-dead-4000-beef-00000000023e"),
-        new Entry(576, "Chizuru",    "Rent-a-Girlfriend",                 1000, true, "fade0001-dead-4000-beef-00000000023f"),
-        new Entry(577, "Komi",       "Komi Can't Communicate",             900, true, "fade0001-dead-4000-beef-000000000240"),
-        new Entry(578, "Hanekawa",   "Monogatari",                         900, true, "fade0001-dead-4000-beef-000000000241"),
-        new Entry(579, "Nadeko",     "Monogatari",                         600, true, "fade0001-dead-4000-beef-000000000242"),
-        new Entry(580, "Shinobu K",  "Monogatari",                        1100, true, "fade0001-dead-4000-beef-000000000243"),
-        new Entry(581, "Yui K",      "K-On!",                              700, true, "fade0001-dead-4000-beef-000000000244"),
-        new Entry(582, "Azusa",      "K-On!",                              700, true, "fade0001-dead-4000-beef-000000000245"),
-        new Entry(583, "Ritsu",      "K-On!",                              600, true, "fade0001-dead-4000-beef-000000000246"),
-        new Entry(584, "Mugi",       "K-On!",                              500, true, "fade0001-dead-4000-beef-000000000247"),
-        new Entry(585, "Lena",       "86 Eighty-Six",                      900, true, "fade0001-dead-4000-beef-000000000248"),
-        new Entry(586, "Celty",      "Durarara!!",                         800, true, "fade0001-dead-4000-beef-000000000249"),
-        new Entry(587, "Akane T",    "Psycho-Pass",                        900, true, "fade0001-dead-4000-beef-00000000024a"),
-        new Entry(588, "Hiyori",     "Noragami",                           700, true, "fade0001-dead-4000-beef-00000000024b"),
-        new Entry(589, "Shouko N",   "A Silent Voice",                     800, true, "fade0001-dead-4000-beef-00000000024c"),
-        new Entry(590, "Sarada",     "Boruto",                             700, true, "fade0001-dead-4000-beef-00000000024d"),
-        new Entry(591, "Louise",     "Zero no Tsukaima",                   700, true, "fade0001-dead-4000-beef-00000000024e"),
-        new Entry(592, "Siesta",     "Zero no Tsukaima",                   400, true, "fade0001-dead-4000-beef-00000000024f"),
-        new Entry(593, "Ikaros",     "Heaven's Lost Property",             800, true, "fade0001-dead-4000-beef-000000000250"),
-        new Entry(594, "Nymph",      "Heaven's Lost Property",             600, true, "fade0001-dead-4000-beef-000000000251"),
-        new Entry(595, "Leafa",      "Sword Art Online",                   600, true, "fade0001-dead-4000-beef-000000000252"),
-        new Entry(596, "Silica",     "Sword Art Online",                   500, true, "fade0001-dead-4000-beef-000000000253"),
-        new Entry(597, "Lisbeth",    "Sword Art Online",                   500, true, "fade0001-dead-4000-beef-000000000254"),
-        new Entry(598, "Alice",      "Sword Art Online",                   900, true, "fade0001-dead-4000-beef-000000000255"),
-        new Entry(599, "Noa",        "Kaiju No. 8",                        500, true, "fade0001-dead-4000-beef-000000000256"),
-        new Entry(600, "Mina A",     "Kaiju No. 8",                        800, true, "fade0001-dead-4000-beef-000000000257"),
-        new Entry(601, "Tohru D",    "Dragon Maid",                        300, true, "fade0001-dead-4000-beef-000000000258"),
-        new Entry(602, "Vivi",       "One Piece",                          700, true, "fade0001-dead-4000-beef-000000000259"),
-        new Entry(603, "Yamato",     "One Piece",                         1000, true, "fade0001-dead-4000-beef-00000000025a"),
-        new Entry(604, "Carrot",     "One Piece",                          700, true, "fade0001-dead-4000-beef-00000000025b"),
-        new Entry(605, "Rebecca",    "One Piece",                          600, true, "fade0001-dead-4000-beef-00000000025c"),
-        new Entry(606, "Nel",        "Bleach",                             700, true, "fade0001-dead-4000-beef-00000000025d"),
-        new Entry(607, "Harribel",   "Bleach",                             800, true, "fade0001-dead-4000-beef-00000000025e"),
-        new Entry(608, "Rangiku",    "Bleach",                             900, true, "fade0001-dead-4000-beef-00000000025f"),
-        new Entry(609, "Unohana",    "Bleach",                             800, true, "fade0001-dead-4000-beef-000000000260"),
-        new Entry(610, "Soifon",     "Bleach",                             700, true, "fade0001-dead-4000-beef-000000000261"),
-        new Entry(611, "Isane",      "Bleach",                             400, true, "fade0001-dead-4000-beef-000000000262"),
-        new Entry(612, "Konan",      "Naruto",                             800, true, "fade0001-dead-4000-beef-000000000263"),
-        new Entry(613, "Temari",     "Naruto",                             600, true, "fade0001-dead-4000-beef-000000000264"),
-        new Entry(614, "Ino",        "Naruto",                             500, true, "fade0001-dead-4000-beef-000000000265"),
-        new Entry(615, "Karin",      "Naruto",                             500, true, "fade0001-dead-4000-beef-000000000266"),
-        new Entry(616, "Mei T",      "Naruto",                             700, true, "fade0001-dead-4000-beef-000000000267"),
-        new Entry(617, "Historia",   "Attack on Titan",                    700, true, "fade0001-dead-4000-beef-000000000268"),
-        new Entry(618, "Sasha",      "Attack on Titan",                    800, true, "fade0001-dead-4000-beef-000000000269"),
-        new Entry(619, "Annie",      "Attack on Titan",                    900, true, "fade0001-dead-4000-beef-00000000026a"),
-        new Entry(620, "Pieck",      "Attack on Titan",                    800, true, "fade0001-dead-4000-beef-00000000026b"),
-        new Entry(621, "Aoi",        "Demon Slayer",                       400, true, "fade0001-dead-4000-beef-00000000026c"),
-        new Entry(622, "Daki",       "Demon Slayer",                       700, true, "fade0001-dead-4000-beef-00000000026d"),
-        new Entry(623, "Mei M",      "Jujutsu Kaisen",                     800, true, "fade0001-dead-4000-beef-00000000026e"),
-        new Entry(624, "Maki Z",     "Jujutsu Kaisen",                     900, true, "fade0001-dead-4000-beef-00000000026f"),
-        new Entry(625, "Mai Z",      "Jujutsu Kaisen",                     700, true, "fade0001-dead-4000-beef-000000000270"),
-        new Entry(626, "Himeno",     "Chainsaw Man",                       800, true, "fade0001-dead-4000-beef-000000000271"),
-        new Entry(627, "Kobeni",     "Chainsaw Man",                       600, true, "fade0001-dead-4000-beef-000000000272"),
-        new Entry(628, "Reze",       "Chainsaw Man",                       900, true, "fade0001-dead-4000-beef-000000000273"),
-        new Entry(629, "Olivier",    "Fullmetal Alchemist",                800, true, "fade0001-dead-4000-beef-000000000274"),
-        new Entry(630, "Lan Fan",    "Fullmetal Alchemist",                700, true, "fade0001-dead-4000-beef-000000000275"),
-        new Entry(631, "Riza",       "Fullmetal Alchemist",               1000, true, "fade0001-dead-4000-beef-000000000276"),
-        new Entry(632, "Mayuri",     "Steins;Gate",                        500, true, "fade0001-dead-4000-beef-000000000277"),
-        new Entry(633, "Suzuha",     "Steins;Gate",                        600, true, "fade0001-dead-4000-beef-000000000278"),
-        new Entry(634, "Yuki N",     "Haruhi Suzumiya",                    700, true, "fade0001-dead-4000-beef-000000000279"),
-        new Entry(635, "Mikuru",     "Haruhi Suzumiya",                    600, true, "fade0001-dead-4000-beef-00000000027a"),
-        new Entry(636, "Kaede K",    "Assassination Classroom",            600, true, "fade0001-dead-4000-beef-00000000027b"),
-        new Entry(637, "Irina J",    "Assassination Classroom",            700, true, "fade0001-dead-4000-beef-00000000027c"),
-        new Entry(638, "Shizuka",    "Doraemon",                           300, true, "fade0001-dead-4000-beef-00000000027d"),
-        new Entry(639, "Taiga A",    "Dragon Ball GT",                     300, true, "fade0001-dead-4000-beef-00000000027e"),
-        new Entry(640, "Akatsuki",   "Log Horizon",                        700, true, "fade0001-dead-4000-beef-00000000027f"),
-        new Entry(641, "Yue",        "Arifureta",                          900, true, "fade0001-dead-4000-beef-000000000280"),
-        new Entry(642, "Shea",       "Arifureta",                          700, true, "fade0001-dead-4000-beef-000000000281"),
-        new Entry(643, "Sasha N",    "Demon King Academy",                 800, true, "fade0001-dead-4000-beef-000000000282"),
-        new Entry(644, "Misha N",    "Demon King Academy",                 700, true, "fade0001-dead-4000-beef-000000000283"),
-        new Entry(645, "Albedo O",   "Overlord",                           300, true, "fade0001-dead-4000-beef-000000000284"),
-        new Entry(646, "Frederica",  "86 Eighty-Six",                      700, true, "fade0001-dead-4000-beef-000000000285"),
-        new Entry(647, "Yotsugi",    "Monogatari",                         500, true, "fade0001-dead-4000-beef-000000000286"),
-        new Entry(648, "Suruga",     "Monogatari",                         700, true, "fade0001-dead-4000-beef-000000000287"),
-        new Entry(649, "Houki",      "Infinite Stratos",                   700, true, "fade0001-dead-4000-beef-000000000288"),
-        new Entry(650, "Cecilia",    "Infinite Stratos",                   600, true, "fade0001-dead-4000-beef-000000000289")
-    );
-
-    // ── HUSBANDOS ────────────────────────────────────────────────────────────────
-    private static final List<Entry> HUSBANDOS = List.of(
-        new Entry(101, "Kirito",     "Sword Art Online",                 1200, false, "a489deac-9d31-4b9b-ba35-db993f6eeb79"),
-        new Entry(102, "Goku",       "Dragon Ball",                      2000, false, "3929e052-bad7-4b74-8177-4d5ba591fbd4"),
-        new Entry(103, "Naruto",     "Naruto",                           1800, false, "0dc42fac-c582-4bd4-9167-9e0bc2c972ce"),
-        new Entry(104, "Sasuke",     "Naruto",                           1600, false, "7e2f8c98-3168-4ea8-b9c4-10e54edc332d"),
-        new Entry(105, "Levi",       "Attack on Titan",                  2000, false, "6c989f35-30aa-4583-bd54-e07ab6151940"),
-        new Entry(106, "Eren",       "Attack on Titan",                  1400, false, "d3cce278-4eb9-4baa-ae90-37ad7f50c056"),
-        new Entry(107, "Zenitsu",    "Demon Slayer",                      900, false, "fc194421-64f8-458a-b1d5-958482a9d7b1"),
-        new Entry(108, "Tanjiro",    "Demon Slayer",                     1600, false, "4cacf72d-a878-4a4e-a124-72a7e60f3dea"),
-        new Entry(109, "Itachi",     "Naruto",                           1800, false, "8871b364-7c66-432a-883b-1017b6475942"),
-        new Entry(110, "Kakashi",    "Naruto",                           1400, false, "a5a260a2-9456-481e-9f4a-922cf8de6a3f"),
-        new Entry(111, "Vegeta",     "Dragon Ball",                      1500, false, "aa269575-7d09-4891-9c29-75f638df0141"),
-        new Entry(112, "Luffy",      "One Piece",                        2000, false, "12c4e186-5700-4237-a6b8-56c05f72aab1"),
-        new Entry(113, "Zoro",       "One Piece",                        1800, false, "7efda859-0038-46b2-9c27-a37cc3776bd4"),
-        new Entry(114, "Sanji",      "One Piece",                        1000, false, "1d403219-a4e8-4ce5-bf99-93124846db80"),
-        new Entry(115, "Ace",        "One Piece",                        1200, false, "35facc3f-7426-4050-80b6-fb2b761477e8"),
-        new Entry(116, "Chopper",    "One Piece",                         700, false, "ee440d2e-c190-4bc9-b67c-213df5cf4c42"),
-        new Entry(117, "Subaru",     "Re:Zero",                           700, false, "c54ec2e8-65b1-47b2-bbaf-72ea7771f785"),
-        new Entry(118, "Deku",       "My Hero Academia",                 1400, false, "07b29e12-f9e7-4541-b6ad-727e6fc68de2"),
-        new Entry(119, "Bakugo",     "My Hero Academia",                 1600, false, "24abcf66-1e47-42f6-9f7b-c29f873f9f74"),
-        new Entry(120, "Todoroki",   "My Hero Academia",                 1400, false, "5138e05c-3e1f-47fc-91cd-497ee4a69410"),
-        new Entry(121, "Saitama",    "One Punch Man",                    1500, false, "7e1f7c13-a400-4c6c-a247-a1d97811f9d5"),
-        new Entry(122, "Genos",      "One Punch Man",                     700, false, "6b186191-ba7c-42f5-bde7-a4223d16269f"),
-        new Entry(123, "Ichigo",     "Bleach",                           1500, false, "12a27ebd-58e3-4ac7-ba01-d09c5e3c2fc6"),
-        new Entry(124, "Natsu",      "Fairy Tail",                       1000, false, "033eff79-b4ec-41f9-8167-1a27f74bc149"),
-        new Entry(125, "Gray",       "Fairy Tail",                        700, false, "1326de59-987d-4b5d-a40d-75ff6dac16da"),
-        new Entry(126, "Edward",     "Fullmetal Alchemist",              1200, false, "f404368f-c297-496e-8844-a1d0b47b21b5"),
-        new Entry(127, "Gohan",      "Dragon Ball",                       900, false, "488fe73a-124b-4b0e-9007-1d52db676dab"),
-        new Entry(128, "Lelouch",    "Code Geass",                       1500, false, "9a85455d-e11e-47a7-8010-b08c1c798cc1"),
-        new Entry(129, "Suzaku",     "Code Geass",                        800, false, "48285d2b-45c0-46cb-9466-88ecc8ebeb3f"),
-        new Entry(130, "Shinji",     "Neon Genesis Evangelion",           700, false, "b980de64-4c9b-43ab-999d-0fbe97156e56"),
-        new Entry(131, "Gon",        "Hunter x Hunter",                  1000, false, "82bafdf8-7f04-4c6f-b382-c03e8790fccd"),
-        new Entry(132, "Killua",     "Hunter x Hunter",                  1500, false, "eb45c43d-e14d-4236-bdc6-611f1fe2ef48"),
-        new Entry(133, "Hisoka",     "Hunter x Hunter",                   900, false, "f26b26f0-106f-4b16-90d5-8a64c8c49539"),
-        new Entry(134, "Giorno",     "JoJo's Bizarre Adventure",          900, false, "f10696bb-9866-40a6-ae64-4c8a49844f3d"),
-        new Entry(135, "Jotaro",     "JoJo's Bizarre Adventure",         1000, false, "d13eca77-cc84-45fd-b063-c6682aabc733"),
-        new Entry(136, "Dio",        "JoJo's Bizarre Adventure",         1000, false, "1d66328b-914f-44e4-a9cb-775c71db8ec8"),
-        new Entry(137, "Josuke",     "JoJo's Bizarre Adventure",          700, false, "fbb25e8a-f49f-4c23-b86b-27783b6566ac"),
-        new Entry(138, "Kira",       "JoJo's Bizarre Adventure",          800, false, "32215687-4dad-4506-bf4d-7c6f9951ec2e"),
-        new Entry(139, "Narancia",   "JoJo's Bizarre Adventure",          600, false, "e0875365-18c6-48cd-aefd-ff6c0e90dd7f"),
-        new Entry(140, "Fugo",       "JoJo's Bizarre Adventure",          600, false, "27bbd967-c836-408c-8ee7-286c4e5a8091"),
-        new Entry(141, "Abbacchio",  "JoJo's Bizarre Adventure",          700, false, "44ff499f-a59e-44cf-be07-cf41c65e01bb"),
-        new Entry(142, "Noriaki",    "JoJo's Bizarre Adventure",          600, false, "b860511c-f8db-487f-ba65-8ea6e05fae8d"),
-        new Entry(143, "Touma",      "A Certain Magical Index",           700, false, "8f259f5b-0ac1-4318-9db5-df6483a58b71"),
-        new Entry(144, "Kaneki",     "Tokyo Ghoul",                      1200, false, "dc42fad3-d9f1-4ea3-98e9-cb1658da51dc"),
-        new Entry(145, "Sora",       "No Game No Life",                   800, false, "297275a7-4387-4633-acb8-bede106f2549"),
-        new Entry(146, "Ainz",       "Overlord",                         1000, false, "cdb65b0e-c690-4df7-8515-14060eda1dd5"),
-        new Entry(147, "Bell",       "DanMachi",                          800, false, "1a21eb8b-5084-4647-9539-b1f2cbcc9a65"),
-        new Entry(148, "Okabe",      "Steins;Gate",                       900, false, "3c16565f-e7e9-4e0e-89a4-a8ea70c3a51d"),
-        new Entry(149, "Soma",       "Food Wars",                         700, false, "2db109fe-1711-45e8-8eb2-72e64f4aed46"),
-        new Entry(150, "Nagisa",     "Assassination Classroom",           800, false, "9d2bf4c8-ad43-451a-978d-057d082c4c93"),
-        new Entry(151, "Asta",       "Black Clover",                      800, false, "9a86c0dc-0aa1-4e33-a2be-17218a0d9e00"),
-        new Entry(152, "Yuno",       "Black Clover",                      700, false, "c1e7266f-af6c-416b-b6aa-d4b7268da353"),
-        new Entry(153, "Inosuke",    "Demon Slayer",                      700, false, "6dbf4f61-c046-453f-a8a4-2668face482d"),
-        new Entry(154, "Giyuu",      "Demon Slayer",                      900, false, "c2538f41-6ee2-456d-8721-00b320f2918e"),
-        new Entry(155, "Rengoku",    "Demon Slayer",                     1000, false, "5f443d28-7319-42c3-95fe-6c3bafbd0ec9"),
-        new Entry(156, "Gyomei",     "Demon Slayer",                      700, false, "a545d42d-3b57-45aa-a0da-2788afd2b868"),
-        new Entry(157, "Tengen",     "Demon Slayer",                      700, false, "a043e5e2-6a47-47c2-acb6-36b31820443c"),
-        new Entry(158, "Sanemi",     "Demon Slayer",                      700, false, "48769cb6-7423-4fba-89be-7049596dcee0"),
-        new Entry(159, "Obanai",     "Demon Slayer",                      600, false, "c7879894-bc04-4f05-924e-d4fc315cd487"),
-        new Entry(160, "Muzan",      "Demon Slayer",                      800, false, "4890d43f-1a65-4382-82f1-9cbbf240e246"),
-        new Entry(161, "Gojo",       "Jujutsu Kaisen",                   1600, false, "8b6e6236-f651-43db-bf74-85f6ef459979"),
-        new Entry(162, "Yuji",       "Jujutsu Kaisen",                   1200, false, "e99f00ec-4356-482d-ad97-b05e75d8f303"),
-        new Entry(163, "Megumi",     "Jujutsu Kaisen",                    900, false, "4e2538c0-a462-4ed3-843d-ee059737c6a5"),
-        new Entry(164, "Nanami",     "Jujutsu Kaisen",                    800, false, "89f22d7f-3755-4cdf-b0c0-29fea1a62fbe"),
-        new Entry(165, "Toge",       "Jujutsu Kaisen",                    600, false, "27463aa7-4826-408e-a1ec-bd8b0201342b"),
-        new Entry(166, "Miyamura",   "Horimiya",                          700, false, "c4d382bd-3e61-4f59-bc7c-e61e75346842"),
-        new Entry(167, "Miyuki",     "Kaguya-sama: Love is War",          800, false, "eb71ad4d-cda1-4967-b5fa-34724c1de7ce"),
-        new Entry(168, "Denji",      "Chainsaw Man",                     1000, false, "3a1cbc81-35d9-4fef-a11b-b50f8fc0e0e5"),
-        new Entry(169, "Rimuru",     "That Time I Got Reincarnated as a Slime", 900, false, "518e7828-2297-4894-af21-2d88a5c012cf"),
-        new Entry(170, "Guts",       "Berserk",                          1200, false, "5eb68b6a-b6e4-4376-a8c2-cada921590ca"),
-        new Entry(171, "Spike",      "Cowboy Bebop",                     1000, false, "c0cc43a6-07a1-44ad-9a86-0b217ca9a9c3"),
-        new Entry(172, "Kamina",     "Gurren Lagann",                     800, false, "494a35eb-b1f8-4698-871d-aa1d049f8eda"),
-        new Entry(173, "Simon",      "Gurren Lagann",                     700, false, "f3c4dfb9-1c7b-40ac-81fd-462538538523"),
-        new Entry(174, "Light",      "Death Note",                       1200, false, "00d313db-93d9-42fc-827d-a43aeafcad34"),
-        new Entry(175, "Naofumi",    "The Rising of the Shield Hero",     700, false, "5f3176bd-8819-42bb-8550-b0ce29e204b6"),
-        new Entry(176, "Denki",      "My Hero Academia",                  600, false, "9541eed0-db6b-49ff-900b-37fbf0603cb5"),
-        new Entry(177, "Eijiro",     "My Hero Academia",                  600, false, "8494876d-1947-40a6-8bd1-10df737ff6fc"),
-        new Entry(178, "Tamaki",     "My Hero Academia",                  700, false, "a086e718-befa-4f95-8bff-ac239a228426"),
-        new Entry(179, "Mirio",      "My Hero Academia",                  700, false, "d035d484-c180-429c-8cae-c005fe87a71b"),
-        new Entry(180, "Aizawa",     "My Hero Academia",                  800, false, "44ee7d74-ce87-48cd-b696-943311e39711"),
-        new Entry(181, "Gyutaro",    "Demon Slayer",                      700, false, "8b1c2fd5-1f78-4bc0-b728-d1c0786aac1f"),
-        new Entry(182, "Hiro",       "Darling in the FranXX",             700, false, "67d0cba2-74a3-4c77-97ab-5c9bce5928f3"),
-        new Entry(183, "Kaworu",     "Neon Genesis Evangelion",           800, false, "20a94804-3ad2-4e8c-8187-5d67518af09c"),
-        new Entry(400, "L",          "Death Note",                        1800, false, "fade0001-dead-4000-beef-0000000000b8"),
-        new Entry(401, "Near",       "Death Note",                         800, false, "fade0001-dead-4000-beef-0000000000b9"),
-        new Entry(402, "Mello",      "Death Note",                         700, false, "fade0001-dead-4000-beef-0000000000ba"),
-        new Entry(403, "Armin",      "Attack on Titan",                    900, false, "fade0001-dead-4000-beef-0000000000bb"),
-        new Entry(404, "Reiner",     "Attack on Titan",                    800, false, "fade0001-dead-4000-beef-0000000000bc"),
-        new Entry(405, "Erwin",      "Attack on Titan",                   1000, false, "fade0001-dead-4000-beef-0000000000bd"),
-        new Entry(406, "Jean",       "Attack on Titan",                    700, false, "fade0001-dead-4000-beef-0000000000be"),
-        new Entry(407, "Kageyama",   "Haikyuu!!",                          900, false, "fade0001-dead-4000-beef-0000000000bf"),
-        new Entry(408, "Hinata SH",  "Haikyuu!!",                         1000, false, "fade0001-dead-4000-beef-0000000000c0"),
-        new Entry(409, "Bokuto",     "Haikyuu!!",                          900, false, "fade0001-dead-4000-beef-0000000000c1"),
-        new Entry(410, "Oikawa",     "Haikyuu!!",                          900, false, "fade0001-dead-4000-beef-0000000000c2"),
-        new Entry(411, "Kuroo",      "Haikyuu!!",                          800, false, "fade0001-dead-4000-beef-0000000000c3"),
-        new Entry(412, "Tsukishima", "Haikyuu!!",                          700, false, "fade0001-dead-4000-beef-0000000000c4"),
-        new Entry(413, "Sugawara",   "Haikyuu!!",                          700, false, "fade0001-dead-4000-beef-0000000000c5"),
-        new Entry(414, "Aomine",     "Kuroko no Basket",                   900, false, "fade0001-dead-4000-beef-0000000000c6"),
-        new Entry(415, "Kuroko",     "Kuroko no Basket",                   800, false, "fade0001-dead-4000-beef-0000000000c7"),
-        new Entry(416, "Kise",       "Kuroko no Basket",                   800, false, "fade0001-dead-4000-beef-0000000000c8"),
-        new Entry(417, "Akashi",     "Kuroko no Basket",                   900, false, "fade0001-dead-4000-beef-0000000000c9"),
-        new Entry(418, "Midorima",   "Kuroko no Basket",                   700, false, "fade0001-dead-4000-beef-0000000000ca"),
-        new Entry(419, "Kagami",     "Kuroko no Basket",                   800, false, "fade0001-dead-4000-beef-0000000000cb"),
-        new Entry(420, "Inuyasha",   "Inuyasha",                          1000, false, "fade0001-dead-4000-beef-0000000000cc"),
-        new Entry(421, "Sesshomaru", "Inuyasha",                          1100, false, "fade0001-dead-4000-beef-0000000000cd"),
-        new Entry(422, "Miroku",     "Inuyasha",                           700, false, "fade0001-dead-4000-beef-0000000000ce"),
-        new Entry(423, "Kurapika",   "Hunter x Hunter",                   1000, false, "fade0001-dead-4000-beef-0000000000cf"),
-        new Entry(424, "Leorio",     "Hunter x Hunter",                    700, false, "fade0001-dead-4000-beef-0000000000d0"),
-        new Entry(425, "Chrollo",    "Hunter x Hunter",                    900, false, "fade0001-dead-4000-beef-0000000000d1"),
-        new Entry(426, "Meruem",     "Hunter x Hunter",                   1000, false, "fade0001-dead-4000-beef-0000000000d2"),
-        new Entry(427, "Illumi",     "Hunter x Hunter",                    800, false, "fade0001-dead-4000-beef-0000000000d3"),
-        new Entry(428, "Ging",       "Hunter x Hunter",                    700, false, "fade0001-dead-4000-beef-0000000000d4"),
-        new Entry(429, "Minato",     "Naruto",                            1200, false, "fade0001-dead-4000-beef-0000000000d5"),
-        new Entry(430, "Gaara",      "Naruto",                            1000, false, "fade0001-dead-4000-beef-0000000000d6"),
-        new Entry(431, "Jiraiya",    "Naruto",                            1000, false, "fade0001-dead-4000-beef-0000000000d7"),
-        new Entry(432, "Pain",       "Naruto",                            1100, false, "fade0001-dead-4000-beef-0000000000d8"),
-        new Entry(433, "Obito",      "Naruto",                             900, false, "fade0001-dead-4000-beef-0000000000d9"),
-        new Entry(434, "Madara",     "Naruto",                            1100, false, "fade0001-dead-4000-beef-0000000000da"),
-        new Entry(435, "Shikamaru",  "Naruto",                             900, false, "fade0001-dead-4000-beef-0000000000db"),
-        new Entry(436, "Rock Lee",   "Naruto",                             800, false, "fade0001-dead-4000-beef-0000000000dc"),
-        new Entry(437, "Neji",       "Naruto",                             800, false, "fade0001-dead-4000-beef-0000000000dd"),
-        new Entry(438, "Shanks",     "One Piece",                         1200, false, "fade0001-dead-4000-beef-0000000000de"),
-        new Entry(439, "Mihawk",     "One Piece",                         1000, false, "fade0001-dead-4000-beef-0000000000df"),
-        new Entry(440, "Sabo",       "One Piece",                          900, false, "fade0001-dead-4000-beef-0000000000e0"),
-        new Entry(441, "Usopp",      "One Piece",                          600, false, "fade0001-dead-4000-beef-0000000000e1"),
-        new Entry(442, "Franky",     "One Piece",                          600, false, "fade0001-dead-4000-beef-0000000000e2"),
-        new Entry(443, "Brook",      "One Piece",                          600, false, "fade0001-dead-4000-beef-0000000000e3"),
-        new Entry(444, "Jinbe",      "One Piece",                          700, false, "fade0001-dead-4000-beef-0000000000e4"),
-        new Entry(445, "Byakuya",    "Bleach",                            1000, false, "fade0001-dead-4000-beef-0000000000e5"),
-        new Entry(446, "Aizen",      "Bleach",                            1200, false, "fade0001-dead-4000-beef-0000000000e6"),
-        new Entry(447, "Grimmjow",   "Bleach",                             900, false, "fade0001-dead-4000-beef-0000000000e7"),
-        new Entry(448, "Ulquiorra",  "Bleach",                            1000, false, "fade0001-dead-4000-beef-0000000000e8"),
-        new Entry(449, "Kisuke",     "Bleach",                             900, false, "fade0001-dead-4000-beef-0000000000e9"),
-        new Entry(450, "Renji",      "Bleach",                             700, false, "fade0001-dead-4000-beef-0000000000ea"),
-        new Entry(451, "Kenpachi",   "Bleach",                             800, false, "fade0001-dead-4000-beef-0000000000eb"),
-        new Entry(452, "Laxus",      "Fairy Tail",                         800, false, "fade0001-dead-4000-beef-0000000000ec"),
-        new Entry(453, "Jellal",     "Fairy Tail",                         800, false, "fade0001-dead-4000-beef-0000000000ed"),
-        new Entry(454, "Gildarts",   "Fairy Tail",                         800, false, "fade0001-dead-4000-beef-0000000000ee"),
-        new Entry(455, "Meliodas",   "Seven Deadly Sins",                 1200, false, "fade0001-dead-4000-beef-0000000000ef"),
-        new Entry(456, "Ban",        "Seven Deadly Sins",                  900, false, "fade0001-dead-4000-beef-0000000000f0"),
-        new Entry(457, "Escanor",    "Seven Deadly Sins",                  900, false, "fade0001-dead-4000-beef-0000000000f1"),
-        new Entry(458, "King SDS",   "Seven Deadly Sins",                  700, false, "fade0001-dead-4000-beef-0000000000f2"),
-        new Entry(459, "Trunks",     "Dragon Ball",                        900, false, "fade0001-dead-4000-beef-0000000000f3"),
-        new Entry(460, "Piccolo",    "Dragon Ball",                        700, false, "fade0001-dead-4000-beef-0000000000f4"),
-        new Entry(461, "Frieza",     "Dragon Ball",                        900, false, "fade0001-dead-4000-beef-0000000000f5"),
-        new Entry(462, "Beerus",     "Dragon Ball Super",                  700, false, "fade0001-dead-4000-beef-0000000000f6"),
-        new Entry(463, "Broly",      "Dragon Ball Super",                  800, false, "fade0001-dead-4000-beef-0000000000f7"),
-        new Entry(464, "Alphonse",   "Fullmetal Alchemist",                800, false, "fade0001-dead-4000-beef-0000000000f8"),
-        new Entry(465, "Roy",        "Fullmetal Alchemist",               1100, false, "fade0001-dead-4000-beef-0000000000f9"),
-        new Entry(466, "Sukuna",     "Jujutsu Kaisen",                    1200, false, "fade0001-dead-4000-beef-0000000000fa"),
-        new Entry(467, "Geto",       "Jujutsu Kaisen",                     900, false, "fade0001-dead-4000-beef-0000000000fb"),
-        new Entry(468, "Yuta",       "Jujutsu Kaisen",                    1000, false, "fade0001-dead-4000-beef-0000000000fc"),
-        new Entry(469, "Todo",       "Jujutsu Kaisen",                     800, false, "fade0001-dead-4000-beef-0000000000fd"),
-        new Entry(470, "Hawks",      "My Hero Academia",                  1000, false, "fade0001-dead-4000-beef-0000000000fe"),
-        new Entry(471, "All Might",  "My Hero Academia",                  1200, false, "fade0001-dead-4000-beef-0000000000ff"),
-        new Entry(472, "Kazuma",     "KonoSuba",                           800, false, "fade0001-dead-4000-beef-000000000100"),
-        new Entry(473, "Rudeus",     "Mushoku Tensei",                     700, false, "fade0001-dead-4000-beef-000000000101"),
-        new Entry(474, "Ruijerd",    "Mushoku Tensei",                     700, false, "fade0001-dead-4000-beef-000000000102"),
-        new Entry(475, "Thorfinn",   "Vinland Saga",                      1000, false, "fade0001-dead-4000-beef-000000000103"),
-        new Entry(476, "Askeladd",   "Vinland Saga",                       900, false, "fade0001-dead-4000-beef-000000000104"),
-        new Entry(477, "Mob",        "Mob Psycho 100",                    1000, false, "fade0001-dead-4000-beef-000000000105"),
-        new Entry(478, "Reigen",     "Mob Psycho 100",                     900, false, "fade0001-dead-4000-beef-000000000106"),
-        new Entry(479, "Garou",      "One Punch Man",                      900, false, "fade0001-dead-4000-beef-000000000107"),
-        new Entry(480, "Gilgamesh",  "Fate/stay night",                   1000, false, "fade0001-dead-4000-beef-000000000108"),
-        new Entry(481, "Archer",     "Fate/stay night",                    800, false, "fade0001-dead-4000-beef-000000000109"),
-        new Entry(482, "Shirou",     "Fate/stay night",                    700, false, "fade0001-dead-4000-beef-00000000010a"),
-        new Entry(483, "Koro-Sensei","Assassination Classroom",            900, false, "fade0001-dead-4000-beef-00000000010b"),
-        new Entry(484, "Karma",      "Assassination Classroom",            800, false, "fade0001-dead-4000-beef-00000000010c"),
-        new Entry(485, "Gintoki",    "Gintama",                           1000, false, "fade0001-dead-4000-beef-00000000010d"),
-        new Entry(486, "Dazai",      "Bungo Stray Dogs",                  1200, false, "fade0001-dead-4000-beef-00000000010e"),
-        new Entry(487, "Atsushi",    "Bungo Stray Dogs",                   800, false, "fade0001-dead-4000-beef-00000000010f"),
-        new Entry(488, "Chuuya",     "Bungo Stray Dogs",                  1000, false, "fade0001-dead-4000-beef-000000000110"),
-        new Entry(489, "Akutagawa",  "Bungo Stray Dogs",                   900, false, "fade0001-dead-4000-beef-000000000111"),
-        new Entry(490, "Diavolo",    "JoJo's Bizarre Adventure",           800, false, "fade0001-dead-4000-beef-000000000112"),
-        new Entry(491, "Joseph",     "JoJo's Bizarre Adventure",           900, false, "fade0001-dead-4000-beef-000000000113"),
-        new Entry(492, "Caesar",     "JoJo's Bizarre Adventure",           700, false, "fade0001-dead-4000-beef-000000000114"),
-        new Entry(493, "Johnny",     "JoJo's Bizarre Adventure",           800, false, "fade0001-dead-4000-beef-000000000115"),
-        new Entry(494, "Izaya",      "Durarara!!",                         800, false, "fade0001-dead-4000-beef-000000000116"),
-        new Entry(495, "Shizuo",     "Durarara!!",                         900, false, "fade0001-dead-4000-beef-000000000117"),
-        new Entry(496, "Accelerator","A Certain Magical Index",            900, false, "fade0001-dead-4000-beef-000000000118"),
-        new Entry(497, "Yami",       "Black Clover",                       900, false, "fade0001-dead-4000-beef-000000000119"),
-        new Entry(498, "Luck",       "Black Clover",                       700, false, "fade0001-dead-4000-beef-00000000011a"),
-        new Entry(499, "Vash",       "Trigun",                             900, false, "fade0001-dead-4000-beef-00000000011b"),
-        new Entry(500, "Shinso",     "My Hero Academia",                   700, false, "fade0001-dead-4000-beef-00000000011c"),
-        // ── Nuevos husbandos ───────────────────────────────────────────────────────
-        new Entry(701, "Yusuke",     "Yu Yu Hakusho",                      900, false, "fade0001-dead-4000-beef-0000000002bd"),
-        new Entry(702, "Hiei",       "Yu Yu Hakusho",                     1000, false, "fade0001-dead-4000-beef-0000000002be"),
-        new Entry(703, "Kurama",     "Yu Yu Hakusho",                     1100, false, "fade0001-dead-4000-beef-0000000002bf"),
-        new Entry(704, "Kuwabara",   "Yu Yu Hakusho",                      400, false, "fade0001-dead-4000-beef-0000000002c0"),
-        new Entry(705, "Kenshin",    "Rurouni Kenshin",                   1100, false, "fade0001-dead-4000-beef-0000000002c1"),
-        new Entry(706, "Sanosuke",   "Rurouni Kenshin",                    500, false, "fade0001-dead-4000-beef-0000000002c2"),
-        new Entry(707, "Shinji",     "Evangelion",                         600, false, "fade0001-dead-4000-beef-0000000002c3"),
-        new Entry(708, "Kaworu",     "Evangelion",                         800, false, "fade0001-dead-4000-beef-0000000002c4"),
-        new Entry(709, "Kaneki",     "Tokyo Ghoul",                       1200, false, "fade0001-dead-4000-beef-0000000002c5"),
-        new Entry(710, "Juuzou",     "Tokyo Ghoul",                        800, false, "fade0001-dead-4000-beef-0000000002c6"),
-        new Entry(711, "Tatsumi",    "Akame ga Kill",                      700, false, "fade0001-dead-4000-beef-0000000002c7"),
-        new Entry(712, "Simon",      "Gurren Lagann",                      800, false, "fade0001-dead-4000-beef-0000000002c8"),
-        new Entry(713, "Kamina",     "Gurren Lagann",                     1100, false, "fade0001-dead-4000-beef-0000000002c9"),
-        new Entry(714, "Ainz",       "Overlord",                          1200, false, "fade0001-dead-4000-beef-0000000002ca"),
-        new Entry(715, "Rimuru",     "Tensura",                           1200, false, "fade0001-dead-4000-beef-0000000002cb"),
-        new Entry(716, "Benimaru",   "Tensura",                            700, false, "fade0001-dead-4000-beef-0000000002cc"),
-        new Entry(717, "Asta",       "Black Clover",                       800, false, "fade0001-dead-4000-beef-0000000002cd"),
-        new Entry(718, "Yuno",       "Black Clover",                       900, false, "fade0001-dead-4000-beef-0000000002ce"),
-        new Entry(719, "Soma",       "Food Wars",                          700, false, "fade0001-dead-4000-beef-0000000002cf"),
-        new Entry(720, "Sora",       "No Game No Life",                    800, false, "fade0001-dead-4000-beef-0000000002d0"),
-        new Entry(721, "Bell",       "DanMachi",                           800, false, "fade0001-dead-4000-beef-0000000002d1"),
-        new Entry(722, "Ryuji T",    "Toradora",                           500, false, "fade0001-dead-4000-beef-0000000002d2"),
-        new Entry(723, "Okabe",      "Steins;Gate",                        900, false, "fade0001-dead-4000-beef-0000000002d3"),
-        new Entry(724, "Soul",       "Soul Eater",                         700, false, "fade0001-dead-4000-beef-0000000002d4"),
-        new Entry(725, "Death Kid",  "Soul Eater",                         900, false, "fade0001-dead-4000-beef-0000000002d5"),
-        new Entry(726, "Black Star", "Soul Eater",                         600, false, "fade0001-dead-4000-beef-0000000002d6"),
-        new Entry(727, "Gohan",      "Dragon Ball Z",                      900, false, "fade0001-dead-4000-beef-0000000002d7"),
-        new Entry(728, "Trunks",     "Dragon Ball Z",                      800, false, "fade0001-dead-4000-beef-0000000002d8"),
-        new Entry(729, "Krillin",    "Dragon Ball",                        500, false, "fade0001-dead-4000-beef-0000000002d9"),
-        new Entry(730, "Piccolo",    "Dragon Ball",                        800, false, "fade0001-dead-4000-beef-0000000002da"),
-        new Entry(731, "Frieza",     "Dragon Ball Z",                      800, false, "fade0001-dead-4000-beef-0000000002db"),
-        new Entry(732, "Beerus",     "Dragon Ball Super",                  800, false, "fade0001-dead-4000-beef-0000000002dc"),
-        new Entry(733, "Syaoran",    "Cardcaptor Sakura",                  600, false, "fade0001-dead-4000-beef-0000000002dd"),
-        new Entry(734, "Shinra",     "Fire Force",                         800, false, "fade0001-dead-4000-beef-0000000002de"),
-        new Entry(735, "Rin O",      "Blue Exorcist",                      900, false, "fade0001-dead-4000-beef-0000000002df"),
-        new Entry(736, "Yukio",      "Blue Exorcist",                      700, false, "fade0001-dead-4000-beef-0000000002e0"),
-        new Entry(737, "Light",      "Death Note",                        1200, false, "fade0001-dead-4000-beef-0000000002e1"),
-        new Entry(738, "Near",       "Death Note",                         800, false, "fade0001-dead-4000-beef-0000000002e2"),
-        new Entry(739, "Mello",      "Death Note",                         700, false, "fade0001-dead-4000-beef-0000000002e3"),
-        new Entry(740, "Lelouch",    "Code Geass",                        1400, false, "fade0001-dead-4000-beef-0000000002e4"),
-        new Entry(741, "Suzaku",     "Code Geass",                         800, false, "fade0001-dead-4000-beef-0000000002e5"),
-        new Entry(742, "Jotaro",     "JoJo's Bizarre Adventure",          1200, false, "fade0001-dead-4000-beef-0000000002e6"),
-        new Entry(743, "Giorno",     "JoJo's Bizarre Adventure",          1300, false, "fade0001-dead-4000-beef-0000000002e7"),
-        new Entry(744, "Josuke",     "JoJo's Bizarre Adventure",          1000, false, "fade0001-dead-4000-beef-0000000002e8"),
-        new Entry(745, "Guts",       "Berserk",                           1300, false, "fade0001-dead-4000-beef-0000000002e9"),
-        new Entry(746, "Griffith",   "Berserk",                            900, false, "fade0001-dead-4000-beef-0000000002ea"),
-        new Entry(747, "Ban",        "Seven Deadly Sins",                  900, false, "fade0001-dead-4000-beef-0000000002eb"),
-        new Entry(748, "King SDS",   "Seven Deadly Sins",                  800, false, "fade0001-dead-4000-beef-0000000002ec"),
-        new Entry(749, "Yato",       "Noragami",                          1000, false, "fade0001-dead-4000-beef-0000000002ed"),
-        new Entry(750, "Norman",     "Promised Neverland",                 800, false, "fade0001-dead-4000-beef-0000000002ee"),
-        new Entry(751, "Ray",        "Promised Neverland",                 700, false, "fade0001-dead-4000-beef-0000000002ef"),
-        new Entry(752, "Kogami",     "Psycho-Pass",                        900, false, "fade0001-dead-4000-beef-0000000002f0"),
-        new Entry(753, "Shizuo",     "Durarara!!",                        1000, false, "fade0001-dead-4000-beef-0000000002f1"),
-        new Entry(754, "Rudeus",     "Mushoku Tensei",                     700, false, "fade0001-dead-4000-beef-0000000002f2"),
-        new Entry(755, "Shiroe",     "Log Horizon",                        800, false, "fade0001-dead-4000-beef-0000000002f3"),
-        new Entry(756, "Shoya",      "A Silent Voice",                     700, false, "fade0001-dead-4000-beef-0000000002f4"),
-        new Entry(757, "Anos",       "Demon King Academy",                1200, false, "fade0001-dead-4000-beef-0000000002f5"),
-        new Entry(758, "Hajime N",   "Arifureta",                          700, false, "fade0001-dead-4000-beef-0000000002f6"),
-        new Entry(759, "Boruto",     "Boruto",                             600, false, "fade0001-dead-4000-beef-0000000002f7"),
-        new Entry(760, "Kawaki",     "Boruto",                             700, false, "fade0001-dead-4000-beef-0000000002f8"),
-        new Entry(761, "Mob",        "Mob Psycho 100",                     800, false, "fade0001-dead-4000-beef-0000000002f9"),
-        new Entry(762, "Reigen",     "Mob Psycho 100",                     700, false, "fade0001-dead-4000-beef-0000000002fa"),
-        new Entry(763, "Kafka",      "Kaiju No. 8",                        700, false, "fade0001-dead-4000-beef-0000000002fb"),
-        new Entry(764, "Reinhard",   "Re:Zero",                            900, false, "fade0001-dead-4000-beef-0000000002fc"),
-        new Entry(765, "Wilhelm",    "Re:Zero",                            600, false, "fade0001-dead-4000-beef-0000000002fd"),
-        new Entry(766, "Kenma",      "Haikyuu!!",                          800, false, "fade0001-dead-4000-beef-0000000002fe"),
-        new Entry(767, "Kuroo",      "Haikyuu!!",                          900, false, "fade0001-dead-4000-beef-0000000002ff"),
-        new Entry(768, "Ushijima",   "Haikyuu!!",                          800, false, "fade0001-dead-4000-beef-000000000300"),
-        new Entry(769, "Tsukishima", "Haikyuu!!",                          700, false, "fade0001-dead-4000-beef-000000000301"),
-        new Entry(770, "Nishinoya",  "Haikyuu!!",                          600, false, "fade0001-dead-4000-beef-000000000302"),
-        new Entry(771, "Akaashi",    "Haikyuu!!",                          700, false, "fade0001-dead-4000-beef-000000000303"),
-        new Entry(772, "Daichi",     "Haikyuu!!",                          600, false, "fade0001-dead-4000-beef-000000000304"),
-        new Entry(773, "Kuroko",     "Kuroko no Basket",                   900, false, "fade0001-dead-4000-beef-000000000305"),
-        new Entry(774, "Kagami B",   "Kuroko no Basket",                   800, false, "fade0001-dead-4000-beef-000000000306"),
-        new Entry(775, "Aomine",     "Kuroko no Basket",                   900, false, "fade0001-dead-4000-beef-000000000307"),
-        new Entry(776, "Akashi",     "Kuroko no Basket",                  1000, false, "fade0001-dead-4000-beef-000000000308"),
-        new Entry(777, "Kise",       "Kuroko no Basket",                   800, false, "fade0001-dead-4000-beef-000000000309"),
-        new Entry(778, "Midorima",   "Kuroko no Basket",                   700, false, "fade0001-dead-4000-beef-00000000030a"),
-        new Entry(779, "Otonashi",   "Angel Beats",                        700, false, "fade0001-dead-4000-beef-00000000030b"),
-        new Entry(780, "Alibaba",    "Magi",                               700, false, "fade0001-dead-4000-beef-00000000030c"),
-        new Entry(781, "Aladdin",    "Magi",                               800, false, "fade0001-dead-4000-beef-00000000030d"),
-        new Entry(782, "Sinbad",     "Magi",                              1000, false, "fade0001-dead-4000-beef-00000000030e"),
-        new Entry(783, "Naofumi",    "Shield Hero",                        900, false, "fade0001-dead-4000-beef-00000000030f"),
-        new Entry(784, "Kirishima",  "My Hero Academia",                   800, false, "fade0001-dead-4000-beef-000000000310"),
-        new Entry(785, "Iida",       "My Hero Academia",                   600, false, "fade0001-dead-4000-beef-000000000311"),
-        new Entry(786, "Kaminari",   "My Hero Academia",                   600, false, "fade0001-dead-4000-beef-000000000312"),
-        new Entry(787, "Hawks",      "My Hero Academia",                  1100, false, "fade0001-dead-4000-beef-000000000313"),
-        new Entry(788, "Endeavor",   "My Hero Academia",                   700, false, "fade0001-dead-4000-beef-000000000314"),
-        new Entry(789, "Nagisa",     "Assassination Classroom",            700, false, "fade0001-dead-4000-beef-000000000315"),
-        new Entry(790, "Senku",      "Dr. Stone",                         1000, false, "fade0001-dead-4000-beef-000000000316"),
-        new Entry(791, "Gen",        "Dr. Stone",                          700, false, "fade0001-dead-4000-beef-000000000317"),
-        new Entry(792, "Ryusui",     "Dr. Stone",                          600, false, "fade0001-dead-4000-beef-000000000318"),
-        new Entry(793, "Gon",        "Hunter x Hunter",                   1200, false, "fade0001-dead-4000-beef-000000000319"),
-        new Entry(794, "Killua",     "Hunter x Hunter",                   1300, false, "fade0001-dead-4000-beef-00000000031a"),
-        new Entry(795, "Hisoka",     "Hunter x Hunter",                   1100, false, "fade0001-dead-4000-beef-00000000031b"),
-        new Entry(796, "Chrollo",    "Hunter x Hunter",                   1000, false, "fade0001-dead-4000-beef-00000000031c"),
-        new Entry(797, "Netero",     "Hunter x Hunter",                    900, false, "fade0001-dead-4000-beef-00000000031d"),
-        new Entry(798, "Ging",       "Hunter x Hunter",                    700, false, "fade0001-dead-4000-beef-00000000031e"),
-        new Entry(799, "Aqua G",     "Oshi no Ko",                         700, false, "fade0001-dead-4000-beef-00000000031f"),
-        new Entry(800, "Shin",       "86 Eighty-Six",                      900, false, "fade0001-dead-4000-beef-000000000320")
-    );
-
-    private static final List<Entry> ALL;
     static {
-        ALL = new ArrayList<>();
-        ALL.addAll(WAIFUS);
-        ALL.addAll(HUSBANDOS);
+        ALL.add(new Character(1, "Rem", "Re:Zero", 5, true));
+        ALL.add(new Character(2, "Zero Two", "Darling in the FranXX", 5, true));
+        ALL.add(new Character(3, "Asuna", "Sword Art Online", 5, true));
+        ALL.add(new Character(4, "Mikasa Ackerman", "Shingeki no Kyojin", 5, true));
+        ALL.add(new Character(5, "Hinata Hyuga", "Naruto", 5, true));
+        ALL.add(new Character(6, "Erza Scarlet", "Fairy Tail", 5, true));
+        ALL.add(new Character(7, "Nico Robin", "One Piece", 5, true));
+        ALL.add(new Character(8, "Rukia Kuchiki", "Bleach", 5, true));
+        ALL.add(new Character(9, "Tohru", "Miss Kobayashi's Dragon Maid", 5, true));
+        ALL.add(new Character(10, "Ai Hoshino", "Oshi no Ko", 5, true));
+        ALL.add(new Character(11, "Aqua", "KonoSuba", 5, true));
+        ALL.add(new Character(12, "Megumin", "KonoSuba", 5, true));
+        ALL.add(new Character(13, "Nezuko Kamado", "Demon Slayer", 5, true));
+        ALL.add(new Character(14, "Power", "Chainsaw Man", 5, true));
+        ALL.add(new Character(15, "Makima", "Chainsaw Man", 5, true));
+        ALL.add(new Character(16, "Shinobu Kocho", "Demon Slayer", 5, true));
+        ALL.add(new Character(17, "Raphtalia", "Rising of the Shield Hero", 5, true));
+        ALL.add(new Character(18, "Emilia", "Re:Zero", 5, true));
+        ALL.add(new Character(19, "Albedo", "Overlord", 5, true));
+        ALL.add(new Character(20, "Shuna", "That Time I Got Reincarnated as a Slime", 5, true));
+        ALL.add(new Character(21, "Ram", "Re:Zero", 4, true));
+        ALL.add(new Character(22, "Beatrice", "Re:Zero", 4, true));
+        ALL.add(new Character(23, "Nami", "One Piece", 4, true));
+        ALL.add(new Character(24, "Robin", "One Piece", 4, true));
+        ALL.add(new Character(25, "Boa Hancock", "One Piece", 4, true));
+        ALL.add(new Character(26, "Nami (Post TS)", "One Piece", 4, true));
+        ALL.add(new Character(27, "Rangiku Matsumoto", "Bleach", 4, true));
+        ALL.add(new Character(28, "Yoruichi Shihouin", "Bleach", 4, true));
+        ALL.add(new Character(29, "Orihime Inoue", "Bleach", 4, true));
+        ALL.add(new Character(30, "Sakura Haruno", "Naruto", 4, true));
+        ALL.add(new Character(31, "Tsunade", "Naruto", 4, true));
+        ALL.add(new Character(32, "Konan", "Naruto", 4, true));
+        ALL.add(new Character(33, "Ino Yamanaka", "Naruto", 4, true));
+        ALL.add(new Character(34, "Temari", "Naruto", 4, true));
+        ALL.add(new Character(35, "Lucy Heartfilia", "Fairy Tail", 4, true));
+        ALL.add(new Character(36, "Mirajane Strauss", "Fairy Tail", 4, true));
+        ALL.add(new Character(37, "Levy McGarden", "Fairy Tail", 4, true));
+        ALL.add(new Character(38, "Wendy Marvell", "Fairy Tail", 4, true));
+        ALL.add(new Character(39, "Yukino Yukinoshita", "Yahari Ore no Seishun", 4, true));
+        ALL.add(new Character(40, "Yui Yuigahama", "Yahari Ore no Seishun", 4, true));
+        ALL.add(new Character(41, "Shiro", "No Game No Life", 4, true));
+        ALL.add(new Character(42, "Stephanie Dola", "No Game No Life", 4, true));
+        ALL.add(new Character(43, "Saber", "Fate/Stay Night", 4, true));
+        ALL.add(new Character(44, "Rin Tohsaka", "Fate/Stay Night", 4, true));
+        ALL.add(new Character(45, "Sakura Matou", "Fate/Stay Night", 4, true));
+        ALL.add(new Character(46, "Ishtar", "Fate/Grand Order", 4, true));
+        ALL.add(new Character(47, "Scathach", "Fate/Grand Order", 4, true));
+        ALL.add(new Character(48, "Mash Kyrielight", "Fate/Grand Order", 4, true));
+        ALL.add(new Character(49, "Violet Evergarden", "Violet Evergarden", 4, true));
+        ALL.add(new Character(50, "Chika Fujiwara", "Kaguya-sama", 4, true));
+        ALL.add(new Character(51, "Kaguya Shinomiya", "Kaguya-sama", 4, true));
+        ALL.add(new Character(52, "Ai Hayasaka", "Kaguya-sama", 4, true));
+        ALL.add(new Character(53, "Miko Iino", "Kaguya-sama", 4, true));
+        ALL.add(new Character(54, "Nino Nakano", "Quintessential Quintuplets", 4, true));
+        ALL.add(new Character(55, "Miku Nakano", "Quintessential Quintuplets", 4, true));
+        ALL.add(new Character(56, "Ichika Nakano", "Quintessential Quintuplets", 4, true));
+        ALL.add(new Character(57, "Yotsuba Nakano", "Quintessential Quintuplets", 4, true));
+        ALL.add(new Character(58, "Itsuki Nakano", "Quintessential Quintuplets", 4, true));
+        ALL.add(new Character(59, "Yor Forger", "Spy x Family", 4, true));
+        ALL.add(new Character(60, "Fiona Frost", "Spy x Family", 4, true));
+        ALL.add(new Character(61, "Nobara Kugisaki", "Jujutsu Kaisen", 4, true));
+        ALL.add(new Character(62, "Maki Zenin", "Jujutsu Kaisen", 4, true));
+        ALL.add(new Character(63, "Mei Mei", "Jujutsu Kaisen", 4, true));
+        ALL.add(new Character(64, "Utahime Iori", "Jujutsu Kaisen", 4, true));
+        ALL.add(new Character(65, "Reze", "Chainsaw Man", 4, true));
+        ALL.add(new Character(66, "Himeno", "Chainsaw Man", 4, true));
+        ALL.add(new Character(67, "Kobeni Higashiyama", "Chainsaw Man", 4, true));
+        ALL.add(new Character(68, "Mitsuri Kanroji", "Demon Slayer", 4, true));
+        ALL.add(new Character(69, "Kanao Tsuyuri", "Demon Slayer", 4, true));
+        ALL.add(new Character(70, "Aoi Kanzaki", "Demon Slayer", 4, true));
+        ALL.add(new Character(71, "Daki", "Demon Slayer", 4, true));
+        ALL.add(new Character(72, "Darkness", "KonoSuba", 4, true));
+        ALL.add(new Character(73, "Wiz", "KonoSuba", 4, true));
+        ALL.add(new Character(74, "Yunyun", "KonoSuba", 4, true));
+        ALL.add(new Character(75, "Eris", "KonoSuba", 4, true));
+        ALL.add(new Character(76, "Silica", "Sword Art Online", 4, true));
+        ALL.add(new Character(77, "Leafa", "Sword Art Online", 4, true));
+        ALL.add(new Character(78, "Sinon", "Sword Art Online", 4, true));
+        ALL.add(new Character(79, "Lisbeth", "Sword Art Online", 4, true));
+        ALL.add(new Character(80, "Alice", "Sword Art Online: Alicization", 4, true));
+        ALL.add(new Character(81, "Eugeo (fem AU)", "Sword Art Online: Alicization", 4, true));
+        ALL.add(new Character(82, "Yuna", "Sword Art Online: Ordinal Scale", 4, true));
+        ALL.add(new Character(83, "Annie Leonhart", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(84, "Historia Reiss", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(85, "Sasha Blouse", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(86, "Ymir", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(87, "Pieck Finger", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(88, "Yelena", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(89, "Riza Hawkeye", "Fullmetal Alchemist", 4, true));
+        ALL.add(new Character(90, "Winry Rockbell", "Fullmetal Alchemist", 4, true));
+        ALL.add(new Character(91, "Lust", "Fullmetal Alchemist", 4, true));
+        ALL.add(new Character(92, "Lan Fan", "Fullmetal Alchemist", 4, true));
+        ALL.add(new Character(93, "Olivier Armstrong", "Fullmetal Alchemist: Brotherhood", 4, true));
+        ALL.add(new Character(94, "Mei Chang", "Fullmetal Alchemist: Brotherhood", 4, true));
+        ALL.add(new Character(95, "Ochaco Uraraka", "My Hero Academia", 4, true));
+        ALL.add(new Character(96, "Momo Yaoyorozu", "My Hero Academia", 4, true));
+        ALL.add(new Character(97, "Tsuyu Asui", "My Hero Academia", 4, true));
+        ALL.add(new Character(98, "Kyoka Jiro", "My Hero Academia", 4, true));
+        ALL.add(new Character(99, "Mina Ashido", "My Hero Academia", 4, true));
+        ALL.add(new Character(100, "Toga Himiko", "My Hero Academia", 4, true));
+        ALL.add(new Character(101, "Mirko", "My Hero Academia", 4, true));
+        ALL.add(new Character(102, "Mount Lady", "My Hero Academia", 4, true));
+        ALL.add(new Character(103, "Nejire Hado", "My Hero Academia", 4, true));
+        ALL.add(new Character(104, "Esdeath", "Akame ga Kill", 3, true));
+        ALL.add(new Character(105, "Mine", "Akame ga Kill", 3, true));
+        ALL.add(new Character(106, "Chelsea", "Akame ga Kill", 3, true));
+        ALL.add(new Character(107, "Leone", "Akame ga Kill", 3, true));
+        ALL.add(new Character(108, "Sheele", "Akame ga Kill", 3, true));
+        ALL.add(new Character(109, "Seryu Ubiquitous", "Akame ga Kill", 3, true));
+        ALL.add(new Character(110, "Akame", "Akame ga Kill", 3, true));
+        ALL.add(new Character(111, "Run", "Akame ga Kill", 3, true));
+        ALL.add(new Character(112, "Kuroka", "High School DxD", 3, true));
+        ALL.add(new Character(113, "Koneko Toujou", "High School DxD", 3, true));
+        ALL.add(new Character(114, "Rias Gremory", "High School DxD", 3, true));
+        ALL.add(new Character(115, "Akeno Himejima", "High School DxD", 3, true));
+        ALL.add(new Character(116, "Asia Argento", "High School DxD", 3, true));
+        ALL.add(new Character(117, "Xenovia Quarta", "High School DxD", 3, true));
+        ALL.add(new Character(118, "Irina Shidou", "High School DxD", 3, true));
+        ALL.add(new Character(119, "Rossweisse", "High School DxD", 3, true));
+        ALL.add(new Character(120, "Ravel Phenex", "High School DxD", 3, true));
+        ALL.add(new Character(121, "Grayfia Lucifuge", "High School DxD", 3, true));
+        ALL.add(new Character(122, "Tohka Yatogami", "Date A Live", 3, true));
+        ALL.add(new Character(123, "Yoshino", "Date A Live", 3, true));
+        ALL.add(new Character(124, "Kotori Itsuka", "Date A Live", 3, true));
+        ALL.add(new Character(125, "Kurumi Tokisaki", "Date A Live", 3, true));
+        ALL.add(new Character(126, "Origami Tobiichi", "Date A Live", 3, true));
+        ALL.add(new Character(127, "Miku Izayoi", "Date A Live", 3, true));
+        ALL.add(new Character(128, "Natsumi", "Date A Live", 3, true));
+        ALL.add(new Character(129, "Nia Honjou", "Date A Live", 3, true));
+        ALL.add(new Character(130, "Mayuri Shiina", "Steins;Gate", 3, true));
+        ALL.add(new Character(131, "Kurisu Makise", "Steins;Gate", 3, true));
+        ALL.add(new Character(132, "Moeka Kiryu", "Steins;Gate", 3, true));
+        ALL.add(new Character(133, "Ruka Urushibara", "Steins;Gate", 3, true));
+        ALL.add(new Character(134, "Yuki Amane", "Steins;Gate", 3, true));
+        ALL.add(new Character(135, "Faris Nyannyan", "Steins;Gate", 3, true));
+        ALL.add(new Character(136, "Kirito (genderbend)", "Sword Art Online", 3, true));
+        ALL.add(new Character(137, "Yui", "Sword Art Online", 3, true));
+        ALL.add(new Character(138, "Premiere", "Sword Art Online: Alternative", 3, true));
+        ALL.add(new Character(139, "Llenn", "Sword Art Online: Alternative", 3, true));
+        ALL.add(new Character(140, "Pitohui", "Sword Art Online: Alternative", 3, true));
+        ALL.add(new Character(141, "Seraphina", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(142, "Alpha", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(143, "Beta", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(144, "Delta", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(145, "Gamma", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(146, "Epsilon", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(147, "Eta", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(148, "Zeta", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(149, "Aurora", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(150, "Rona", "The Eminence in Shadow", 3, true));
+        ALL.add(new Character(151, "Rui Tachibana", "Domestic Girlfriend", 3, true));
+        ALL.add(new Character(152, "Hina Tachibana", "Domestic Girlfriend", 3, true));
+        ALL.add(new Character(153, "Momo Kashiwabara", "Domestic Girlfriend", 3, true));
+        ALL.add(new Character(154, "Natsuo Fujii", "Domestic Girlfriend", 3, true));
+        ALL.add(new Character(155, "Yuzuki Tachibana", "Domestic Girlfriend", 3, true));
+        ALL.add(new Character(156, "Marin Kitagawa", "My Dress-Up Darling", 3, true));
+        ALL.add(new Character(157, "Sajuna Inui", "My Dress-Up Darling", 3, true));
+        ALL.add(new Character(158, "Shinju Inui", "My Dress-Up Darling", 3, true));
+        ALL.add(new Character(159, "Noa Crestia", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(160, "Hestia", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(161, "Ais Wallenstein", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(162, "Eina Tulle", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(163, "Ryuu Lion", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(164, "Freya", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(165, "Haruhime Sanjouno", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(166, "Wiene", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(167, "Lili", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(168, "Syr Flova", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(169, "Xenovia", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(170, "Ryu Lion", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(171, "Tiona Hiryute", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(172, "Tione Hiryute", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(173, "Aiz Wallenstein", "Is It Wrong to Try to Pick Up Girls in a Dungeon?", 3, true));
+        ALL.add(new Character(174, "Yuno Gasai", "Future Diary", 3, true));
+        ALL.add(new Character(175, "Minene Uryuu", "Future Diary", 3, true));
+        ALL.add(new Character(176, "Hinata Hino", "Future Diary", 3, true));
+        ALL.add(new Character(177, "Mao", "Future Diary", 3, true));
+        ALL.add(new Character(178, "Tsubaki Kasugano", "Future Diary", 3, true));
+        ALL.add(new Character(179, "Saber Alter", "Fate/Stay Night", 3, true));
+        ALL.add(new Character(180, "Medusa (Rider)", "Fate/Stay Night", 3, true));
+        ALL.add(new Character(181, "Caster (Medea)", "Fate/Stay Night", 3, true));
+        ALL.add(new Character(182, "Artoria Pendragon Lily", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(183, "Nitocris", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(184, "Tamamo-no-Mae", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(185, "Nero Claudius", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(186, "Jeanne d'Arc", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(187, "Jeanne Alter", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(188, "Kama", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(189, "Ereshkigal", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(190, "Morgan le Fay", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(191, "Caenis", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(192, "Atalante", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(193, "Okita Souji", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(194, "Musashi Miyamoto (fem)", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(195, "Jack the Ripper", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(196, "Medb", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(197, "Abigail Williams", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(198, "Xuanzang Sanzang", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(199, "BB", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(200, "Meltryllis", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(201, "Passionlip", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(202, "Sessyoin Kiara", "Fate/Grand Order", 3, true));
+        ALL.add(new Character(203, "Himari Noihara", "Omamori Himari", 3, true));
+        ALL.add(new Character(204, "Rinko Kuzaki", "Omamori Himari", 3, true));
+        ALL.add(new Character(205, "Lizlet L. Chelsie", "Omamori Himari", 3, true));
+        ALL.add(new Character(206, "Shizuku", "Omamori Himari", 3, true));
+        ALL.add(new Character(207, "Kagari Shushu", "Witch Craft Works", 3, true));
+        ALL.add(new Character(208, "Ayaka Kagari", "Witch Craft Works", 3, true));
+        ALL.add(new Character(209, "Tanpopo Kuraishi", "Witch Craft Works", 3, true));
+        ALL.add(new Character(210, "Medusa", "Witch Craft Works", 3, true));
+        ALL.add(new Character(211, "Kasumi Miwa", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(212, "Yuki Tsukumo", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(213, "Remi", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(214, "Tsumiki Fushiguro", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(215, "Norie Yamada", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(216, "Riko Amanai", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(217, "Mimiko Hasaba", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(218, "Nanako Hasaba", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(219, "Hana Kurusu", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(220, "Iori Hazenoki", "Jujutsu Kaisen", 3, true));
+        ALL.add(new Character(221, "Yuki Nagato", "Haruhi Suzumiya", 3, true));
+        ALL.add(new Character(222, "Haruhi Suzumiya", "Haruhi Suzumiya", 3, true));
+        ALL.add(new Character(223, "Mikuru Asahina", "Haruhi Suzumiya", 3, true));
+        ALL.add(new Character(224, "Tsuruya-san", "Haruhi Suzumiya", 3, true));
+        ALL.add(new Character(225, "Nagato Yuki-chan", "The Disappearance of Nagato Yuki-chan", 3, true));
+        ALL.add(new Character(226, "Kyon no Imouto", "Haruhi Suzumiya", 3, true));
+        ALL.add(new Character(227, "Kanon Nakagawa", "The World God Only Knows", 3, true));
+        ALL.add(new Character(228, "Elsie", "The World God Only Knows", 3, true));
+        ALL.add(new Character(229, "Ayumi Takahara", "The World God Only Knows", 3, true));
+        ALL.add(new Character(230, "Chihiro Kosaka", "The World God Only Knows", 3, true));
+        ALL.add(new Character(231, "Yui Goidou", "The World God Only Knows", 3, true));
+        ALL.add(new Character(232, "Tsukiyo Kujyo", "The World God Only Knows", 3, true));
+        ALL.add(new Character(233, "Shiori Shiomiya", "The World God Only Knows", 3, true));
+        ALL.add(new Character(234, "Minami Ikoma", "The World God Only Knows", 3, true));
+        ALL.add(new Character(235, "Jun Nagase", "The World God Only Knows", 3, true));
+        ALL.add(new Character(236, "Tenri Ayukawa", "The World God Only Knows", 3, true));
+        ALL.add(new Character(237, "Haqua du Lot Herminium", "The World God Only Knows", 3, true));
+        ALL.add(new Character(238, "Diana", "The World God Only Knows", 3, true));
+        ALL.add(new Character(239, "Dokuro Mitsukai", "Bludgeoning Angel Dokuro-chan", 3, true));
+        ALL.add(new Character(240, "Zakuro", "Otome Youkai Zakuro", 3, true));
+        ALL.add(new Character(241, "Kushina Uzumaki", "Naruto", 3, true));
+        ALL.add(new Character(242, "Mei Terumi", "Naruto", 3, true));
+        ALL.add(new Character(243, "Anko Mitarashi", "Naruto", 3, true));
+        ALL.add(new Character(244, "Kurenai Yuhi", "Naruto", 3, true));
+        ALL.add(new Character(245, "Samui", "Naruto", 3, true));
+        ALL.add(new Character(246, "Yugito Nii", "Naruto", 3, true));
+        ALL.add(new Character(247, "Karin", "Naruto", 3, true));
+        ALL.add(new Character(248, "Tayuya", "Naruto", 3, true));
+        ALL.add(new Character(249, "Shizune", "Naruto", 3, true));
+        ALL.add(new Character(250, "Yakumo Kurama", "Naruto", 3, true));
+        ALL.add(new Character(251, "Yugao Uzuki", "Naruto", 3, true));
+        ALL.add(new Character(252, "Tenten", "Naruto", 3, true));
+        ALL.add(new Character(253, "Hana Inuzuka", "Naruto", 3, true));
+        ALL.add(new Character(254, "Nozomi Tojo", "Love Live!", 2, true));
+        ALL.add(new Character(255, "Umi Sonoda", "Love Live!", 2, true));
+        ALL.add(new Character(256, "Honoka Kosaka", "Love Live!", 2, true));
+        ALL.add(new Character(257, "Eri Ayase", "Love Live!", 2, true));
+        ALL.add(new Character(258, "Maki Nishikino", "Love Live!", 2, true));
+        ALL.add(new Character(259, "Kotori Minami", "Love Live!", 2, true));
+        ALL.add(new Character(260, "Hanayo Koizumi", "Love Live!", 2, true));
+        ALL.add(new Character(261, "Rin Hoshizora", "Love Live!", 2, true));
+        ALL.add(new Character(262, "Nico Yazawa", "Love Live!", 2, true));
+        ALL.add(new Character(263, "Chika Takami", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(264, "Riko Sakurauchi", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(265, "Kanan Matsuura", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(266, "Dia Kurosawa", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(267, "You Watanabe", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(268, "Yoshiko Tsushima", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(269, "Hanamaru Kunikida", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(270, "Mari Ohara", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(271, "Ruby Kurosawa", "Love Live! Sunshine!!", 2, true));
+        ALL.add(new Character(272, "Ayumu Uehara", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(273, "Kasumi Nakasu", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(274, "Shizuku Osaka", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(275, "Ai Miyashita", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(276, "Kanata Konoe", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(277, "Setsuna Yuki", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(278, "Emma Verde", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(279, "Rina Tennoji", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(280, "Shioriko Mifune", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(281, "Lanzhu Zhong", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(282, "Mia Taylor", "Love Live! Nijigasaki", 2, true));
+        ALL.add(new Character(283, "Kanon Shibuya", "Love Live! Superstar!!", 2, true));
+        ALL.add(new Character(284, "Keke Tang", "Love Live! Superstar!!", 2, true));
+        ALL.add(new Character(285, "Chisato Arashi", "Love Live! Superstar!!", 2, true));
+        ALL.add(new Character(286, "Sumire Heanna", "Love Live! Superstar!!", 2, true));
+        ALL.add(new Character(287, "Ren Hazuki", "Love Live! Superstar!!", 2, true));
+        ALL.add(new Character(288, "Haruka Kinugawa", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(289, "Rin Shibuya", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(290, "Uzuki Shimamura", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(291, "Mio Honda", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(292, "Kanako Mimura", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(293, "Frederica Miyamoto", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(294, "Ranko Kanzaki", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(295, "Anastasia", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(296, "Minami Nitta", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(297, "Kaede Takagaki", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(298, "Nana Abe", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(299, "Mayu Sakuma", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(300, "Mika Jougasaki", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(301, "Syoko Hoshi", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(302, "Natsuki Kimura", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(303, "Yuki Himekawa", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(304, "Fumika Sagisawa", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(305, "Arisa Matsuda", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(306, "Sae Kobayakawa", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(307, "Shiki Ichinose", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(308, "Momoka Sakurai", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(309, "Miria Akagi", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(310, "Kirari Moroboshi", "The Idolm@ster: Cinderella Girls", 2, true));
+        ALL.add(new Character(311, "Ritsu Tainaka", "K-On!", 2, true));
+        ALL.add(new Character(312, "Yui Hirasawa", "K-On!", 2, true));
+        ALL.add(new Character(313, "Mio Akiyama", "K-On!", 2, true));
+        ALL.add(new Character(314, "Tsumugi Kotobuki", "K-On!", 2, true));
+        ALL.add(new Character(315, "Azusa Nakano", "K-On!", 2, true));
+        ALL.add(new Character(316, "Ui Hirasawa", "K-On!", 2, true));
+        ALL.add(new Character(317, "Jun Suzuki", "K-On!", 2, true));
+        ALL.add(new Character(318, "Sawako Yamanaka", "K-On!", 2, true));
+        ALL.add(new Character(319, "Nodoka Manabe", "K-On!", 2, true));
+        ALL.add(new Character(320, "Himari Otemachi", "K-On!", 2, true));
+        ALL.add(new Character(321, "Chitanda Eru", "Hyouka", 2, true));
+        ALL.add(new Character(322, "Mayaka Ibara", "Hyouka", 2, true));
+        ALL.add(new Character(323, "Irisu Fuyumi", "Hyouka", 2, true));
+        ALL.add(new Character(324, "Tomoe Oreki", "Hyouka", 2, true));
+        ALL.add(new Character(325, "Nakamichi Jirou", "Hyouka", 2, true));
+        ALL.add(new Character(326, "Tohru Honda", "Fruits Basket", 2, true));
+        ALL.add(new Character(327, "Akito Sohma", "Fruits Basket", 2, true));
+        ALL.add(new Character(328, "Kagura Sohma", "Fruits Basket", 2, true));
+        ALL.add(new Character(329, "Uo Hanajima", "Fruits Basket", 2, true));
+        ALL.add(new Character(330, "Saki Hanajima", "Fruits Basket", 2, true));
+        ALL.add(new Character(331, "Isuzu Sohma", "Fruits Basket", 2, true));
+        ALL.add(new Character(332, "Motoko Minagawa", "Fruits Basket", 2, true));
+        ALL.add(new Character(333, "Arisa Uotani", "Fruits Basket", 2, true));
+        ALL.add(new Character(334, "Kisa Sohma", "Fruits Basket", 2, true));
+        ALL.add(new Character(335, "Tohru (adult)", "Fruits Basket: The Final", 2, true));
+        ALL.add(new Character(336, "Yona", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(337, "Yun", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(338, "Lili", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(339, "Tae-Yeon", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(340, "Ayura", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(341, "Luel", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(342, "Kouka", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(343, "Kurone", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(344, "Zeno", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(345, "Sooyeon", "Yona of the Dawn", 2, true));
+        ALL.add(new Character(346, "Yuri Katsuki", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(347, "Minako Okukawa", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(348, "Mari Katsuki", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(349, "Sala Crispino", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(350, "Mila Babicheva", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(351, "Sara Crispino", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(352, "Isabella Yang", "Yuri!!! on Ice", 2, true));
+        ALL.add(new Character(353, "Akko Kagari", "Little Witch Academia", 2, true));
+        ALL.add(new Character(354, "Sucy Manbavaran", "Little Witch Academia", 2, true));
+        ALL.add(new Character(355, "Lotte Jansson", "Little Witch Academia", 2, true));
+        ALL.add(new Character(356, "Diana Cavendish", "Little Witch Academia", 2, true));
+        ALL.add(new Character(357, "Hannah England", "Little Witch Academia", 2, true));
+        ALL.add(new Character(358, "Amanda O'Neill", "Little Witch Academia", 2, true));
+        ALL.add(new Character(359, "Constanze Amalie von Braunschbank-Albrechtsberger", "Little Witch Academia", 2, true));
+        ALL.add(new Character(360, "Jasminka Antonenko", "Little Witch Academia", 2, true));
+        ALL.add(new Character(361, "Ursula Callistis", "Little Witch Academia", 2, true));
+        ALL.add(new Character(362, "Chariot du Nord", "Little Witch Academia", 2, true));
+        ALL.add(new Character(363, "Croix Meridies", "Little Witch Academia", 2, true));
+        ALL.add(new Character(364, "Lotte", "Little Witch Academia", 2, true));
+        ALL.add(new Character(365, "Beatrix", "Infinite Stratos", 2, true));
+        ALL.add(new Character(366, "Charlotte Dunois", "Infinite Stratos", 2, true));
+        ALL.add(new Character(367, "Cecilia Alcott", "Infinite Stratos", 2, true));
+        ALL.add(new Character(368, "Houki Shinonono", "Infinite Stratos", 2, true));
+        ALL.add(new Character(369, "Lingyin Huang", "Infinite Stratos", 2, true));
+        ALL.add(new Character(370, "Laura Bodewig", "Infinite Stratos", 2, true));
+        ALL.add(new Character(371, "Tatenashi Sarashiki", "Infinite Stratos", 2, true));
+        ALL.add(new Character(372, "Kanzashi Sarashiki", "Infinite Stratos", 2, true));
+        ALL.add(new Character(373, "Maya Yamada", "Infinite Stratos", 2, true));
+        ALL.add(new Character(374, "Tabane Shinonono", "Infinite Stratos", 2, true));
+        ALL.add(new Character(375, "Nonon Jakuzure", "Kill la Kill", 2, true));
+        ALL.add(new Character(376, "Satsuki Kiryuin", "Kill la Kill", 2, true));
+        ALL.add(new Character(377, "Ryuko Matoi", "Kill la Kill", 2, true));
+        ALL.add(new Character(378, "Nui Harime", "Kill la Kill", 2, true));
+        ALL.add(new Character(379, "Ragyo Kiryuin", "Kill la Kill", 2, true));
+        ALL.add(new Character(380, "Mako Mankanshoku", "Kill la Kill", 2, true));
+        ALL.add(new Character(381, "Aikuro Mikisugi", "Kill la Kill", 2, true));
+        ALL.add(new Character(382, "Shiroi Iori", "Kill la Kill", 2, true));
+        ALL.add(new Character(383, "Ayame Sarashiki", "Kill la Kill", 2, true));
+        ALL.add(new Character(384, "Honnoji Academy", "Kill la Kill", 2, true));
+        ALL.add(new Character(385, "Natsuki Subaru (fem)", "Re:Zero", 2, true));
+        ALL.add(new Character(386, "Frederica Baumann", "Re:Zero", 2, true));
+        ALL.add(new Character(387, "Petra Leyte", "Re:Zero", 2, true));
+        ALL.add(new Character(388, "Crusch Karsten", "Re:Zero", 2, true));
+        ALL.add(new Character(389, "Priscilla Barielle", "Re:Zero", 2, true));
+        ALL.add(new Character(390, "Anastasia Hoshin", "Re:Zero", 2, true));
+        ALL.add(new Character(391, "Felt", "Re:Zero", 2, true));
+        ALL.add(new Character(392, "Elsa Granhiert", "Re:Zero", 2, true));
+        ALL.add(new Character(393, "Echidna", "Re:Zero", 2, true));
+        ALL.add(new Character(394, "Minerva", "Re:Zero", 2, true));
+        ALL.add(new Character(395, "Daphne", "Re:Zero", 2, true));
+        ALL.add(new Character(396, "Carmilla", "Re:Zero", 2, true));
+        ALL.add(new Character(397, "Typhon", "Re:Zero", 2, true));
+        ALL.add(new Character(398, "Satella", "Re:Zero", 2, true));
+        ALL.add(new Character(399, "Meili Portroute", "Re:Zero", 2, true));
+        ALL.add(new Character(400, "Liliana Masquerade", "Re:Zero", 2, true));
+        ALL.add(new Character(401, "Shaula", "Re:Zero", 2, true));
+        ALL.add(new Character(402, "Rui", "Re:Zero", 2, true));
+        ALL.add(new Character(403, "Mimi", "Re:Zero", 2, true));
+        ALL.add(new Character(404, "Teresa of the Faint Smile", "Re:Zero", 2, true));
+        ALL.add(new Character(405, "Ryuzu", "Re:Zero", 2, true));
+        ALL.add(new Character(406, "Emilia (young)", "Re:Zero", 2, true));
+        ALL.add(new Character(407, "Mira", "Re:Zero", 2, true));
+        ALL.add(new Character(408, "Shion", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(409, "Milim Nava", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(410, "Benimaru", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(411, "Treyni", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(412, "Hinata Sakaguchi", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(413, "Chloe Aubert", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(414, "Luminous Valentine", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(415, "Ruminas Valentine", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(416, "Diablo (fem)", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(417, "Ranga", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(418, "Myormiles", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(419, "Fuze", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(420, "Alvis", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(421, "Veldora", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(422, "Velzard", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(423, "Kagurazaka Yuuki", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(424, "Kondou Tatsuya", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(425, "Laplace", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(426, "Kagali", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(427, "Misato Katsuragi", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(428, "Rei Ayanami", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(429, "Asuka Langley Soryu", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(430, "Yui Ikari", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(431, "Ritsuko Akagi", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(432, "Hikari Horaki", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(433, "Mari Illustrious Makinami", "Evangelion: 3.0+1.0", 2, true));
+        ALL.add(new Character(434, "Kaworu Nagisa (fem)", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(435, "Nagato Rei (Q)", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(436, "Penpen", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(437, "Ryouko Ritsuko", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(438, "Shinji (fem)", "Neon Genesis Evangelion", 2, true));
+        ALL.add(new Character(439, "Filo", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(440, "Melty Q Melromarc", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(441, "Malty S Melromarc", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(442, "L'Arc Berg", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(443, "Therese Alexanderite", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(444, "Sadeena", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(445, "Rishia Ivyred", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(446, "Wyndia", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(447, "Kizuna Kazayama", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(448, "S'yne", "Rising of the Shield Hero", 2, true));
+        ALL.add(new Character(449, "Yomogi Ochi", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(450, "Mujina", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(451, "Chise Asukagawa", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(452, "Minami Yume", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(453, "Koyomi Yamanaka", "SSSS.Gridman", 2, true));
+        ALL.add(new Character(454, "Rikka Takarada", "SSSS.Gridman", 2, true));
+        ALL.add(new Character(455, "Akane Shinjo", "SSSS.Gridman", 2, true));
+        ALL.add(new Character(456, "Borr", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(457, "Natsuki", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(458, "Azuma Gauma (fem)", "SSSS.Dynazenon", 2, true));
+        ALL.add(new Character(459, "Eruna Ichinomiya", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(460, "Seisa Mikagura", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(461, "Shigure Ninomiya", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(462, "Yuto Akama", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(463, "Bimii", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(464, "Asuhi Imizu", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(465, "Sadamatsu Minatogawa", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(466, "Himi Yasaka", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(467, "Kyoma Kuzuryuu", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(468, "Mikagura Mikagura", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(469, "Utano Kashiwa", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(470, "Tsukinose Usamaru", "Mikagura School Suite", 2, true));
+        ALL.add(new Character(471, "Inaho Wakura", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(472, "Lemrina Vers Envers", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(473, "Asseylum Vers Allusia", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(474, "Darzana Magbaredge", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(475, "Yuki Kaizuka", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(476, "Eddelrittuo", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(477, "Rayleigh", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(478, "Melina Dolokov", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(479, "Nina Klein", "Aldnoah.Zero", 2, true));
+        ALL.add(new Character(480, "Nao Tomori", "Charlotte", 2, true));
+        ALL.add(new Character(481, "Yusa Nishimori", "Charlotte", 2, true));
+        ALL.add(new Character(482, "Ayumi Otosaka", "Charlotte", 2, true));
+        ALL.add(new Character(483, "Sara Shane", "Charlotte", 2, true));
+        ALL.add(new Character(484, "Sala Shane", "Charlotte", 2, true));
+        ALL.add(new Character(485, "Nishimori Yusa", "Charlotte", 2, true));
+        ALL.add(new Character(486, "Tomori Nao", "Charlotte", 2, true));
+        ALL.add(new Character(487, "Ayaka", "Charlotte", 2, true));
+        ALL.add(new Character(488, "Kazuki Tomori", "Charlotte", 2, true));
+        ALL.add(new Character(489, "Misa Kurobane", "Charlotte", 2, true));
+        ALL.add(new Character(490, "Miyuki Shiba", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(491, "Erika Chiba", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(492, "Mayumi Saegusa", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(493, "Honoka Mitsui", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(494, "Shizuku Kitayama", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(495, "Azusa Nakajou", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(496, "Lina Sinclair", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(497, "Angela Sirius", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(498, "Pixie", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(499, "Minami Sakurai", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(500, "Izumi Yoshida", "Mahouka Koukou no Rettousei", 2, true));
+        ALL.add(new Character(501, "Kokoa Hoto", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(502, "Chino Kafuu", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(503, "Rize Tedeza", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(504, "Syaro Kirima", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(505, "Maya Jougasaki", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(506, "Megumi Natsu", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(507, "Megu Natsu", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(508, "Aoyama Blue Mountain", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(509, "Mocha Hoto", "Is the Order a Rabbit?", 2, true));
+        ALL.add(new Character(510, "Eimi Fukada", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(511, "Airi Sakura", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(512, "Honami Ichinose", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(513, "Kikyo Kushida", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(514, "Arisu Sakayanagi", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(515, "Sae Chabashira", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(516, "Maya Sato", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(517, "Haruka Hasebe", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(518, "Kei Karuizawa", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(519, "Chiaki Matsushita", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(520, "Miyu Momose", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(521, "Mio Ibuki", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(522, "Ryuuen Kakeru (fem)", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(523, "Nanase Tsubasa", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(524, "Utomiya Riku (fem)", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(525, "Kaneda Satoru (fem)", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(526, "Ichinose Honami", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(527, "Amikura Mako", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(528, "Mii-chan Takashiro", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(529, "Konomi Tonogawa", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(530, "Yumiko Fukuma", "Classroom of the Elite", 1, true));
+        ALL.add(new Character(531, "Sophie", "Atelier Sophie", 1, true));
+        ALL.add(new Character(532, "Plachta", "Atelier Sophie", 1, true));
+        ALL.add(new Character(533, "Monika Ellmenreich", "Atelier Sophie", 1, true));
+        ALL.add(new Character(534, "Corneria", "Atelier Sophie", 1, true));
+        ALL.add(new Character(535, "Julio", "Atelier Sophie", 1, true));
+        ALL.add(new Character(536, "Oskar Behlmer", "Atelier Sophie", 1, true));
+        ALL.add(new Character(537, "Pamela Ibis", "Atelier Sophie", 1, true));
+        ALL.add(new Character(538, "Tess Heitzmann", "Atelier Sophie", 1, true));
+        ALL.add(new Character(539, "Amira", "Atelier Sophie", 1, true));
+        ALL.add(new Character(540, "Logy Fischkopf", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(541, "Escha Malier", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(542, "Lucille Ernella", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(543, "Awin Sidelet", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(544, "Clone", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(545, "Reyfer Luckberry", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(546, "Solle Grumman", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(547, "Katla", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(548, "Nio Altugle", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(549, "Colland Grumman", "Atelier Escha & Logy", 1, true));
+        ALL.add(new Character(550, "Yuuki Cross", "Vampire Knight", 1, true));
+        ALL.add(new Character(551, "Ruka Souen", "Vampire Knight", 1, true));
+        ALL.add(new Character(552, "Yori Wakaba", "Vampire Knight", 1, true));
+        ALL.add(new Character(553, "Rima Toya", "Vampire Knight", 1, true));
+        ALL.add(new Character(554, "Seiren", "Vampire Knight", 1, true));
+        ALL.add(new Character(555, "Takuma Ichijo (fem)", "Vampire Knight", 1, true));
+        ALL.add(new Character(556, "Senri Shiki (fem)", "Vampire Knight", 1, true));
+        ALL.add(new Character(557, "Maria Kurenai", "Vampire Knight", 1, true));
+        ALL.add(new Character(558, "Hio Shizuka", "Vampire Knight", 1, true));
+        ALL.add(new Character(559, "Ai", "Vampire Knight", 1, true));
+        ALL.add(new Character(560, "Touko Nanami", "Bloom Into You", 1, true));
+        ALL.add(new Character(561, "Yuu Koito", "Bloom Into You", 1, true));
+        ALL.add(new Character(562, "Sayaka Saeki", "Bloom Into You", 1, true));
+        ALL.add(new Character(563, "Maki Serizawa", "Bloom Into You", 1, true));
+        ALL.add(new Character(564, "Ichigaya Rei", "Bloom Into You", 1, true));
+        ALL.add(new Character(565, "Doujima Fujino", "Bloom Into You", 1, true));
+        ALL.add(new Character(566, "Koyama Riko", "Bloom Into You", 1, true));
+        ALL.add(new Character(567, "Riko Murakami", "Bloom Into You", 1, true));
+        ALL.add(new Character(568, "Nanami Touko's sister", "Bloom Into You", 1, true));
+        ALL.add(new Character(569, "Nanamitai Natsuki", "Bloom Into You", 1, true));
+        ALL.add(new Character(570, "Yuu Serizawa", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(571, "Hakari Hanazono", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(572, "Karane Inda", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(573, "Shizuka Yoshimoto", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(574, "Nano Eiai", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(575, "Kusuri Yakuzen", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(576, "Iku Iku Yotsuya", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(577, "Mei Queeney", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(578, "Momoha Onda", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(579, "Mimimi Suwano", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(580, "Hahari Hanazono", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(581, "Kurumi Tokinomiya", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(582, "Nina Rentarou", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(583, "Ahko Rentarou", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(584, "Claire Aoki", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(585, "Naddy Akua", "The 100 Girlfriends Who Really, Really Love You", 1, true));
+        ALL.add(new Character(586, "Chiyo Utsumi", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(587, "Yuzuki Seo", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(588, "Mayu Kashima", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(589, "Yukari Miyako", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(590, "Nozaki Mikoto", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(591, "Wakamatsu Hirotaka", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(592, "Minami Yuki", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(593, "Seo Yuzuki", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(594, "Sakura Chiyo", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(595, "Hori Masayuki (fem)", "Monthly Girls' Nozaki-kun", 1, true));
+        ALL.add(new Character(596, "Yoshida Haru", "My Little Monster", 1, true));
+        ALL.add(new Character(597, "Natsume Asako", "My Little Monster", 1, true));
+        ALL.add(new Character(598, "Ooshima Chizuru", "My Little Monster", 1, true));
+        ALL.add(new Character(599, "Sasayan Sasahara (fem)", "My Little Monster", 1, true));
+        ALL.add(new Character(600, "Oshima Natsume", "My Little Monster", 1, true));
+        ALL.add(new Character(601, "Yamaken Yamakawa (fem)", "My Little Monster", 1, true));
+        ALL.add(new Character(602, "Takaya Natsume", "My Little Monster", 1, true));
+        ALL.add(new Character(603, "Shirosaki", "My Little Monster", 1, true));
+        ALL.add(new Character(604, "Chizuru Ooshima", "My Little Monster", 1, true));
+        ALL.add(new Character(605, "Asako Natsume", "My Little Monster", 1, true));
+        ALL.add(new Character(606, "Chiyuki Fujito", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(607, "Akari Kawamoto", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(608, "Hinata Kawamoto", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(609, "Momo Kawamoto", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(610, "Kyouko Mouri", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(611, "Sakura Harue", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(612, "Fuyuki Hiraki", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(613, "Akemi Kawamoto", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(614, "Yui Takao", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(615, "Ai Takeyama", "March Comes in Like a Lion", 1, true));
+        ALL.add(new Character(616, "Miyako Ishida", "A Silent Voice", 1, true));
+        ALL.add(new Character(617, "Shouko Nishimiya", "A Silent Voice", 1, true));
+        ALL.add(new Character(618, "Sahara Miyoko", "A Silent Voice", 1, true));
+        ALL.add(new Character(619, "Yuzuru Nishimiya", "A Silent Voice", 1, true));
+        ALL.add(new Character(620, "Naoka Ueno", "A Silent Voice", 1, true));
+        ALL.add(new Character(621, "Miki Kawai", "A Silent Voice", 1, true));
+        ALL.add(new Character(622, "Nagatsuka Tomohiro (fem)", "A Silent Voice", 1, true));
+        ALL.add(new Character(623, "Misaki Shimada", "A Silent Voice", 1, true));
+        ALL.add(new Character(624, "Satoshi Mashiba", "A Silent Voice", 1, true));
+        ALL.add(new Character(625, "Pedro Ayano Sora", "A Silent Voice", 1, true));
+        ALL.add(new Character(626, "Tsukasa Yugi", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(627, "Kou Minamoto", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(628, "Nene Yashiro", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(629, "Mitsuba Sousuke", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(630, "Aoi Akane", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(631, "Sakura Nanamine", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(632, "Tsuchigomori", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(633, "Yako", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(634, "Teru Minamoto", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(635, "Sousuke Mitsuba", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(636, "Akane Aoi", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(637, "Takahiro Natsuhiko", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(638, "Tsuruhime Itsuki", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(639, "Hakujoudai", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(640, "Ryuuguu Tsukasa", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(641, "Nanamine Sakura", "Toilet-bound Hanako-kun", 1, true));
+        ALL.add(new Character(642, "Hinako Note", "Hinako Note", 1, true));
+        ALL.add(new Character(643, "Kuina", "Hinako Note", 1, true));
+        ALL.add(new Character(644, "Yua Nakajima", "Hinako Note", 1, true));
+        ALL.add(new Character(645, "Chiaki Hagino", "Hinako Note", 1, true));
+        ALL.add(new Character(646, "Mayu", "Hinako Note", 1, true));
+        ALL.add(new Character(647, "Sari Makuwa", "Hinako Note", 1, true));
+        ALL.add(new Character(648, "Ruriko Kagamihari", "Hinako Note", 1, true));
+        ALL.add(new Character(649, "Lilianne", "Hinako Note", 1, true));
+        ALL.add(new Character(650, "Akane Ryuno", "Hinako Note", 1, true));
+        ALL.add(new Character(651, "Yua Nakagawa", "Hinako Note", 1, true));
+        ALL.add(new Character(652, "Chika Kudou", "Working!!", 1, true));
+        ALL.add(new Character(653, "Mahiru Inami", "Working!!", 1, true));
+        ALL.add(new Character(654, "Yachiyo Todoroki", "Working!!", 1, true));
+        ALL.add(new Character(655, "Kozue Takanashi", "Working!!", 1, true));
+        ALL.add(new Character(656, "Izumi Takanashi", "Working!!", 1, true));
+        ALL.add(new Character(657, "Nazuna Takanashi", "Working!!", 1, true));
+        ALL.add(new Character(658, "Popura Taneshima", "Working!!", 1, true));
+        ALL.add(new Character(659, "Jun Satou", "Working!!", 1, true));
+        ALL.add(new Character(660, "Mitsuki Takanashi", "Working!!", 1, true));
+        ALL.add(new Character(661, "Haruna Otoo", "Working!!", 1, true));
+        ALL.add(new Character(662, "Hime Haruno", "Gamers!", 1, true));
+        ALL.add(new Character(663, "Aguri", "Gamers!", 1, true));
+        ALL.add(new Character(664, "Chiaki Hoshinomori", "Gamers!", 1, true));
+        ALL.add(new Character(665, "Karen Tendou", "Gamers!", 1, true));
+        ALL.add(new Character(666, "Ayumi Koumoto", "Gamers!", 1, true));
+        ALL.add(new Character(667, "Konoha Hoshinomori", "Gamers!", 1, true));
+        ALL.add(new Character(668, "Haruki Kasama (fem)", "Gamers!", 1, true));
+        ALL.add(new Character(669, "Tsukino Tendo", "Gamers!", 1, true));
+        ALL.add(new Character(670, "Nina Oiso", "Gamers!", 1, true));
+        ALL.add(new Character(671, "Izumi Yuiga", "We Never Learn", 1, true));
+        ALL.add(new Character(672, "Fumino Furuhashi", "We Never Learn", 1, true));
+        ALL.add(new Character(673, "Rizu Ogata", "We Never Learn", 1, true));
+        ALL.add(new Character(674, "Asumi Kominami", "We Never Learn", 1, true));
+        ALL.add(new Character(675, "Uruka Takemoto", "We Never Learn", 1, true));
+        ALL.add(new Character(676, "Mafuyu Kirisu", "We Never Learn", 1, true));
+        ALL.add(new Character(677, "Miharu Ogata", "We Never Learn", 1, true));
+        ALL.add(new Character(678, "Sawako Yuiga", "We Never Learn", 1, true));
+        ALL.add(new Character(679, "Hazuki Ichinose", "We Never Learn", 1, true));
+        ALL.add(new Character(680, "Sekijou Nariyuki", "We Never Learn", 1, true));
+        ALL.add(new Character(681, "Chizuru Hishiro", "ReLIFE", 1, true));
+        ALL.add(new Character(682, "An Onoya", "ReLIFE", 1, true));
+        ALL.add(new Character(683, "Rena Kariu", "ReLIFE", 1, true));
+        ALL.add(new Character(684, "Kokoro Amatsu", "ReLIFE", 1, true));
+        ALL.add(new Character(685, "Honoka Tamarai", "ReLIFE", 1, true));
+        ALL.add(new Character(686, "Ohga Kazuomi (fem)", "ReLIFE", 1, true));
+        ALL.add(new Character(687, "Inukai Yoake", "ReLIFE", 1, true));
+        ALL.add(new Character(688, "An Onoya alt", "ReLIFE", 1, true));
+        ALL.add(new Character(689, "Hishiro Chizuru (young)", "ReLIFE", 1, true));
+        ALL.add(new Character(690, "Arata Kaizaki (fem)", "ReLIFE", 1, true));
+        ALL.add(new Character(691, "Shirayuki", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(692, "Kiki Seiran", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(693, "Raj Shenazard (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(694, "Yuzuri Makiri", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(695, "Ryuu Lorca (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(696, "Sakaki", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(697, "Mihaya", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(698, "Mitsuhide Rouen (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(699, "Zen Wistaria (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(700, "Izana Wistaria (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(701, "Obi (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(702, "Tsuruba Higashide (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(703, "Garak Gazelt", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(704, "Viscount Blaker (fem)", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(705, "Kihal Toghrul", "Snow White with the Red Hair", 1, true));
+        ALL.add(new Character(706, "Haruka Nanami", "Uta no Prince-sama", 1, true));
+        ALL.add(new Character(707, "Tomochika Shibuya", "Uta no Prince-sama", 1, true));
+        ALL.add(new Character(708, "Shibuya Tomochika", "Uta no Prince-sama", 1, true));
+        ALL.add(new Character(709, "Nanami Haruka", "Uta no Prince-sama", 1, true));
+        ALL.add(new Character(710, "Saotome Shining (fem)", "Uta no Prince-sama", 1, true));
+        ALL.add(new Character(711, "Cecil Aijima (fem)", "Uta no Prince-sama", 1, true));
+        ALL.add(new Character(712, "Tomo", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(713, "Tomo Aizawa", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(714, "Misuzu Gundou", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(715, "Carol Olston", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(716, "Mifune Mitsuki", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(717, "Jun Kubota (fem)", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(718, "Taichi Tanabe (fem)", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(719, "Konomi Watase", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(720, "Tatsumi Misuzu", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(721, "Misaki Aizawa", "Tomo-chan Is a Girl!", 1, true));
+        ALL.add(new Character(722, "Nagi Sanzenin", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(723, "Hinagiku Katsura", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(724, "Athena Tennousu", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(725, "Isumi Saginomiya", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(726, "Ruka Suirenji", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(727, "Ayumu Nishizawa", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(728, "Chiharu Harukaze", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(729, "Kayura Tsurugino", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(730, "Maria", "Hayate the Combat Butler", 1, true));
+        ALL.add(new Character(731, "Kotetsu T. Kaburagi (fem)", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(732, "Karina Lyle", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(733, "Pao-Lin Huang", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(734, "Agnes", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(735, "Kaede Kaburagi", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(736, "Tomoe Marguerite", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(737, "Cis", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(738, "Yuri Petrov (fem)", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(739, "Origami", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(740, "Suzue", "Tiger & Bunny", 1, true));
+        ALL.add(new Character(741, "Murasaki Shikibu", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(742, "Marie Antoinette", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(743, "Altera", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(744, "Helena Blavatsky", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(745, "Thomas Edison (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(746, "Atalante Alter", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(747, "Florence Nightingale", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(748, "Anne Bonny", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(749, "Mary Read", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(750, "Carmilla", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(751, "Elizabeth Bathory", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(752, "Elizabeth Halloween", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(753, "Nursery Rhyme", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(754, "Jing Ke", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(755, "Ushiwakamaru", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(756, "Tomoe Gozen", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(757, "Minamoto no Raikou", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(758, "Ibaraki-douji", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(759, "Shuten-douji", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(760, "Caesar (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(761, "Artoria (Lancer)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(762, "Mysterious Heroine X", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(763, "Suzuka Gozen", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(764, "Valkyrie", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(765, "Sitonai", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(766, "Sei Shounagon", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(767, "Chiyo (Izo fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(768, "Senji Muramasa (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(769, "Saber Lily", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(770, "Arash (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(771, "Romulus-Quirinus (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(772, "Ozymandias (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(773, "Sherlock Holmes (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(774, "Da Vinci", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(775, "Nikola Tesla (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(776, "Napoleon (fem)", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(777, "Space Ishtar", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(778, "Ibuki-douji", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(779, "Habetrot", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(780, "Summer Musashi", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(781, "Summer Hokusai", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(782, "Summer Jeanne", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(783, "Summer Atalante", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(784, "Summer Tamamo", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(785, "Ibuki", "Fate/Grand Order", 1, true));
+        ALL.add(new Character(786, "Illyasviel von Einzbern", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(787, "Miyu Edelfelt", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(788, "Chloe von Einzbern", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(789, "Mimi Orion", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(790, "Nanaki Moriyama", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(791, "Suzuka Kurihara", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(792, "Taiga Fujimura", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(793, "Tatsuko Gakumazawa", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(794, "Irisviel von Einzbern", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(795, "Erica Ainsworth", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(796, "Julian Ainsworth (fem)", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(797, "Beatrice Flowerchild", "Fate/kaleid liner Prisma Illya", 1, true));
+        ALL.add(new Character(798, "Enkidu (fem)", "Fate/Strange Fake", 1, true));
+        ALL.add(new Character(799, "Flat Escardos (fem)", "Fate/Strange Fake", 1, true));
+        ALL.add(new Character(800, "Sigma", "Fate/Strange Fake", 1, true));
+        ALL.add(new Character(801, "True Archer (fem)", "Fate/Strange Fake", 1, true));
+        ALL.add(new Character(802, "Tsubaki Kuruoka", "Fate/Strange Fake", 1, true));
+        ALL.add(new Character(803, "Hana Makidera", "Unlimited Blade Works", 1, true));
+        ALL.add(new Character(804, "Kane Himuro", "Unlimited Blade Works", 1, true));
+        ALL.add(new Character(805, "Kaede Makidera", "Unlimited Blade Works", 1, true));
+        ALL.add(new Character(806, "Rumi Adachi", "Toradora!", 1, true));
+        ALL.add(new Character(807, "Taiga Aisaka", "Toradora!", 1, true));
+        ALL.add(new Character(808, "Minori Kushieda", "Toradora!", 1, true));
+        ALL.add(new Character(809, "Ami Kawashima", "Toradora!", 1, true));
+        ALL.add(new Character(810, "Sumire Kano", "Toradora!", 1, true));
+        ALL.add(new Character(811, "Haruta Masuda (fem)", "Toradora!", 1, true));
+        ALL.add(new Character(812, "Maya Kihara", "Toradora!", 1, true));
+        ALL.add(new Character(813, "Nanako Kashii", "Toradora!", 1, true));
+        ALL.add(new Character(814, "Yuri Shirota", "Toradora!", 1, true));
+        ALL.add(new Character(815, "Yasuko Takasu", "Toradora!", 1, true));
+        ALL.add(new Character(816, "Inko Takasu", "Toradora!", 1, true));
+        ALL.add(new Character(817, "Nene Kinoshita", "Toradora!", 1, true));
+        ALL.add(new Character(818, "Chidori Yoshiura", "Toradora!", 1, true));
+        ALL.add(new Character(819, "Kana Miyamae", "Minami-ke", 1, true));
+        ALL.add(new Character(820, "Haruka Minami", "Minami-ke", 1, true));
+        ALL.add(new Character(821, "Chiaki Minami", "Minami-ke", 1, true));
+        ALL.add(new Character(822, "Atsuko Yoshino", "Minami-ke", 1, true));
+        ALL.add(new Character(823, "Fujioka", "Minami-ke", 1, true));
+        ALL.add(new Character(824, "Keiko Yoshino", "Minami-ke", 1, true));
+        ALL.add(new Character(825, "Makoto", "Minami-ke", 1, true));
+        ALL.add(new Character(826, "Hitomi", "Minami-ke", 1, true));
+        ALL.add(new Character(827, "Touma Minami", "Minami-ke", 1, true));
+        ALL.add(new Character(828, "Maki", "Minami-ke", 1, true));
+        ALL.add(new Character(829, "Fuyuki Hinata", "Sgt. Frog", 1, true));
+        ALL.add(new Character(830, "Natsumi Hinata", "Sgt. Frog", 1, true));
+        ALL.add(new Character(831, "Momoka Nishizawa", "Sgt. Frog", 1, true));
+        ALL.add(new Character(832, "Angol Mois", "Sgt. Frog", 1, true));
+        ALL.add(new Character(833, "Aki Hinata", "Sgt. Frog", 1, true));
+        ALL.add(new Character(834, "Chiruyo Skullene", "Sgt. Frog", 1, true));
+        ALL.add(new Character(835, "Tamama (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(836, "Keroro (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(837, "Kururu (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(838, "Giroro (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(839, "Garuru (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(840, "Pururu", "Sgt. Frog", 1, true));
+        ALL.add(new Character(841, "Koyuki Azumaya", "Sgt. Frog", 1, true));
+        ALL.add(new Character(842, "Etsuni Sato (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(843, "Nasarou (fem)", "Sgt. Frog", 1, true));
+        ALL.add(new Character(844, "Higurashi Kagome", "InuYasha", 1, true));
+        ALL.add(new Character(845, "Sango", "InuYasha", 1, true));
+        ALL.add(new Character(846, "Kikyo", "InuYasha", 1, true));
+        ALL.add(new Character(847, "Ayame", "InuYasha", 1, true));
+        ALL.add(new Character(848, "Kagura", "InuYasha", 1, true));
+        ALL.add(new Character(849, "Kanna", "InuYasha", 1, true));
+        ALL.add(new Character(850, "Rin", "InuYasha", 1, true));
+        ALL.add(new Character(851, "Hakudoshi (fem)", "InuYasha", 1, true));
+        ALL.add(new Character(852, "Shiori", "InuYasha", 1, true));
+        ALL.add(new Character(853, "Sara", "InuYasha", 1, true));
+        ALL.add(new Character(854, "Jaken (fem)", "InuYasha", 1, true));
+        ALL.add(new Character(855, "Izayoi", "InuYasha", 1, true));
+        ALL.add(new Character(856, "Moroha", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(857, "Towa Higurashi", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(858, "Setsuna", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(859, "Riku Kagome", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(860, "Hisui", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(861, "Ogigayatsu Hiiragi", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(862, "Takechiyo (fem)", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(863, "Zero", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(864, "Rion", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(865, "Akuru Ookido", "Yashahime: Princess Half-Demon", 1, true));
+        ALL.add(new Character(866, "Sakura Kinomoto", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(867, "Tomoyo Daidoji", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(868, "Kero", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(869, "Meiling Li", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(870, "Naoko Yanagisawa", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(871, "Rika Sasaki", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(872, "Chiharu Mihara", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(873, "Eriol Hiiragizawa (fem)", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(874, "Yukito Tsukishiro (fem)", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(875, "Nadeshiko Kinomoto", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(876, "Sonomi Daidoji", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(877, "Spinel Sun", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(878, "Ruby Moon", "Cardcaptor Sakura", 1, true));
+        ALL.add(new Character(879, "Akiho Shinomoto", "Cardcaptor Sakura Clear Card", 1, true));
+        ALL.add(new Character(880, "Kaito", "Cardcaptor Sakura Clear Card", 1, true));
+        ALL.add(new Character(881, "Momo", "Cardcaptor Sakura Clear Card", 1, true));
+        ALL.add(new Character(882, "Doremi Harukaze", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(883, "Hazuki Fujiwara", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(884, "Aiko Senoo", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(885, "Onpu Segawa", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(886, "Momoko Asuka", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(887, "Pop Harukaze", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(888, "Lala Harukaze", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(889, "Majorika", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(890, "Majoheart", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(891, "Majorisuka", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(892, "Toei Sensei", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(893, "Natsuyuki Honoka", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(894, "Kotake", "Ojamajo Doremi", 1, true));
+        ALL.add(new Character(895, "Serena Tsukino (Sailor Moon)", "Sailor Moon", 1, true));
+        ALL.add(new Character(896, "Ami Mizuno (Sailor Mercury)", "Sailor Moon", 1, true));
+        ALL.add(new Character(897, "Rei Hino (Sailor Mars)", "Sailor Moon", 1, true));
+        ALL.add(new Character(898, "Makoto Kino (Sailor Jupiter)", "Sailor Moon", 1, true));
+        ALL.add(new Character(899, "Minako Aino (Sailor Venus)", "Sailor Moon", 1, true));
+        ALL.add(new Character(900, "Chibiusa", "Sailor Moon", 1, true));
+        ALL.add(new Character(901, "Setsuna Meiou (Sailor Pluto)", "Sailor Moon", 1, true));
+        ALL.add(new Character(902, "Hotaru Tomoe (Sailor Saturn)", "Sailor Moon", 1, true));
+        ALL.add(new Character(903, "Haruka Tenou (Sailor Uranus)", "Sailor Moon", 1, true));
+        ALL.add(new Character(904, "Michiru Kaiou (Sailor Neptune)", "Sailor Moon", 1, true));
+        ALL.add(new Character(905, "Naru Osaka", "Sailor Moon", 1, true));
+        ALL.add(new Character(906, "Umino Gurio (fem)", "Sailor Moon", 1, true));
+        ALL.add(new Character(907, "Unazuki Furuhata", "Sailor Moon", 1, true));
+        ALL.add(new Character(908, "Rini", "Sailor Moon", 1, true));
+        ALL.add(new Character(909, "Sailor Chibi Chibi", "Sailor Moon", 1, true));
+        ALL.add(new Character(910, "Sailor Star Maker", "Sailor Moon", 1, true));
+        ALL.add(new Character(911, "Sailor Star Fighter", "Sailor Moon", 1, true));
+        ALL.add(new Character(912, "Sailor Star Healer", "Sailor Moon", 1, true));
+        ALL.add(new Character(913, "Galaxia", "Sailor Moon", 1, true));
+        ALL.add(new Character(914, "Chaos", "Sailor Moon", 1, true));
+        ALL.add(new Character(915, "Queen Serenity", "Sailor Moon", 1, true));
+        ALL.add(new Character(916, "Princess Kakyuu", "Sailor Moon", 1, true));
+        ALL.add(new Character(917, "Sailor Iron Mouse", "Sailor Moon", 1, true));
+        ALL.add(new Character(918, "Sailor Lead Crow", "Sailor Moon", 1, true));
+        ALL.add(new Character(919, "Sailor Tin Nyanko", "Sailor Moon", 1, true));
+        ALL.add(new Character(920, "Sailor Aluminum Siren", "Sailor Moon", 1, true));
+        ALL.add(new Character(921, "Sailor Lethe", "Sailor Moon", 1, true));
+        ALL.add(new Character(922, "Sailor Mnemosyne", "Sailor Moon", 1, true));
+        ALL.add(new Character(923, "Noelle Silva", "Black Clover", 3, true));
+        ALL.add(new Character(924, "Mimosa Vermillion", "Black Clover", 3, true));
+        ALL.add(new Character(925, "Charmy Pappitson", "Black Clover", 2, true));
+        ALL.add(new Character(926, "Dorothy Unsworth", "Black Clover", 3, true));
+        ALL.add(new Character(927, "Vanessa Enoteca", "Black Clover", 3, true));
+        ALL.add(new Character(928, "Secre Swallowtail", "Black Clover", 2, true));
+        ALL.add(new Character(929, "Sol Marron", "Black Clover", 2, true));
+        ALL.add(new Character(930, "Kahono", "Black Clover", 2, true));
+        ALL.add(new Character(931, "Rebecca Scarlet", "Black Clover", 1, true));
+        ALL.add(new Character(932, "Grey", "Black Clover", 2, true));
+        ALL.add(new Character(933, "Nero", "Black Clover", 2, true));
+        ALL.add(new Character(934, "Megicula", "Black Clover", 2, true));
+        ALL.add(new Character(935, "Vanica Zogratis", "Black Clover", 3, true));
+        ALL.add(new Character(936, "Lolopechka", "Black Clover", 3, true));
+        ALL.add(new Character(937, "Undine", "Black Clover", 2, true));
+        ALL.add(new Character(938, "Mereoleona Vermillion", "Black Clover", 3, true));
+        ALL.add(new Character(939, "Evergreen", "Black Clover", 2, true));
+        ALL.add(new Character(940, "Acier Silva", "Black Clover", 2, true));
+        ALL.add(new Character(941, "Kohaku", "Dr. Stone", 3, true));
+        ALL.add(new Character(942, "Ruri", "Dr. Stone", 2, true));
+        ALL.add(new Character(943, "Suika", "Dr. Stone", 2, true));
+        ALL.add(new Character(944, "Lillian Weinberg", "Dr. Stone", 2, true));
+        ALL.add(new Character(945, "Luna Wright", "Dr. Stone", 1, true));
+        ALL.add(new Character(946, "Chelsea", "Dr. Stone", 1, true));
+        ALL.add(new Character(947, "Yuzuriha Ogawa", "Dr. Stone", 3, true));
+        ALL.add(new Character(948, "Nikki Hanada", "Dr. Stone", 1, true));
+        ALL.add(new Character(949, "Amaryllis", "Dr. Stone", 2, true));
+        ALL.add(new Character(950, "Homura Momiji", "Dr. Stone", 2, true));
+        ALL.add(new Character(951, "Tamaki Kotatsu", "Fire Force", 3, true));
+        ALL.add(new Character(952, "Iris", "Fire Force", 3, true));
+        ALL.add(new Character(953, "Maki Oze", "Fire Force", 3, true));
+        ALL.add(new Character(954, "Princess Hibana", "Fire Force", 3, true));
+        ALL.add(new Character(955, "Inca Kasugatani", "Fire Force", 2, true));
+        ALL.add(new Character(956, "Arrow", "Fire Force", 2, true));
+        ALL.add(new Character(957, "Sylphiette", "Mushoku Tensei", 4, true));
+        ALL.add(new Character(958, "Roxy Migurdia", "Mushoku Tensei", 4, true));
+        ALL.add(new Character(959, "Eris Boreas Greyrat", "Mushoku Tensei", 4, true));
+        ALL.add(new Character(960, "Sara", "Mushoku Tensei", 2, true));
+        ALL.add(new Character(961, "Nanahoshi", "Mushoku Tensei", 3, true));
+        ALL.add(new Character(962, "Elinalise Dragonroad", "Mushoku Tensei", 3, true));
+        ALL.add(new Character(963, "Zenith Greyrat", "Mushoku Tensei", 2, true));
+        ALL.add(new Character(964, "Lilia", "Mushoku Tensei", 2, true));
+        ALL.add(new Character(965, "Ghislaine Dedoldia", "Mushoku Tensei", 3, true));
+        ALL.add(new Character(966, "Norn Greyrat", "Mushoku Tensei", 2, true));
+        ALL.add(new Character(967, "Aisha Greyrat", "Mushoku Tensei", 2, true));
+        ALL.add(new Character(968, "Fitts", "Mushoku Tensei", 2, true));
+        ALL.add(new Character(969, "Shalltear Bloodfallen", "Overlord", 3, true));
+        ALL.add(new Character(970, "Aura Bella Fiora", "Overlord", 3, true));
+        ALL.add(new Character(971, "Entoma Vasilissa Zeta", "Overlord", 2, true));
+        ALL.add(new Character(972, "Narberal Gamma", "Overlord", 2, true));
+        ALL.add(new Character(973, "Solution Epsilon", "Overlord", 2, true));
+        ALL.add(new Character(974, "Lupusregina Beta", "Overlord", 2, true));
+        ALL.add(new Character(975, "CZ2128 Delta", "Overlord", 2, true));
+        ALL.add(new Character(976, "Yuri Alpha", "Overlord", 2, true));
+        ALL.add(new Character(977, "Evileye", "Overlord", 3, true));
+        ALL.add(new Character(978, "Lakyus Alvein Dale Aindra", "Overlord", 2, true));
+        ALL.add(new Character(979, "Renner Theiere Chardelon", "Overlord", 3, true));
+        ALL.add(new Character(980, "Crusch Lulu", "Overlord", 2, true));
+        ALL.add(new Character(981, "Zesshi Zetsumei", "Overlord", 2, true));
+        ALL.add(new Character(982, "Draudillon Oriculus", "Overlord", 2, true));
+        ALL.add(new Character(983, "Shizue Izawa", "That Time I Got Reincarnated as a Slime", 3, true));
+        ALL.add(new Character(984, "Ramiris", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(985, "Frey", "That Time I Got Reincarnated as a Slime", 2, true));
+        ALL.add(new Character(986, "Tamayo", "Demon Slayer", 3, true));
+        ALL.add(new Character(987, "Nakime", "Demon Slayer", 2, true));
+        ALL.add(new Character(988, "Susamaru", "Demon Slayer", 2, true));
+        ALL.add(new Character(989, "Quanxi", "Chainsaw Man", 3, true));
+        ALL.add(new Character(990, "Cosmo", "Chainsaw Man", 2, true));
+        ALL.add(new Character(991, "Princi", "Chainsaw Man", 2, true));
+        ALL.add(new Character(992, "Ruby Hoshino", "Oshi no Ko", 3, true));
+        ALL.add(new Character(993, "Akane Kurokawa", "Oshi no Ko", 4, true));
+        ALL.add(new Character(994, "Kana Arima", "Oshi no Ko", 3, true));
+        ALL.add(new Character(995, "MEM-cho", "Oshi no Ko", 2, true));
+        ALL.add(new Character(996, "Miyako Saitou", "Oshi no Ko", 2, true));
+        ALL.add(new Character(997, "Minami Kotobuki", "Oshi no Ko", 2, true));
+        ALL.add(new Character(998, "Brandish u", "Fairy Tail", 3, true));
+        ALL.add(new Character(999, "Dimaria Yesta", "Fairy Tail", 3, true));
+        ALL.add(new Character(1000, "Irene Belserion", "Fairy Tail", 3, true));
+        ALL.add(new Character(1001, "Kagura Mikazuchi", "Fairy Tail", 3, true));
+        ALL.add(new Character(1002, "Ultear Milkovich", "Fairy Tail", 3, true));
+        ALL.add(new Character(1003, "Meredy", "Fairy Tail", 2, true));
+        ALL.add(new Character(1004, "Juvia Lockser", "Fairy Tail", 4, true));
+        ALL.add(new Character(1005, "Cana Alberona", "Fairy Tail", 3, true));
+        ALL.add(new Character(1006, "Flare Corona", "Fairy Tail", 2, true));
+        ALL.add(new Character(1007, "Jenny Realight", "Fairy Tail", 2, true));
+        ALL.add(new Character(1008, "Mavis Vermillion", "Fairy Tail", 4, true));
+        ALL.add(new Character(1009, "Zera", "Fairy Tail", 2, true));
+        ALL.add(new Character(1010, "Strea", "Sword Art Online: Hollow Fragment", 2, true));
+        ALL.add(new Character(1011, "Administrator (Quinella)", "Sword Art Online: Alicization", 3, true));
+        ALL.add(new Character(1012, "Cardinal", "Sword Art Online: Alicization", 2, true));
+        ALL.add(new Character(1013, "Tiese Schtrinen", "Sword Art Online: Alicization", 2, true));
+        ALL.add(new Character(1014, "Ronie Arabel", "Sword Art Online: Alicization", 2, true));
+        ALL.add(new Character(1015, "Sortiliena Serlut", "Sword Art Online: Alicization", 2, true));
+        ALL.add(new Character(1016, "Sarada Uchiha", "Boruto", 3, true));
+        ALL.add(new Character(1017, "Sumire Kakei", "Boruto", 2, true));
+        ALL.add(new Character(1018, "Himawari Uzumaki", "Boruto", 2, true));
+        ALL.add(new Character(1019, "Eida", "Boruto", 4, true));
+        ALL.add(new Character(1020, "Ada", "Boruto", 3, true));
+        ALL.add(new Character(1021, "Delta", "Boruto", 3, true));
+        ALL.add(new Character(1022, "Hanabi Hyuga", "Boruto", 2, true));
+        ALL.add(new Character(1023, "Yorozu", "Jujutsu Kaisen", 2, true));
+        ALL.add(new Character(1024, "Uro", "Jujutsu Kaisen", 2, true));
+        ALL.add(new Character(1025, "Kirara Hoshi", "Jujutsu Kaisen", 2, true));
+        ALL.add(new Character(1026, "Hange Zoe", "Shingeki no Kyojin", 4, true));
+        ALL.add(new Character(1027, "Petra Ral", "Shingeki no Kyojin", 2, true));
+        ALL.add(new Character(1028, "Gabi Braun", "Shingeki no Kyojin", 2, true));
+        ALL.add(new Character(1029, "Isabel Magnolia", "Shingeki no Kyojin", 2, true));
+        ALL.add(new Character(1030, "Frieda Reiss", "Shingeki no Kyojin", 2, true));
+        ALL.add(new Character(1031, "Nagisa Kashiwagi", "Kaguya-sama", 2, true));
+        ALL.add(new Character(1032, "Tsubame Koyasu", "Kaguya-sama", 2, true));
+        ALL.add(new Character(1033, "Kei Shirogane", "Kaguya-sama", 2, true));
+        ALL.add(new Character(1034, "Hayasaka Ai", "Kaguya-sama", 3, true));
+        ALL.add(new Character(1035, "Anya Forger", "Spy x Family", 3, true));
+        ALL.add(new Character(1036, "Becky Blackbell", "Spy x Family", 2, true));
+        ALL.add(new Character(1037, "Nightfall", "Spy x Family", 3, true));
+        ALL.add(new Character(1038, "Bambietta Basterbine", "Bleach", 3, true));
+        ALL.add(new Character(1039, "Candice Catnipp", "Bleach", 3, true));
+        ALL.add(new Character(1040, "Meninas McAllon", "Bleach", 2, true));
+        ALL.add(new Character(1041, "Liltotto Lamperd", "Bleach", 2, true));
+        ALL.add(new Character(1042, "Giselle Gewelle", "Bleach", 2, true));
+        ALL.add(new Character(1043, "Lille Barro", "Bleach", 2, true));
+        ALL.add(new Character(1044, "Cecily", "KonoSuba", 2, true));
+        ALL.add(new Character(1045, "Chris", "KonoSuba", 2, true));
+        ALL.add(new Character(1046, "Wolbach", "KonoSuba", 2, true));
+        ALL.add(new Character(1047, "Iris", "KonoSuba", 3, true));
+        ALL.add(new Character(1048, "Megumin (adult)", "KonoSuba", 2, true));
+        ALL.add(new Character(1049, "Yuiyui", "KonoSuba", 2, true));
+        ALL.add(new Character(1050, "Cattleya Baudelaire", "Violet Evergarden", 2, true));
+        ALL.add(new Character(1051, "Iris Cannary", "Violet Evergarden", 1, true));
+        ALL.add(new Character(1052, "Luculia Marlborough", "Violet Evergarden", 1, true));
+        ALL.add(new Character(1053, "Charlotte Abelfreyja Drossel", "Violet Evergarden", 2, true));
+        ALL.add(new Character(1054, "Junko Enoshima", "Danganronpa", 4, true));
+        ALL.add(new Character(1055, "Mukuro Ikusaba", "Danganronpa", 3, true));
+        ALL.add(new Character(1056, "Celestia Ludenberg", "Danganronpa", 3, true));
+        ALL.add(new Character(1057, "Kyoko Kirigiri", "Danganronpa", 3, true));
+        ALL.add(new Character(1058, "Aoi Asahina", "Danganronpa", 2, true));
+        ALL.add(new Character(1059, "Sayaka Maizono", "Danganronpa", 2, true));
+        ALL.add(new Character(1060, "Touko Fukawa", "Danganronpa", 2, true));
+        ALL.add(new Character(1061, "Mahiru Koizumi", "Danganronpa", 2, true));
+        ALL.add(new Character(1062, "Ibuki Mioda", "Danganronpa", 2, true));
+        ALL.add(new Character(1063, "Mikan Tsumiki", "Danganronpa", 2, true));
+        ALL.add(new Character(1064, "Peko Pekoyama", "Danganronpa", 2, true));
+        ALL.add(new Character(1065, "Chiaki Nanami", "Danganronpa", 3, true));
+        ALL.add(new Character(1066, "Sonia Nevermind", "Danganronpa", 2, true));
+        ALL.add(new Character(1067, "Miu Iruma", "Danganronpa", 1, true));
+        ALL.add(new Character(1068, "Tenko Chabashira", "Danganronpa", 1, true));
+        ALL.add(new Character(1069, "Himiko Yumeno", "Danganronpa", 1, true));
+        ALL.add(new Character(1070, "Angie Yonaga", "Danganronpa", 1, true));
+        ALL.add(new Character(1071, "Kaede Akamatsu", "Danganronpa", 2, true));
+        ALL.add(new Character(1072, "Maki Harukawa", "Danganronpa", 2, true));
+        ALL.add(new Character(1073, "Tsumugi Shirogane", "Danganronpa", 1, true));
+        ALL.add(new Character(1074, "Yuuki", "Sword Art Online", 4, true));
+        ALL.add(new Character(1075, "Asuna (ALO)", "Sword Art Online", 3, true));
+        ALL.add(new Character(1076, "Asuna (SAO arc)", "Sword Art Online", 4, true));
+        ALL.add(new Character(1501, "Roronoa Zoro", "One Piece", 5, false));
+        ALL.add(new Character(1502, "Trafalgar Law", "One Piece", 5, false));
+        ALL.add(new Character(1503, "Portgas D. Ace", "One Piece", 5, false));
+        ALL.add(new Character(1504, "Sabo", "One Piece", 5, false));
+        ALL.add(new Character(1505, "Shanks", "One Piece", 5, false));
+        ALL.add(new Character(1506, "Levi Ackerman", "Shingeki no Kyojin", 5, false));
+        ALL.add(new Character(1507, "Erwin Smith", "Shingeki no Kyojin", 5, false));
+        ALL.add(new Character(1508, "Gojo Satoru", "Jujutsu Kaisen", 5, false));
+        ALL.add(new Character(1509, "Yuji Itadori", "Jujutsu Kaisen", 5, false));
+        ALL.add(new Character(1510, "Megumi Fushiguro", "Jujutsu Kaisen", 5, false));
+        ALL.add(new Character(1511, "Ryomen Sukuna", "Jujutsu Kaisen", 5, false));
+        ALL.add(new Character(1512, "Killua Zoldyck", "Hunter x Hunter", 5, false));
+        ALL.add(new Character(1513, "Hisoka Morow", "Hunter x Hunter", 5, false));
+        ALL.add(new Character(1514, "Gon Freecss", "Hunter x Hunter", 5, false));
+        ALL.add(new Character(1515, "Kurapika", "Hunter x Hunter", 5, false));
+        ALL.add(new Character(1516, "Leorio Paradinight", "Hunter x Hunter", 5, false));
+        ALL.add(new Character(1517, "Shoto Todoroki", "My Hero Academia", 5, false));
+        ALL.add(new Character(1518, "Katsuki Bakugo", "My Hero Academia", 5, false));
+        ALL.add(new Character(1519, "Izuku Midoriya", "My Hero Academia", 5, false));
+        ALL.add(new Character(1520, "Tanjiro Kamado", "Demon Slayer", 5, false));
+        ALL.add(new Character(1521, "Inosuke Hashibira", "Demon Slayer", 5, false));
+        ALL.add(new Character(1522, "Zenitsu Agatsuma", "Demon Slayer", 5, false));
+        ALL.add(new Character(1523, "Giyu Tomioka", "Demon Slayer", 5, false));
+        ALL.add(new Character(1524, "Rengoku Kyojuro", "Demon Slayer", 5, false));
+        ALL.add(new Character(1525, "Denji", "Chainsaw Man", 5, false));
+        ALL.add(new Character(1526, "Aki Hayakawa", "Chainsaw Man", 5, false));
+        ALL.add(new Character(1527, "Yuta Okkotsu", "Jujutsu Kaisen", 5, false));
+        ALL.add(new Character(1528, "Sanji", "One Piece", 4, false));
+        ALL.add(new Character(1529, "Luffy", "One Piece", 4, false));
+        ALL.add(new Character(1530, "Nami (male AU)", "One Piece", 4, false));
+        ALL.add(new Character(1531, "Smoker", "One Piece", 4, false));
+        ALL.add(new Character(1532, "Crocodile", "One Piece", 4, false));
+        ALL.add(new Character(1533, "Mihawk", "One Piece", 4, false));
+        ALL.add(new Character(1534, "Doflamingo", "One Piece", 4, false));
+        ALL.add(new Character(1535, "Marco", "One Piece", 4, false));
+        ALL.add(new Character(1536, "Katakuri", "One Piece", 4, false));
+        ALL.add(new Character(1537, "Jinbe", "One Piece", 4, false));
+        ALL.add(new Character(1538, "Usopp", "One Piece", 4, false));
+        ALL.add(new Character(1539, "Franky", "One Piece", 4, false));
+        ALL.add(new Character(1540, "Brook", "One Piece", 4, false));
+        ALL.add(new Character(1541, "Chopper", "One Piece", 4, false));
+        ALL.add(new Character(1542, "Whitebeard", "One Piece", 4, false));
+        ALL.add(new Character(1543, "Roger", "One Piece", 4, false));
+        ALL.add(new Character(1544, "Sengoku", "One Piece", 4, false));
+        ALL.add(new Character(1545, "Issho Fujitora", "One Piece", 4, false));
+        ALL.add(new Character(1546, "Ryokugyu", "One Piece", 4, false));
+        ALL.add(new Character(1547, "Coby", "One Piece", 4, false));
+        ALL.add(new Character(1548, "Kid", "One Piece", 4, false));
+        ALL.add(new Character(1549, "Killer", "One Piece", 4, false));
+        ALL.add(new Character(1550, "Izo", "One Piece", 4, false));
+        ALL.add(new Character(1551, "Nekomamushi", "One Piece", 4, false));
+        ALL.add(new Character(1552, "Inuarashi", "One Piece", 4, false));
+        ALL.add(new Character(1553, "Kaido", "One Piece", 4, false));
+        ALL.add(new Character(1554, "Big Mom", "One Piece", 4, false));
+        ALL.add(new Character(1555, "Tobiroppo", "One Piece", 4, false));
+        ALL.add(new Character(1556, "Sasuke Uchiha", "Naruto", 4, false));
+        ALL.add(new Character(1557, "Naruto Uzumaki", "Naruto", 4, false));
+        ALL.add(new Character(1558, "Itachi Uchiha", "Naruto", 4, false));
+        ALL.add(new Character(1559, "Kakashi Hatake", "Naruto", 4, false));
+        ALL.add(new Character(1560, "Gaara", "Naruto", 4, false));
+        ALL.add(new Character(1561, "Minato Namikaze", "Naruto", 4, false));
+        ALL.add(new Character(1562, "Obito Uchiha", "Naruto", 4, false));
+        ALL.add(new Character(1563, "Madara Uchiha", "Naruto", 4, false));
+        ALL.add(new Character(1564, "Pain", "Naruto", 4, false));
+        ALL.add(new Character(1565, "Jiraiya", "Naruto", 4, false));
+        ALL.add(new Character(1566, "Rock Lee", "Naruto", 4, false));
+        ALL.add(new Character(1567, "Neji Hyuga", "Naruto", 4, false));
+        ALL.add(new Character(1568, "Shikamaru Nara", "Naruto", 4, false));
+        ALL.add(new Character(1569, "Kiba Inuzuka", "Naruto", 4, false));
+        ALL.add(new Character(1570, "Shino Aburame", "Naruto", 4, false));
+        ALL.add(new Character(1571, "Choji Akimichi", "Naruto", 4, false));
+        ALL.add(new Character(1572, "Ino Yamanaka (male AU)", "Naruto", 4, false));
+        ALL.add(new Character(1573, "Yamato", "Naruto", 4, false));
+        ALL.add(new Character(1574, "Sai", "Naruto", 4, false));
+        ALL.add(new Character(1575, "Suigetsu Hozuki", "Naruto", 4, false));
+        ALL.add(new Character(1576, "Jugo", "Naruto", 4, false));
+        ALL.add(new Character(1577, "Kimimaro Kaguya", "Naruto", 4, false));
+        ALL.add(new Character(1578, "Kisame Hoshigaki", "Naruto", 4, false));
+        ALL.add(new Character(1579, "Deidara", "Naruto", 4, false));
+        ALL.add(new Character(1580, "Hidan", "Naruto", 4, false));
+        ALL.add(new Character(1581, "Kakuzu", "Naruto", 4, false));
+        ALL.add(new Character(1582, "Konan (male AU)", "Naruto", 4, false));
+        ALL.add(new Character(1583, "Nagato", "Naruto", 4, false));
+        ALL.add(new Character(1584, "Zetsu", "Naruto", 4, false));
+        ALL.add(new Character(1585, "Orochimaru", "Naruto", 4, false));
+        ALL.add(new Character(1586, "Kabuto Yakushi", "Naruto", 4, false));
+        ALL.add(new Character(1587, "Danzo Shimura", "Naruto", 4, false));
+        ALL.add(new Character(1588, "Hiruzen Sarutobi", "Naruto", 4, false));
+        ALL.add(new Character(1589, "Tobirama Senju", "Naruto", 4, false));
+        ALL.add(new Character(1590, "Hashirama Senju", "Naruto", 4, false));
+        ALL.add(new Character(1591, "Tsunade (male AU)", "Naruto", 4, false));
+        ALL.add(new Character(1592, "Boruto Uzumaki", "Boruto", 4, false));
+        ALL.add(new Character(1593, "Kawaki", "Boruto", 4, false));
+        ALL.add(new Character(1594, "Mitsuki", "Boruto", 4, false));
+        ALL.add(new Character(1595, "Sarada (male AU)", "Boruto", 4, false));
+        ALL.add(new Character(1596, "Shinki", "Boruto", 4, false));
+        ALL.add(new Character(1597, "Inojin Yamanaka", "Boruto", 4, false));
+        ALL.add(new Character(1598, "Shikadai Nara", "Boruto", 4, false));
+        ALL.add(new Character(1599, "Chocho Akimichi (male AU)", "Boruto", 4, false));
+        ALL.add(new Character(1600, "Ichigo Kurosaki", "Bleach", 4, false));
+        ALL.add(new Character(1601, "Byakuya Kuchiki", "Bleach", 4, false));
+        ALL.add(new Character(1602, "Renji Abarai", "Bleach", 4, false));
+        ALL.add(new Character(1603, "Hitsugaya Toshiro", "Bleach", 4, false));
+        ALL.add(new Character(1604, "Sosuke Aizen", "Bleach", 4, false));
+        ALL.add(new Character(1605, "Grimmjow Jaegerjaquez", "Bleach", 4, false));
+        ALL.add(new Character(1606, "Ulquiorra Cifer", "Bleach", 4, false));
+        ALL.add(new Character(1607, "Hollow Ichigo", "Bleach", 4, false));
+        ALL.add(new Character(1608, "Kenpachi Zaraki", "Bleach", 4, false));
+        ALL.add(new Character(1609, "Kisuke Urahara", "Bleach", 4, false));
+        ALL.add(new Character(1610, "Shunsui Kyoraku", "Bleach", 4, false));
+        ALL.add(new Character(1611, "Jushiro Ukitake", "Bleach", 4, false));
+        ALL.add(new Character(1612, "Isshin Kurosaki", "Bleach", 4, false));
+        ALL.add(new Character(1613, "Shinji Hirako", "Bleach", 4, false));
+        ALL.add(new Character(1614, "Uryuu Ishida", "Bleach", 4, false));
+        ALL.add(new Character(1615, "Yasutora Sado", "Bleach", 4, false));
+        ALL.add(new Character(1616, "Kensei Muguruma", "Bleach", 4, false));
+        ALL.add(new Character(1617, "Yhwach", "Bleach", 4, false));
+        ALL.add(new Character(1618, "Jugram Haschwalth", "Bleach", 4, false));
+        ALL.add(new Character(1619, "Bazz-B", "Bleach", 4, false));
+        ALL.add(new Character(1620, "Gremmy Thoumeaux", "Bleach", 4, false));
+        ALL.add(new Character(1621, "Edward Elric", "Fullmetal Alchemist", 3, false));
+        ALL.add(new Character(1622, "Alphonse Elric", "Fullmetal Alchemist", 3, false));
+        ALL.add(new Character(1623, "Roy Mustang", "Fullmetal Alchemist", 3, false));
+        ALL.add(new Character(1624, "Scar", "Fullmetal Alchemist", 3, false));
+        ALL.add(new Character(1625, "Van Hohenheim", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1626, "Ling Yao", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1627, "Greed", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1628, "Envy", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1629, "Gluttony", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1630, "Pride (Selim Bradley)", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1631, "Izumi Curtis (male AU)", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1632, "Yoki", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1633, "Maes Hughes", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1634, "Alex Louis Armstrong", "Fullmetal Alchemist: Brotherhood", 3, false));
+        ALL.add(new Character(1635, "Dabi", "My Hero Academia", 3, false));
+        ALL.add(new Character(1636, "Hawks", "My Hero Academia", 3, false));
+        ALL.add(new Character(1637, "Endeavor", "My Hero Academia", 3, false));
+        ALL.add(new Character(1638, "All Might", "My Hero Academia", 3, false));
+        ALL.add(new Character(1639, "Aizawa Shouta", "My Hero Academia", 3, false));
+        ALL.add(new Character(1640, "Present Mic", "My Hero Academia", 3, false));
+        ALL.add(new Character(1641, "Hitoshi Shinso", "My Hero Academia", 3, false));
+        ALL.add(new Character(1642, "Tokoyami Fumikage", "My Hero Academia", 3, false));
+        ALL.add(new Character(1643, "Mirio Togata", "My Hero Academia", 3, false));
+        ALL.add(new Character(1644, "Tamaki Amajiki", "My Hero Academia", 3, false));
+        ALL.add(new Character(1645, "Nejire Hado (male AU)", "My Hero Academia", 3, false));
+        ALL.add(new Character(1646, "Twice", "My Hero Academia", 3, false));
+        ALL.add(new Character(1647, "Shigaraki Tomura", "My Hero Academia", 3, false));
+        ALL.add(new Character(1648, "All For One", "My Hero Academia", 3, false));
+        ALL.add(new Character(1649, "Kurogiri", "My Hero Academia", 3, false));
+        ALL.add(new Character(1650, "Moonfish", "My Hero Academia", 3, false));
+        ALL.add(new Character(1651, "Re-Destro", "My Hero Academia", 3, false));
+        ALL.add(new Character(1652, "Giran", "My Hero Academia", 3, false));
+        ALL.add(new Character(1653, "Stain", "My Hero Academia", 3, false));
+        ALL.add(new Character(1654, "Muscular", "My Hero Academia", 3, false));
+        ALL.add(new Character(1655, "Overhaul", "My Hero Academia", 3, false));
+        ALL.add(new Character(1656, "Nomu", "My Hero Academia", 3, false));
+        ALL.add(new Character(1657, "Illumi Zoldyck", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1658, "Chrollo Lucilfer", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1659, "Leorio", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1660, "Bisky", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1661, "Netero", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1662, "Ging Freecss", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1663, "Neferpitou (male ver)", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1664, "Meruem", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1665, "Komugi (male AU)", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1666, "Kite", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1667, "Alluka Zoldyck", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1668, "Nanika", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1669, "Shoot McMahon", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1670, "Knuckle Bine", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1671, "Gon (adult)", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1672, "Zushii", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1673, "Wing", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1674, "Hanzo", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1675, "Bodoro", "Hunter x Hunter", 3, false));
+        ALL.add(new Character(1676, "Satoru Gojo", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1677, "Nanami Kento", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1678, "Inumaki Toge", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1679, "Panda", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1680, "Aoi Todo", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1681, "Suguru Geto", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1682, "Kenjaku", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1683, "Choso", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1684, "Junpei Yoshino", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1685, "Mahito", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1686, "Jogo", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1687, "Hanami", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1688, "Dagon", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1689, "Naoya Zenin", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1690, "Naobito Zenin", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1691, "Ogi Zenin", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1692, "Kokichi Muta", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1693, "Noritoshi Kamo", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(1694, "Ranta Rix (male AU)", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1695, "Goblin Slayer", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1696, "Dwarf Shaman", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1697, "Spearman", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1698, "Heavy Warrior", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1699, "Sage", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1700, "Rookie Warrior", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1701, "Noble Fencer (male AU)", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1702, "Witch (male AU)", "Goblin Slayer", 3, false));
+        ALL.add(new Character(1703, "Arc", "Arc the Lad", 3, false));
+        ALL.add(new Character(1704, "Toan", "Dark Cloud", 3, false));
+        ALL.add(new Character(1705, "Maxim", "Lufia & the Fortress of Doom", 3, false));
+        ALL.add(new Character(1706, "Rui Nii", "Scum's Wish", 3, false));
+        ALL.add(new Character(1707, "Hanabi Yasuraoka (male AU)", "Scum's Wish", 3, false));
+        ALL.add(new Character(1708, "Mugi Awaya", "Scum's Wish", 3, false));
+        ALL.add(new Character(1709, "Akane Minagawa (male AU)", "Scum's Wish", 3, false));
+        ALL.add(new Character(1710, "Sanae Ebato (male AU)", "Scum's Wish", 3, false));
+        ALL.add(new Character(1711, "Noriko Kamomebata (male AU)", "Scum's Wish", 3, false));
+        ALL.add(new Character(1712, "Atsuya Kirishima", "Scum's Wish", 3, false));
+        ALL.add(new Character(1713, "Takuya Terauchi", "Scum's Wish", 3, false));
+        ALL.add(new Character(1714, "Kyousuke", "Scum's Wish", 3, false));
+        ALL.add(new Character(1715, "Moca Aoba (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1716, "Arisa Ichigaya (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1717, "Rimi Ushigome (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1718, "Kasumi Toyama (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1719, "Tae Hanazono (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1720, "Yukina Minato (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1721, "Sayo Hikawa (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1722, "Lisa Imai (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1723, "Ako Udagawa (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1724, "Rinko Shirokane (male AU)", "BanG Dream!", 3, false));
+        ALL.add(new Character(1725, "Killua (adult)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1726, "Gon (teen)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1727, "Feitan Portor", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1728, "Phinks Magcub", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1729, "Shalnark", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1730, "Machi Komacine (male AU)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1731, "Pakunoda (male AU)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1732, "Uvogin", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1733, "Nobunaga Hazama", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1734, "Kortopi", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1735, "Bonolenov Ndongo", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1736, "Shizuku Murasaki (male AU)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1737, "Kalluto Zoldyck", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1738, "Milluki Zoldyck", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1739, "Kikyo Zoldyck (male AU)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1740, "Silva Zoldyck", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1741, "Zeno Zoldyck", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1742, "Gotoh", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1743, "Canary (male AU)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1744, "Amane (male AU)", "Hunter x Hunter", 2, false));
+        ALL.add(new Character(1745, "Yoshihiro Yagami", "Death Note", 2, false));
+        ALL.add(new Character(1746, "Light Yagami", "Death Note", 2, false));
+        ALL.add(new Character(1747, "L Lawliet", "Death Note", 2, false));
+        ALL.add(new Character(1748, "Near", "Death Note", 2, false));
+        ALL.add(new Character(1749, "Mello", "Death Note", 2, false));
+        ALL.add(new Character(1750, "Matsuda Touta", "Death Note", 2, false));
+        ALL.add(new Character(1751, "Ryuk", "Death Note", 2, false));
+        ALL.add(new Character(1752, "Rem (male AU)", "Death Note", 2, false));
+        ALL.add(new Character(1753, "Gelus", "Death Note", 2, false));
+        ALL.add(new Character(1754, "Sidoh", "Death Note", 2, false));
+        ALL.add(new Character(1755, "Mikami Teru", "Death Note", 2, false));
+        ALL.add(new Character(1756, "Takada Kiyomi (male AU)", "Death Note", 2, false));
+        ALL.add(new Character(1757, "Aizawa Shuichi", "Death Note", 2, false));
+        ALL.add(new Character(1758, "Ide Hirokazu", "Death Note", 2, false));
+        ALL.add(new Character(1759, "Ukita Hirokazu", "Death Note", 2, false));
+        ALL.add(new Character(1760, "Mogi Kanzo", "Death Note", 2, false));
+        ALL.add(new Character(1761, "Naomi Misora (male AU)", "Death Note", 2, false));
+        ALL.add(new Character(1762, "Raye Penber", "Death Note", 2, false));
+        ALL.add(new Character(1763, "Roger Ruvie", "Death Note", 2, false));
+        ALL.add(new Character(1764, "Nate River", "Death Note", 2, false));
+        ALL.add(new Character(1765, "Kira", "Death Note", 2, false));
+        ALL.add(new Character(1766, "Yuzuru Otonashi", "Angel Beats!", 2, false));
+        ALL.add(new Character(1767, "Hideki Hinata", "Angel Beats!", 2, false));
+        ALL.add(new Character(1768, "Takeyama Christ", "Angel Beats!", 2, false));
+        ALL.add(new Character(1769, "Fujimaki", "Angel Beats!", 2, false));
+        ALL.add(new Character(1770, "TK", "Angel Beats!", 2, false));
+        ALL.add(new Character(1771, "Noda", "Angel Beats!", 2, false));
+        ALL.add(new Character(1772, "Takamatsu", "Angel Beats!", 2, false));
+        ALL.add(new Character(1773, "Matsushita 5dan", "Angel Beats!", 2, false));
+        ALL.add(new Character(1774, "Chaa", "Angel Beats!", 2, false));
+        ALL.add(new Character(1775, "Shiina (male AU)", "Angel Beats!", 2, false));
+        ALL.add(new Character(1776, "Yuri Nakamura (male AU)", "Angel Beats!", 2, false));
+        ALL.add(new Character(1777, "Angel/Kanade (male AU)", "Angel Beats!", 2, false));
+        ALL.add(new Character(1778, "Naoi Ayato", "Angel Beats!", 2, false));
+        ALL.add(new Character(1779, "Ayato Naoi", "Angel Beats!", 2, false));
+        ALL.add(new Character(1780, "Igarashi", "Angel Beats!", 2, false));
+        ALL.add(new Character(1781, "Miyuki Irie", "Angel Beats!", 2, false));
+        ALL.add(new Character(1782, "Seiichi Yukimura", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1783, "Ryoma Echizen", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1784, "Kunimitsu Tezuka", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1785, "Shuichiro Oishi", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1786, "Takashi Kawamura", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1787, "Eiji Kikumaru", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1788, "Sadaharu Inui", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1789, "Shusuke Fuji", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1790, "Kaoru Kaidoh", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1791, "Momoshiro Takeshi", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1792, "Akaya Kirihara", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1793, "Renji Yanagi", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1794, "Masaharu Niou", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1795, "Hiroshi Yagyu", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1796, "Bunta Marui", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1797, "Genichirou Sanada", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1798, "Jackal Kuwahara", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1799, "Keigo Atobe", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1800, "Ryo Shishido", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1801, "Choutarou Ootori", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1802, "Shoichi Oshitari", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1803, "Yushi Oshitari", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1804, "Kippei Tachibana", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1805, "Shinji Ibu", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1806, "Akira Kamio", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1807, "Syuusuke Fuji", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1808, "Satoshi Momoshiro", "The Prince of Tennis", 2, false));
+        ALL.add(new Character(1809, "Ryunosuke Tanaka", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1810, "Nishinoya Yu", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1811, "Asahi Azumane", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1812, "Daichi Sawamura", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1813, "Koushi Sugawara", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1814, "Tobio Kageyama", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1815, "Shoyo Hinata", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1816, "Kei Tsukishima", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1817, "Tadashi Yamaguchi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1818, "Kenma Kozume", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1819, "Kuroo Tetsurou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1820, "Bokuto Koutarou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1821, "Keiji Akaashi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1822, "Koutarou Bokuto", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1823, "Atsumu Miya", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1824, "Osamu Miya", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1825, "Sakusa Kiyoomi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1826, "Aran Ojiro", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1827, "Suna Rintaro", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1828, "Tooru Oikawa", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1829, "Iwaizumi Hajime", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1830, "Hanamaki Takahiro", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1831, "Matsukawa Issei", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1832, "Kindaichi Yuutarou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1833, "Kunimi Akira", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1834, "Watari Shinji", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1835, "Kyotani Kentarou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1836, "Yahaba Shigeru", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1837, "Yachi Hitoka (male AU)", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1838, "Shimizu Kiyoko (male AU)", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1839, "Takanobu Aone", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1840, "Futakuchi Kenji", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1841, "Sakunami Kousuke", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1842, "Kamasaki Yasushi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1843, "Moniwa Kaname", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1844, "Nametake Yasushi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1845, "Obara Hirotaka", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1846, "Koganegawa Kanji", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1847, "Goshiki Tsutomu", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1848, "Tendou Satori", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1849, "Semi Eita", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1850, "Kawanishi Taichi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1851, "Ushijima Wakatoshi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1852, "Shirabu Kenjirou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1853, "Takeda Ittetsu", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1854, "Ukai Keishin", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1855, "Tendo Satori", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1856, "Lev Haiba", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1857, "Yaku Morisuke", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1858, "Inuoka Sou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1859, "Kai Nobuyuki", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1860, "Fukunaga Shouhei", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1861, "Shibayama Yuuki", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1862, "Yamamoto Taketora", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1863, "Haiba Alisa (male AU)", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1864, "Tetsurou Kuroo", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1865, "Suguru Daishou", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1866, "Takuma Hiroo", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1867, "Komori Motoya", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1868, "Romero Meian", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1869, "Barnes Adriah", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1870, "Hyakuzawa Yuudai", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1871, "Teradomari Motoki", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1872, "Akagi Michinari", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1873, "Hakuba Gao", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1874, "Oliver Barnes", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1875, "Meian Shugo", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1876, "Kiyoomi Sakusa", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1877, "Hinata (Brazil)", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1878, "Korai Hoshiumi", "Haikyuu!!", 1, false));
+        ALL.add(new Character(1879, "Heiwajima Shizuo", "Durarara!!", 1, false));
+        ALL.add(new Character(1880, "Izaya Orihara", "Durarara!!", 1, false));
+        ALL.add(new Character(1881, "Mikado Ryuugamine", "Durarara!!", 1, false));
+        ALL.add(new Character(1882, "Masaomi Kida", "Durarara!!", 1, false));
+        ALL.add(new Character(1883, "Shinra Kishitani", "Durarara!!", 1, false));
+        ALL.add(new Character(1884, "Kyouhei Kadota", "Durarara!!", 1, false));
+        ALL.add(new Character(1885, "Simon Brezhnev", "Durarara!!", 1, false));
+        ALL.add(new Character(1886, "Aoba Kuronuma", "Durarara!!", 1, false));
+        ALL.add(new Character(1887, "Ran Izumii", "Durarara!!", 1, false));
+        ALL.add(new Character(1888, "Shuuji Niekawa", "Durarara!!", 1, false));
+        ALL.add(new Character(1889, "Vorona (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1890, "Varona (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1891, "Walker Yumasaki", "Durarara!!", 1, false));
+        ALL.add(new Character(1892, "Erika Karisawa (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1893, "Togusa Saburou", "Durarara!!", 1, false));
+        ALL.add(new Character(1894, "Anri Sonohara (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1895, "Celty Sturluson (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1896, "Kinnosuke Kuzuhara", "Durarara!!", 1, false));
+        ALL.add(new Character(1897, "Orihara Kururi (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1898, "Orihara Mairu (male AU)", "Durarara!!", 1, false));
+        ALL.add(new Character(1899, "Mizuki Akiyama", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1900, "Koizumi Itsuki", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1901, "Kyon", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1902, "Kunikida Nagato (male AU)", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1903, "Taniguchi", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1904, "Kunikida", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1905, "Tsuruya (male AU)", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1906, "Kimidori Emiri (male AU)", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1907, "Mori", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1908, "Fujiwara", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1909, "Sasaki", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1910, "Kyouko Tachibana (male AU)", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1911, "Arakawa", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1912, "Watanabe", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1913, "Oguchi Koichirou", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1914, "Yuki Nagato (male AU)", "The Melancholy of Haruhi Suzumiya", 1, false));
+        ALL.add(new Character(1915, "Akio Okazaki", "Clannad", 1, false));
+        ALL.add(new Character(1916, "Tomoya Okazaki", "Clannad", 1, false));
+        ALL.add(new Character(1917, "Youhei Sunohara", "Clannad", 1, false));
+        ALL.add(new Character(1918, "Fuko Ibuki (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1919, "Nagisa Furukawa (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1920, "Kotomi Ichinose (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1921, "Tomoyo Sakagami (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1922, "Kyou Fujibayashi (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1923, "Ryou Fujibayashi (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1924, "Yukine Miyazawa (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1925, "Mei Sunohara (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1926, "Misae Sagara (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1927, "Ushio Okazaki (male AU)", "Clannad", 1, false));
+        ALL.add(new Character(1928, "Yusuke Yoshino", "Clannad", 1, false));
+        ALL.add(new Character(1929, "Yuuichi Aizawa", "Kanon", 1, false));
+        ALL.add(new Character(1930, "Jun Kitagawa", "Kanon", 1, false));
+        ALL.add(new Character(1931, "Mishio Amano (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1932, "Makoto Sawatari (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1933, "Nayuki Minase (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1934, "Ayu Tsukimiya (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1935, "Mai Kawasumi (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1936, "Shiori Misaka (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1937, "Sayuri Kurata (male AU)", "Kanon", 1, false));
+        ALL.add(new Character(1938, "Kaito Kirishima", "AnoHana", 1, false));
+        ALL.add(new Character(1939, "Jinta Yadomi", "AnoHana", 1, false));
+        ALL.add(new Character(1940, "Tetsudo Hisakawa", "AnoHana", 1, false));
+        ALL.add(new Character(1941, "Chiriko Tsurumi (male AU)", "AnoHana", 1, false));
+        ALL.add(new Character(1942, "Meiko Honma (male AU)", "AnoHana", 1, false));
+        ALL.add(new Character(1943, "Naruko Anjo (male AU)", "AnoHana", 1, false));
+        ALL.add(new Character(1944, "Yukiatsu Matsuyuki", "AnoHana", 1, false));
+        ALL.add(new Character(1945, "Satoshi Nishikawa", "AnoHana", 1, false));
+        ALL.add(new Character(1946, "Jinta Yadomi (adult)", "AnoHana", 1, false));
+        ALL.add(new Character(1947, "Takumi Nishijou", "Chaos;Head", 1, false));
+        ALL.add(new Character(1948, "Rimi Sakihata (male AU)", "Chaos;Head", 1, false));
+        ALL.add(new Character(1949, "Ayase Kishimoto (male AU)", "Chaos;Head", 1, false));
+        ALL.add(new Character(1950, "Kozu Ooe (male AU)", "Chaos;Head", 1, false));
+        ALL.add(new Character(1951, "Yua Kusunoki (male AU)", "Chaos;Head", 1, false));
+        ALL.add(new Character(1952, "Sena Aoi (male AU)", "Chaos;Head", 1, false));
+        ALL.add(new Character(1953, "Nanami Nishijou (male AU)", "Chaos;Head", 1, false));
+        ALL.add(new Character(1954, "Ban", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1955, "Meliodas", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1956, "King", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1957, "Diane (male AU)", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1958, "Gowther", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1959, "Merlin (male AU)", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1960, "Escanor", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1961, "Hawk", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1962, "Gilthunder", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1963, "Howzer", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1964, "Grayroad (male AU)", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1965, "Hendrickson", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1966, "Dreyfus", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1967, "Fraudrin", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1968, "Zeldris", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1969, "Estarossa", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1970, "Galand", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1971, "Monspeet", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1972, "Derieri (male AU)", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1973, "Melascula (male AU)", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1974, "Gloxinia", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1975, "Drole", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1976, "Mael", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1977, "Arthur Pendragon", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1978, "Ludociel", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1979, "Sariel", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1980, "Tarmiel", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1981, "Cusack", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1982, "Chandler", "The Seven Deadly Sins", 1, false));
+        ALL.add(new Character(1983, "Tristan", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1984, "Percival", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1985, "Lancelot", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1986, "Gawain (male AU)", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1987, "Anne (male AU)", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1988, "Nasiens", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1989, "Donny", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1990, "Ironside", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1991, "Jade", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1992, "Pellegarde", "The Seven Deadly Sins: Four Knights of the Apocalypse", 1, false));
+        ALL.add(new Character(1993, "Asta", "Black Clover", 4, false));
+        ALL.add(new Character(1994, "Yuno", "Black Clover", 4, false));
+        ALL.add(new Character(1995, "Yami Sukehiro", "Black Clover", 4, false));
+        ALL.add(new Character(1996, "Julius Novachrono", "Black Clover", 3, false));
+        ALL.add(new Character(1997, "Nozel Silva", "Black Clover", 3, false));
+        ALL.add(new Character(1998, "Fuegoleon Vermillion", "Black Clover", 3, false));
+        ALL.add(new Character(1999, "Luck Voltia", "Black Clover", 2, false));
+        ALL.add(new Character(2000, "Magna Swing", "Black Clover", 2, false));
+        ALL.add(new Character(2001, "Finral Roulacase", "Black Clover", 2, false));
+        ALL.add(new Character(2002, "Gauche Adlai", "Black Clover", 2, false));
+        ALL.add(new Character(2003, "William Vangeance", "Black Clover", 3, false));
+        ALL.add(new Character(2004, "Patolli", "Black Clover", 3, false));
+        ALL.add(new Character(2005, "Zenon Zogratis", "Black Clover", 3, false));
+        ALL.add(new Character(2006, "Dante Zogratis", "Black Clover", 3, false));
+        ALL.add(new Character(2007, "Jack the Ripper", "Black Clover", 2, false));
+        ALL.add(new Character(2008, "Licht", "Black Clover", 2, false));
+        ALL.add(new Character(2009, "Langris Vaude", "Black Clover", 2, false));
+        ALL.add(new Character(2010, "Zora Ideale", "Black Clover", 2, false));
+        ALL.add(new Character(2011, "Senku Ishigami", "Dr. Stone", 5, false));
+        ALL.add(new Character(2012, "Taiju Oki", "Dr. Stone", 3, false));
+        ALL.add(new Character(2013, "Tsukasa Shishio", "Dr. Stone", 4, false));
+        ALL.add(new Character(2014, "Ryusui Nanami", "Dr. Stone", 3, false));
+        ALL.add(new Character(2015, "Gen Asagiri", "Dr. Stone", 3, false));
+        ALL.add(new Character(2016, "Chrome", "Dr. Stone", 3, false));
+        ALL.add(new Character(2017, "Kinro", "Dr. Stone", 2, false));
+        ALL.add(new Character(2018, "Ginro", "Dr. Stone", 2, false));
+        ALL.add(new Character(2019, "Magma", "Dr. Stone", 2, false));
+        ALL.add(new Character(2020, "Ukyo Saionji", "Dr. Stone", 2, false));
+        ALL.add(new Character(2021, "Stanley Snyder", "Dr. Stone", 2, false));
+        ALL.add(new Character(2022, "Hyoga", "Dr. Stone", 2, false));
+        ALL.add(new Character(2023, "Xeno Houston Wingfield", "Dr. Stone", 3, false));
+        ALL.add(new Character(2024, "Shinra Kusakabe", "Fire Force", 4, false));
+        ALL.add(new Character(2025, "Arthur Boyle", "Fire Force", 3, false));
+        ALL.add(new Character(2026, "Akitaru Obi", "Fire Force", 3, false));
+        ALL.add(new Character(2027, "Takehisa Hinawa", "Fire Force", 3, false));
+        ALL.add(new Character(2028, "Sho Kusakabe", "Fire Force", 4, false));
+        ALL.add(new Character(2029, "Viktor Licht", "Fire Force", 3, false));
+        ALL.add(new Character(2030, "Benimaru Shinmon", "Fire Force", 4, false));
+        ALL.add(new Character(2031, "Joker", "Fire Force", 2, false));
+        ALL.add(new Character(2032, "Konro Sagamiya", "Fire Force", 2, false));
+        ALL.add(new Character(2033, "Leonard Burns", "Fire Force", 2, false));
+        ALL.add(new Character(2034, "Kurono Yuichiro", "Fire Force", 2, false));
+        ALL.add(new Character(2035, "Rekka Hoshimiya", "Fire Force", 2, false));
+        ALL.add(new Character(2036, "Rudeus Greyrat", "Mushoku Tensei", 4, false));
+        ALL.add(new Character(2037, "Paul Greyrat", "Mushoku Tensei", 3, false));
+        ALL.add(new Character(2038, "Orsted", "Mushoku Tensei", 4, false));
+        ALL.add(new Character(2039, "Cliff Grimoire", "Mushoku Tensei", 2, false));
+        ALL.add(new Character(2040, "Zanoba Shirone", "Mushoku Tensei", 2, false));
+        ALL.add(new Character(2041, "Badigadi", "Mushoku Tensei", 2, false));
+        ALL.add(new Character(2042, "Pergius Dola", "Mushoku Tensei", 2, false));
+        ALL.add(new Character(2043, "Geese", "Mushoku Tensei", 1, false));
+        ALL.add(new Character(2044, "Momonga/Ainz", "Overlord", 5, false));
+        ALL.add(new Character(2045, "Demiurge", "Overlord", 4, false));
+        ALL.add(new Character(2046, "Cocytus", "Overlord", 3, false));
+        ALL.add(new Character(2047, "Sebas Tian", "Overlord", 3, false));
+        ALL.add(new Character(2048, "Pandora Actor", "Overlord", 2, false));
+        ALL.add(new Character(2049, "Mare Bello Fiore", "Overlord", 2, false));
+        ALL.add(new Character(2050, "Climb", "Overlord", 2, false));
+        ALL.add(new Character(2051, "Brain Unglaus", "Overlord", 2, false));
+        ALL.add(new Character(2052, "Gazef Stronoff", "Overlord", 2, false));
+        ALL.add(new Character(2053, "Momon", "Overlord", 3, false));
+        ALL.add(new Character(2054, "Sanemi Shinazugawa", "Demon Slayer", 3, false));
+        ALL.add(new Character(2055, "Gyomei Himejima", "Demon Slayer", 3, false));
+        ALL.add(new Character(2056, "Iguro Obanai", "Demon Slayer", 3, false));
+        ALL.add(new Character(2057, "Muichiro Tokito", "Demon Slayer", 3, false));
+        ALL.add(new Character(2058, "Tengen Uzui", "Demon Slayer", 3, false));
+        ALL.add(new Character(2059, "Genya Shinazugawa", "Demon Slayer", 2, false));
+        ALL.add(new Character(2060, "Kokushibo", "Demon Slayer", 3, false));
+        ALL.add(new Character(2061, "Douma", "Demon Slayer", 3, false));
+        ALL.add(new Character(2062, "Akaza", "Demon Slayer", 3, false));
+        ALL.add(new Character(2063, "Enmu", "Demon Slayer", 2, false));
+        ALL.add(new Character(2064, "Muzan Kibutsuji", "Demon Slayer", 4, false));
+        ALL.add(new Character(2065, "Gyutaro", "Demon Slayer", 2, false));
+        ALL.add(new Character(2066, "Rui", "Demon Slayer", 2, false));
+        ALL.add(new Character(2067, "Gyokko", "Demon Slayer", 2, false));
+        ALL.add(new Character(2068, "Yushiro", "Demon Slayer", 2, false));
+        ALL.add(new Character(2069, "Denki Kaminari", "My Hero Academia", 2, false));
+        ALL.add(new Character(2070, "Eijiro Kirishima", "My Hero Academia", 2, false));
+        ALL.add(new Character(2071, "Tenya Iida", "My Hero Academia", 2, false));
+        ALL.add(new Character(2072, "Fumikage Tokoyami", "My Hero Academia", 2, false));
+        ALL.add(new Character(2073, "Toji Fushiguro", "Jujutsu Kaisen", 4, false));
+        ALL.add(new Character(2074, "Hakari Kinji", "Jujutsu Kaisen", 3, false));
+        ALL.add(new Character(2075, "Higuruma Hiromi", "Jujutsu Kaisen", 2, false));
+        ALL.add(new Character(2076, "Uraume", "Jujutsu Kaisen", 2, false));
+        ALL.add(new Character(2077, "Loid Forger", "Spy x Family", 4, false));
+        ALL.add(new Character(2078, "Yuri Briar", "Spy x Family", 3, false));
+        ALL.add(new Character(2079, "Damian Desmond", "Spy x Family", 2, false));
+        ALL.add(new Character(2080, "Yoshida Hirofumi", "Chainsaw Man", 2, false));
+        ALL.add(new Character(2081, "Kishibe", "Chainsaw Man", 3, false));
+        ALL.add(new Character(2082, "Angel Devil", "Chainsaw Man", 3, false));
+        ALL.add(new Character(2083, "Violence Fiend", "Chainsaw Man", 2, false));
+        ALL.add(new Character(2084, "Beam", "Chainsaw Man", 2, false));
+        ALL.add(new Character(2085, "Terushima Yuuji", "Haikyuu!!", 1, false));
+        ALL.add(new Character(2086, "Hoshiumi Kourai", "Haikyuu!!", 1, false));
+        ALL.add(new Character(2087, "Code", "Boruto", 3, false));
+        ALL.add(new Character(2088, "Makoto Naegi", "Danganronpa", 3, false));
+        ALL.add(new Character(2089, "Nagito Komaeda", "Danganronpa", 3, false));
+        ALL.add(new Character(2090, "Hajime Hinata", "Danganronpa", 3, false));
+        ALL.add(new Character(2091, "Shuichi Saihara", "Danganronpa", 3, false));
+        ALL.add(new Character(2092, "Kokichi Oma", "Danganronpa", 3, false));
+        ALL.add(new Character(2093, "Kiibo", "Danganronpa", 2, false));
+        ALL.add(new Character(2094, "Byakuya Togami", "Danganronpa", 2, false));
+        ALL.add(new Character(2095, "Leon Kuwata", "Danganronpa", 1, false));
+        ALL.add(new Character(2096, "Mondo Owada", "Danganronpa", 1, false));
+        ALL.add(new Character(2097, "Kiyotaka Ishimaru", "Danganronpa", 1, false));
+        ALL.add(new Character(2098, "Chihiro Fujisaki", "Danganronpa", 1, false));
+        ALL.add(new Character(2099, "Yasuhiro Hagakure", "Danganronpa", 1, false));
+        ALL.add(new Character(2100, "Fuyuhiko Kuzuryu", "Danganronpa", 2, false));
+        ALL.add(new Character(2101, "Nekomaru Nidai", "Danganronpa", 1, false));
+        ALL.add(new Character(2102, "Gundham Tanaka", "Danganronpa", 2, false));
+        ALL.add(new Character(2103, "Kazuichi Souda", "Danganronpa", 1, false));
+        ALL.add(new Character(2104, "Teruteru Hanamura", "Danganronpa", 1, false));
+        ALL.add(new Character(2105, "Mahiru Koizumi (male AU)", "Danganronpa", 1, false));
+        ALL.add(new Character(2106, "Ryuuji Takasu", "Toradora!", 2, false));
+        ALL.add(new Character(2107, "Kitamura Yuusaku", "Toradora!", 1, false));
+        ALL.add(new Character(2108, "Kirito", "Sword Art Online", 5, false));
+        ALL.add(new Character(2109, "Klein", "Sword Art Online", 2, false));
+        ALL.add(new Character(2110, "Agil", "Sword Art Online", 2, false));
+        ALL.add(new Character(2111, "Eugene", "Sword Art Online: ALO", 1, false));
+        ALL.add(new Character(2112, "Recon", "Sword Art Online", 1, false));
+        ALL.add(new Character(2113, "Shinji Ikari", "Neon Genesis Evangelion", 3, false));
+        ALL.add(new Character(2114, "Kaworu Nagisa", "Neon Genesis Evangelion", 4, false));
+        ALL.add(new Character(2115, "Ryoji Kaji", "Neon Genesis Evangelion", 2, false));
+        ALL.add(new Character(2116, "Gendo Ikari", "Neon Genesis Evangelion", 2, false));
+        ALL.add(new Character(2117, "Rintaro Okabe", "Steins;Gate", 4, false));
+        ALL.add(new Character(2118, "Mayuri (male AU)", "Steins;Gate", 1, false));
+        ALL.add(new Character(2119, "Daru", "Steins;Gate", 2, false));
+        ALL.add(new Character(2120, "Itaru Hashida", "Steins;Gate", 1, false));
     }
 
-    public static Entry rollRandom(boolean waifu) {
-        List<Entry> pool = waifu ? WAIFUS : HUSBANDOS;
-        return pool.get(RANDOM.nextInt(pool.size()));
+    public static Character rollRandom(boolean waifu) {
+        return rollRandomExcluding(waifu, Set.of());
     }
 
-    public static Entry rollRandomExcluding(boolean waifu, java.util.Set<Integer> excludedIds) {
-        List<Entry> pool = waifu ? WAIFUS : HUSBANDOS;
-        List<Entry> available = pool.stream()
-            .filter(e -> !excludedIds.contains(e.id()))
-            .collect(java.util.stream.Collectors.toList());
-        if (available.isEmpty()) return pool.get(RANDOM.nextInt(pool.size()));
-        return available.get(RANDOM.nextInt(available.size()));
+    public static Character rollRandomExcluding(boolean waifu, Set<Integer> excludedIds) {
+        List<Character> pool = new ArrayList<>();
+        for (Character c : ALL) {
+            if (c.isWaifu() == waifu && !excludedIds.contains(c.getId()))
+                for (int w = 0; w < rankWeight(c.getRank()); w++) pool.add(c);
+        }
+        if (pool.isEmpty()) return null;
+        return pool.get(new Random().nextInt(pool.size()));
+    }
+
+    public static Character getById(int id) {
+        for (Character c : ALL) if (c.getId() == id) return c;
+        return null;
     }
 
     public static int getRank(int id) {
-        List<Entry> sorted = new ArrayList<>(ALL);
-        sorted.sort((a, b) -> Integer.compare(b.kakeraValue(), a.kakeraValue()));
-        for (int i = 0; i < sorted.size(); i++) {
-            if (sorted.get(i).id() == id) return i + 1;
-        }
-        return -1;
+        Character c = getById(id);
+        return c != null ? c.getRank() : 1;
     }
 
-    public static List<Entry> getAll() { return ALL; }
-    public static List<Entry> getWaifus() { return WAIFUS; }
-    public static List<Entry> getHusbandos() { return HUSBANDOS; }
+    /** Rank 1 = muy comun (peso 50), Rank 5 = legendaria (peso 1) */
+    private static int rankWeight(int rank) {
+        return switch (rank) {
+            case 1 -> 50;
+            case 2 -> 20;
+            case 3 -> 8;
+            case 4 -> 3;
+            default -> 1;
+        };
+    }
 }
