@@ -108,7 +108,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
     public void onCharacterReceived(CharacterResultPayload payload) {
         this.currentCharacter = new Character(
-            payload.id(), payload.name(), payload.animeName(), payload.imageUrl(), payload.kakeraValue());
+            payload.id(), payload.name(), payload.animeName(), payload.skinUUID(), payload.kakeraValue());
         this.playerKakera = payload.playerKakera();
         this.state = State.DONE;
         this.fakePlayer = null;
@@ -117,7 +117,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
         claimBtn.active = true;
 
         // Load skin via Minecraft's own SkinManager — no custom HTTP, always works
-        SkinLoader.createPlayerForCharacter(payload.name()).thenAccept(player ->
+        SkinLoader.createPlayer(payload.skinUUID(), payload.name()).thenAccept(player ->
             Minecraft.getInstance().execute(() -> this.fakePlayer = player)
         );
     }

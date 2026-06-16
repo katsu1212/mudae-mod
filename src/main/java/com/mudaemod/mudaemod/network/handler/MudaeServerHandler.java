@@ -1,12 +1,13 @@
 package com.mudaemod.mudaemod.network.handler;
 
 import com.mudaemod.mudaemod.data.ActiveRoll;
+import com.mudaemod.mudaemod.data.Character;
+import com.mudaemod.mudaemod.data.CharacterDatabase;
 import com.mudaemod.mudaemod.data.MudaeDataManager;
 import com.mudaemod.mudaemod.data.PlayerData;
 import com.mudaemod.mudaemod.network.CharacterResultPayload;
 import com.mudaemod.mudaemod.network.ClaimRequestPayload;
 import com.mudaemod.mudaemod.network.RollRequestPayload;
-import com.mudaemod.mudaemod.network.AniListClient;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -32,36 +33,32 @@ public class MudaeServerHandler {
             data.useRoll();
             MudaeDataManager.get().savePlayer(player.getUUID());
 
-            AniListClient.rollRandom(payload.waifu()).thenAccept(optChar -> {
-                if (optChar.isEmpty()) {
-                    player.sendSystemMessage(Component.literal("❌ No se pudo obtener personaje. Intentá de nuevo."));
-                    return;
-                }
+            // Roll from curated character database (guaranteed skin)
+            CharacterDatabase.Entry entry = CharacterDatabase.rollRandom(payload.waifu());
 
-                var character = optChar.get();
-                UUID rollKey = UUID.nameUUIDFromBytes(("roll_" + character.id()).getBytes());
-                MudaeDataManager.get().setActiveRoll(rollKey, new ActiveRoll(character, player.getUUID()));
+            Character character = new Character(
+                entry.id(), entry.name(), entry.animeName(), entry.skinUUID(), entry.kakeraValue());
 
-                var resultPayload = new CharacterResultPayload(
-                    character.id(), character.name(), character.animeName(),
-                    character.imageUrl(), data.getKakera(), character.kakeraValue()
-                );
+            UUID rollKey = UUID.nameUUIDFromBytes(("roll_" + character.id()).getBytes());
+            MudaeDataManager.get().setActiveRoll(rollKey, new ActiveRoll(character, player.getUUID()));
 
-                // Send to ALL players so anyone near the altar can claim
-                for (ServerPlayer p : player.getServer().getPlayerList().getPlayers()) {
-                    PacketDistributor.sendToPlayer(p, resultPayload);
-                }
+            var resultPayload = new CharacterResultPayload(
+                character.id(), character.name(), character.animeName(),
+                entry.skinUUID(), data.getKakera(), character.kakeraValue()
+            );
 
-                // Announce in chat
-                player.getServer().getPlayerList().broadcastSystemMessage(
-                    Component.literal("🎲 ")
-                        .append(Component.literal(player.getName().getString()).withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
-                        .append(Component.literal(" invocó a ").withStyle(s -> s.withColor(0xFFFFFF)))
-                        .append(Component.literal(character.name()).withStyle(s -> s.withColor(0xFFD700).withBold(true)))
-                        .append(Component.literal(" de " + character.animeName() + " — ¡claimea con 💍!").withStyle(s -> s.withColor(0xADD8E6))),
-                    false
-                );
-            });
+            for (ServerPlayer p : player.getServer().getPlayerList().getPlayers()) {
+                PacketDistributor.sendToPlayer(p, resultPayload);
+            }
+
+            player.getServer().getPlayerList().broadcastSystemMessage(
+                Component.literal("🎲 ")
+                    .append(Component.literal(player.getName().getString()).withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
+                    .append(Component.literal(" invocó a ").withStyle(s -> s.withColor(0xFFFFFF)))
+                    .append(Component.literal(character.name()).withStyle(s -> s.withColor(0xFFD700).withBold(true)))
+                    .append(Component.literal(" de " + character.animeName() + " — ¡claimea con 💍!").withStyle(s -> s.withColor(0xADD8E6))),
+                false
+            );
         });
     }
 

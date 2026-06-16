@@ -11,7 +11,7 @@ public record CharacterResultPayload(
     int id,
     String name,
     String animeName,
-    String imageUrl,
+    String skinUUID,
     int playerKakera,
     int kakeraValue
 ) implements CustomPacketPayload {
@@ -21,12 +21,12 @@ public record CharacterResultPayload(
 
     public static final StreamCodec<ByteBuf, CharacterResultPayload> STREAM_CODEC =
         StreamCodec.composite(
-            ByteBufCodecs.INT,        CharacterResultPayload::id,
+            ByteBufCodecs.INT,         CharacterResultPayload::id,
             ByteBufCodecs.STRING_UTF8, CharacterResultPayload::name,
             ByteBufCodecs.STRING_UTF8, CharacterResultPayload::animeName,
-            ByteBufCodecs.STRING_UTF8, CharacterResultPayload::imageUrl,
-            ByteBufCodecs.INT,        CharacterResultPayload::playerKakera,
-            ByteBufCodecs.INT,        CharacterResultPayload::kakeraValue,
+            ByteBufCodecs.STRING_UTF8, CharacterResultPayload::skinUUID,
+            ByteBufCodecs.INT,         CharacterResultPayload::playerKakera,
+            ByteBufCodecs.INT,         CharacterResultPayload::kakeraValue,
             CharacterResultPayload::new
         );
 

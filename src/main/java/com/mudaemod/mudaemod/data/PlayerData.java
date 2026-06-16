@@ -81,7 +81,7 @@ public class PlayerData {
             ct.putInt("id", c.id());
             ct.putString("name", c.name());
             ct.putString("animeName", c.animeName());
-            ct.putString("imageUrl", c.imageUrl());
+            ct.putString("skinUUID", c.imageUrl()); // imageUrl field now stores skinUUID
             ct.putInt("kakeraValue", c.kakeraValue());
             haremTag.add(ct);
         }
@@ -103,7 +103,7 @@ public class PlayerData {
                 ct.getInt("id"),
                 ct.getString("name"),
                 ct.getString("animeName"),
-                ct.getString("imageUrl"),
+                ct.getString("skinUUID"),
                 ct.getInt("kakeraValue")
             ));
         }
