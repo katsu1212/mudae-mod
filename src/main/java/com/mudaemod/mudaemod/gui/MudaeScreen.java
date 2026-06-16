@@ -20,7 +20,7 @@ import java.util.List;
 public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
     private static final int W = 320;
-    private static final int H = 230;
+    private static final int H = 250;
 
     private static final int COLOR_BG      = 0xF21A1A2E;
     private static final int COLOR_HEADER  = 0xF2111130;
@@ -152,23 +152,24 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
             // Name
             String name = entry.name();
-            if (font.width(name) > 110) name = font.plainSubstrByWidth(name, 107) + "…";
+            if (font.width(name) > 100) name = font.plainSubstrByWidth(name, 97) + "…";
             g.drawString(font, name, x + 8, ry + 5, COLOR_GOLD, false);
 
             // Anime
             String anime = entry.animeName();
-            if (font.width(anime) > 100) anime = font.plainSubstrByWidth(anime, 97) + "…";
-            g.drawString(font, anime, x + 125, ry + 5, COLOR_BLUE, false);
+            if (font.width(anime) > 88) anime = font.plainSubstrByWidth(anime, 85) + "…";
+            g.drawString(font, anime, x + 114, ry + 5, COLOR_BLUE, false);
 
-            // Kakera
-            g.drawString(font, "💎" + entry.kakeraValue(), x + 235, ry + 5, COLOR_PURPLE, false);
+            // Kakera (right-aligned before button)
+            String kak = "+" + entry.kakeraValue();
+            g.drawString(font, kak, x + 208, ry + 5, COLOR_PURPLE, false);
 
             // Vender button
-            int btnX = x + W - 60;
+            int btnX = x + W - 56;
             int btnY2 = ry + 2;
-            boolean btnHov = mx >= btnX && mx < btnX + 52 && my >= btnY2 && my < btnY2 + 16;
-            g.fill(btnX, btnY2, btnX + 52, btnY2 + 16, btnHov ? 0xFFAA5533 : COLOR_SELL);
-            g.drawCenteredString(font, "Vender", btnX + 26, btnY2 + 4, COLOR_WHITE);
+            boolean btnHov = mx >= btnX && mx < btnX + 48 && my >= btnY2 && my < btnY2 + 16;
+            g.fill(btnX, btnY2, btnX + 48, btnY2 + 16, btnHov ? 0xFFAA5533 : COLOR_SELL);
+            g.drawCenteredString(font, "Vender", btnX + 24, btnY2 + 4, COLOR_WHITE);
 
             g.hLine(x + 5, x + W - 6, ry + ROW_H - 2, 0x33FF69B4);
         }
@@ -185,9 +186,9 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
         int startY = y + LIST_Y_START;
         for (int i = 0; i < 5; i++) {
-            int ry = startY + i * 37;
+            int ry = startY + i * 38;
             int lv = statLevels[i];
-            int cost = PlayerData.STAT_COSTS[i];
+            int cost = PlayerData.getStatCost(i, lv);
             boolean maxed = lv >= PlayerData.STAT_MAX;
 
             g.fill(x + 8, ry, x + W - 8, ry + 32, 0x33000000);
@@ -259,9 +260,9 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
         for (int i = 0; i < visibleRows && (scrollOffset + i) < entries.size(); i++) {
             int ry = listY + i * ROW_H;
-            int btnX = x + W - 60;
+            int btnX = x + W - 56;
             int btnY2 = ry + 2;
-            if (mx >= btnX && mx < btnX + 52 && my >= btnY2 && my < btnY2 + 16) {
+            if (mx >= btnX && mx < btnX + 48 && my >= btnY2 && my < btnY2 + 16) {
                 HaremPayload.HaremEntry entry = entries.get(scrollOffset + i);
                 PacketDistributor.sendToServer(new SellPayload(entry.id()));
                 return true;
@@ -278,7 +279,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
 
         for (int i = 0; i < 5; i++) {
             if (statLevels[i] >= PlayerData.STAT_MAX) continue;
-            int ry = startY + i * 37;
+            int ry = startY + i * 38;
             int btnX = x + W - 62;
             int btnY2 = ry + 8;
             if (mx >= btnX && mx < btnX + 54 && my >= btnY2 && my < btnY2 + 16) {

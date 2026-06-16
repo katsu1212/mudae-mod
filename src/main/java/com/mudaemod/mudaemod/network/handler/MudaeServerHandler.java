@@ -57,9 +57,10 @@ public class MudaeServerHandler {
                 player.sendSystemMessage(Component.literal("❌ " + PlayerData.STAT_NAMES[idx] + " ya está al máximo (5/5)."));
                 return;
             }
-            if (data.getKakera() < PlayerData.STAT_COSTS[idx]) {
+            int cost = PlayerData.getStatCost(idx, data.getStatLevels()[idx]);
+            if (data.getKakera() < cost) {
                 player.sendSystemMessage(Component.literal(
-                    "❌ Kakera insuficiente. Necesitás 💎 " + PlayerData.STAT_COSTS[idx] + "."));
+                    "❌ Kakera insuficiente. Necesitás 💎 " + cost + "."));
                 return;
             }
 
