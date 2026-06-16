@@ -39,8 +39,8 @@ public class ChatCommandHandler {
         if (!data.canRoll()) {
             long secs = data.getRollCooldownRemaining() / 1000;
             player.sendSystemMessage(Component.literal(
-                String.format("⏳ Sin rolls. Recarga en %dm %ds. (%d rolls/hora)",
-                    secs / 60, secs % 60, PlayerData.STAT_MAX)));
+                String.format("Sin rolls. Recarga en %dm %ds. (16 rolls/hora)",
+                    secs / 60, secs % 60)));
             return;
         }
 
