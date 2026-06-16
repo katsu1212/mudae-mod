@@ -8,7 +8,7 @@ Tirá rolls, clameá waifus y husbandos, y construí tu harem — todo desde un 
 
 <br>
 
-[![Download](https://img.shields.io/badge/⬇️%20DESCARGAR%20MOD-v1.0.0-FF69B4?style=for-the-badge&logoColor=white&labelColor=1a1a2e)](https://github.com/katsu1212/mudae-mod/releases/latest/download/mudaemod-1.0.0.jar)
+[![Download](https://img.shields.io/badge/⬇️%20DESCARGAR%20MOD-v1.2-FF69B4?style=for-the-badge&logoColor=white&labelColor=1a1a2e)](https://github.com/katsu1212/mudae-mod/releases/latest/download/mudaemod-1.2.jar)
 
 <br>
 
@@ -135,15 +135,20 @@ cd mudae-mod
 
 ## 📋 Changelog
 
-### v1.0.0
+### v1.2 — Actual
 - ✅ Altar de Mudae — bloque interactivo con GUI
 - ✅ Imágenes reales de personajes vía AniList API
-- ✅ Sistema de rolls (waifu / husbando)
-- ✅ Sistema de claims con ventana de 3 minutos
+- ✅ Botones de roll (Waifu / Husbando) y Claim integrados en la GUI
+- ✅ Contador de kakera visible en la GUI
+- ✅ Sistema de claims competitivo con ventana de 3 minutos
 - ✅ Kakera con valor único por personaje
 - ✅ Cooldowns: 10 rolls/hora, 1 claim/3hs
 - ✅ Persistencia de datos por jugador
-- ✅ Soporte multiplayer
+- ✅ Soporte multiplayer completo
+
+### v1.0.0
+- ✅ Sistema de rolls y claims por comandos de chat
+- ✅ Integración con AniList API
 
 ---
 
