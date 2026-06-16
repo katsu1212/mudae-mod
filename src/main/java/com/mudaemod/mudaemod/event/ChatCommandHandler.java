@@ -17,6 +17,7 @@ public class ChatCommandHandler {
 
         if (!lower.equals("$w") && !lower.equals("$waifu")
             && !lower.equals("$h") && !lower.equals("$husbando")
+            && !lower.equals("$m") && !lower.equals("$mudae")
             && !lower.equals("$claim") && !lower.equals("$kakera")
             && !lower.equals("$debug")) {
             return;
@@ -26,15 +27,14 @@ public class ChatCommandHandler {
         ServerPlayer player = event.getPlayer();
 
         switch (lower) {
-            case "$w", "$waifu"      -> handleRoll(player, true);
-            case "$h", "$husbando"   -> handleRoll(player, false);
-            case "$claim"            -> handleClaim(player);
-            case "$kakera"           -> handleKakera(player);
-            case "$debug"            -> handleDebug(player);
+            case "$w", "$waifu", "$h", "$husbando", "$m", "$mudae" -> handleRoll(player);
+            case "$claim"  -> handleClaim(player);
+            case "$kakera" -> handleKakera(player);
+            case "$debug"  -> handleDebug(player);
         }
     }
 
-    private static void handleRoll(ServerPlayer player, boolean waifu) {
+    private static void handleRoll(ServerPlayer player) {
         MudaeDataManager mgr = MudaeDataManager.get();
         PlayerData data = mgr.getPlayer(player.getUUID());
 
@@ -47,14 +47,17 @@ public class ChatCommandHandler {
         }
 
         GlobalMudaeData global = GlobalMudaeData.get(player.getServer());
-        CharacterDatabase.Entry entry = CharacterDatabase.rollRandomExcluding(waifu, global.getClaimedIds());
-        com.mudaemod.mudaemod.data.Character character = new com.mudaemod.mudaemod.data.Character(entry.id(), entry.name(), entry.animeName(), entry.skinUUID(), entry.kakeraValue());
+        com.mudaemod.mudaemod.data.Character character = CharacterDatabase.rollRandomExcluding(global.getClaimedIds());
+
+        if (character == null) {
+            player.sendSystemMessage(Component.literal("El pool de personajes está vacío."));
+            return;
+        }
 
         data.useRoll();
         mgr.savePlayer(player.getUUID());
 
         global.setActiveRoll(character, player.getUUID());
-        int rank = CharacterDatabase.getRank(entry.id());
 
         player.getServer().getPlayerList().broadcastSystemMessage(
             Component.literal("🎲 ")
@@ -66,7 +69,7 @@ public class ChatCommandHandler {
                     .withStyle(s -> s.withColor(0xFFD700).withBold(true)))
                 .append(Component.literal(" de " + character.animeName())
                     .withStyle(s -> s.withColor(0xADD8E6)))
-                .append(Component.literal(" | 💎 " + character.kakeraValue() + " | 🏆 #" + rank + " ← $claim")
+                .append(Component.literal(" | 💎 " + character.kakeraValue() + " | Rank " + character.rank() + " ← $claim")
                     .withStyle(s -> s.withColor(0xAA55FF))),
             false
         );
@@ -95,13 +98,12 @@ public class ChatCommandHandler {
             return;
         }
 
-        com.mudaemod.mudaemod.data.Character character = new com.mudaemod.mudaemod.data.Character(
-            global.getActiveCharId(),
-            global.getActiveCharName(),
-            global.getActiveCharAnime(),
-            "",
-            global.getActiveKakera()
-        );
+        int charId = global.getActiveCharId();
+        com.mudaemod.mudaemod.data.Character character = CharacterDatabase.getById(charId);
+        if (character == null) {
+            player.sendSystemMessage(Component.literal("Error: personaje no encontrado en la base de datos."));
+            return;
+        }
 
         data.claim(character);
         global.claimCharacter(character.id());

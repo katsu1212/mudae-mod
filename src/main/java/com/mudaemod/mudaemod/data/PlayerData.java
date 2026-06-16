@@ -128,8 +128,8 @@ public class PlayerData {
             ct.putInt("id", c.id());
             ct.putString("name", c.name());
             ct.putString("animeName", c.animeName());
-            ct.putString("skinUUID", c.imageUrl());
-            ct.putInt("kakeraValue", c.kakeraValue());
+            ct.putInt("rank", c.rank());
+            ct.putBoolean("waifu", c.waifu());
             haremTag.add(ct);
         }
         tag.put("harem", haremTag);
@@ -144,8 +144,7 @@ public class PlayerData {
         data.rollsRemaining = tag.getInt("rollsRemaining");
         if (tag.contains("statLevels")) {
             int[] loaded = tag.getIntArray("statLevels");
-            if (loaded.length >= 4) {
-                // migrate from 4-stat saves to 5-stat
+            if (loaded.length >= 1) {
                 int[] s = new int[5];
                 System.arraycopy(loaded, 0, s, 0, Math.min(loaded.length, 5));
                 data.statLevels = s;
@@ -155,12 +154,15 @@ public class PlayerData {
         ListTag haremTag = tag.getList("harem", Tag.TAG_COMPOUND);
         for (int i = 0; i < haremTag.size(); i++) {
             CompoundTag ct = haremTag.getCompound(i);
+            // Soporte legacy (saves viejos tenian kakeraValue/skinUUID)
+            int rank = ct.contains("rank") ? ct.getInt("rank") : 1;
+            boolean waifu = !ct.contains("waifu") || ct.getBoolean("waifu");
             data.harem.add(new Character(
                 ct.getInt("id"),
                 ct.getString("name"),
                 ct.getString("animeName"),
-                ct.getString("skinUUID"),
-                ct.getInt("kakeraValue")
+                rank,
+                waifu
             ));
         }
         return data;

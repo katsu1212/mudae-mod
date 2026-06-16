@@ -7,7 +7,6 @@ import com.mudaemod.mudaemod.data.MudaeDataManager;
 import com.mudaemod.mudaemod.data.PlayerData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -44,9 +43,8 @@ public class MudaeCommands {
             msg.append(Component.literal((i + 1) + ". ").withStyle(s -> s.withColor(0x808080)))
                .append(Component.literal(c.name()).withStyle(s -> s
                     .withColor(0xFFD700)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, c.imageUrl()))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Component.literal("📺 " + c.animeName() + "\n💎 " + c.kakeraValue() + " kakera\nClick para ver imagen")))))
+                        Component.literal("📺 " + c.animeName() + "\n💎 " + c.kakeraValue() + " kakera")))))
                .append(Component.literal(" — " + c.animeName() + "\n").withStyle(s -> s.withColor(0xADD8E6)));
         }
 

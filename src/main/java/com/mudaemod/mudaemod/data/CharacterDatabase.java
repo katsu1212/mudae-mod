@@ -1708,14 +1708,14 @@ public class CharacterDatabase {
         ALL.add(new Character(2120, "Itaru Hashida", "Steins;Gate", 1, false));
     }
 
-    public static Character rollRandom(boolean waifu) {
-        return rollRandomExcluding(waifu, Set.of());
+    public static Character rollRandom() {
+        return rollRandomExcluding(Set.of());
     }
 
-    public static Character rollRandomExcluding(boolean waifu, Set<Integer> excludedIds) {
+    public static Character rollRandomExcluding(Set<Integer> excludedIds) {
         List<Character> pool = new ArrayList<>();
         for (Character c : ALL) {
-            if (c.isWaifu() == waifu && !excludedIds.contains(c.getId()))
+            if (!excludedIds.contains(c.getId()))
                 for (int w = 0; w < rankWeight(c.getRank()); w++) pool.add(c);
         }
         if (pool.isEmpty()) return null;
