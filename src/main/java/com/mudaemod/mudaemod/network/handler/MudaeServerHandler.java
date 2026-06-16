@@ -48,7 +48,7 @@ public class MudaeServerHandler {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             int idx = payload.statIndex();
-            if (idx < 0 || idx >= 4) return;
+            if (idx < 0 || idx >= 5) return;
 
             MudaeDataManager mgr = MudaeDataManager.get();
             PlayerData data = mgr.getPlayer(player.getUUID());
