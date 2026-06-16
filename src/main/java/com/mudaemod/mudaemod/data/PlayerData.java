@@ -130,6 +130,7 @@ public class PlayerData {
             ct.putString("animeName", c.animeName());
             ct.putInt("rank", c.rank());
             ct.putBoolean("waifu", c.waifu());
+            ct.putInt("kakera", c.kakeraValue());
             haremTag.add(ct);
         }
         tag.put("harem", haremTag);
@@ -154,16 +155,15 @@ public class PlayerData {
         ListTag haremTag = tag.getList("harem", Tag.TAG_COMPOUND);
         for (int i = 0; i < haremTag.size(); i++) {
             CompoundTag ct = haremTag.getCompound(i);
-            // Soporte legacy (saves viejos tenian kakeraValue/skinUUID)
-            int rank = ct.contains("rank") ? ct.getInt("rank") : 1;
+            int rank  = ct.contains("rank")  ? ct.getInt("rank")     : 1;
             boolean waifu = !ct.contains("waifu") || ct.getBoolean("waifu");
-            data.harem.add(new Character(
-                ct.getInt("id"),
-                ct.getString("name"),
-                ct.getString("animeName"),
-                rank,
-                waifu
-            ));
+            // Intentar recuperar ka real del DB; fallback al valor guardado o al rank
+            int charId = ct.getInt("id");
+            com.mudaemod.mudaemod.data.Character fromDb = CharacterDatabase.getById(charId);
+            int ka = fromDb != null ? fromDb.kakeraValue()
+                   : ct.contains("kakera") ? ct.getInt("kakera")
+                   : (rank == 5 ? 800 : rank == 4 ? 500 : rank == 3 ? 350 : rank == 2 ? 150 : 50);
+            data.harem.add(new Character(charId, ct.getString("name"), ct.getString("animeName"), rank, waifu, ka));
         }
         return data;
     }
