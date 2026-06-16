@@ -117,7 +117,7 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
         claimBtn.active = true;
 
         // Load skin via Minecraft's own SkinManager — no custom HTTP, always works
-        SkinLoader.createPlayer(payload.skinUUID(), payload.name()).thenAccept(player ->
+        SkinLoader.createPlayer(payload.skinUUID(), payload.name(), payload.id()).thenAccept(player ->
             Minecraft.getInstance().execute(() -> this.fakePlayer = player)
         );
     }

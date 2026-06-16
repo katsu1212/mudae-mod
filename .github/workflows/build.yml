@@ -21,6 +21,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -30,6 +35,87 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Download character skins from Mojang
+        run: |
+          python3 << 'PYEOF'
+          import re, json, urllib.request, urllib.error, os, time, base64
+
+          DB = "src/main/java/com/mudaemod/mudaemod/data/CharacterDatabase.java"
+          OUT = "src/main/resources/assets/mudaemod/textures/skins"
+          os.makedirs(OUT, exist_ok=True)
+
+          # Parse every Entry(id, name, ..., skinUUID) from the Java file
+          pattern = re.compile(
+              r'new Entry\(\s*(\d+)\s*,\s*"([^"]+)"\s*,\s*"[^"]+"\s*,\s*\d+\s*,\s*(?:true|false)\s*,\s*"([^"]+)"\s*\)')
+          entries = pattern.findall(open(DB).read())
+          print(f"Found {len(entries)} characters")
+
+          def get_texture_url(uuid_str):
+              """Get skin texture URL from Mojang session server."""
+              try:
+                  url = f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid_str.replace('-','')}"
+                  with urllib.request.urlopen(url, timeout=8) as r:
+                      data = json.loads(r.read())
+                  for prop in data.get("properties", []):
+                      if prop["name"] == "textures":
+                          tex = json.loads(base64.b64decode(prop["value"]))
+                          return tex["textures"]["SKIN"]["url"]
+              except Exception as e:
+                  pass
+              return None
+
+          def download_skin(texture_url, out_path):
+              try:
+                  req = urllib.request.Request(texture_url,
+                      headers={"User-Agent": "MudaeMod/1.8 skin-downloader"})
+                  with urllib.request.urlopen(req, timeout=8) as r:
+                      data = r.read()
+                  with open(out_path, "wb") as f:
+                      f.write(data)
+                  return True
+              except:
+                  return False
+
+          FAKE_PREFIX = "fade0001"
+          ok = 0
+          skip = 0
+
+          for char_id, name, skin_uuid in entries:
+              out_path = f"{OUT}/{char_id}.png"
+              if os.path.exists(out_path):
+                  skip += 1
+                  continue
+
+              # For fake UUIDs, try to look up the player by name first
+              if skin_uuid.startswith(FAKE_PREFIX):
+                  try:
+                      lookup_url = f"https://api.mojang.com/users/profiles/minecraft/{urllib.parse.quote(name.replace(' ', '').replace('.', ''))}"
+                      with urllib.request.urlopen(lookup_url, timeout=8) as r:
+                          data = json.loads(r.read())
+                          skin_uuid = data["id"]
+                          # Insert dashes: 8-4-4-4-12
+                          skin_uuid = f"{skin_uuid[0:8]}-{skin_uuid[8:12]}-{skin_uuid[12:16]}-{skin_uuid[16:20]}-{skin_uuid[20:]}"
+                  except:
+                      print(f"  [{char_id}] {name}: no MC account found, skipping")
+                      time.sleep(0.1)
+                      continue
+
+              tex_url = get_texture_url(skin_uuid)
+              if tex_url:
+                  if download_skin(tex_url, out_path):
+                      print(f"  [{char_id}] {name}: OK")
+                      ok += 1
+                  else:
+                      print(f"  [{char_id}] {name}: download failed")
+              else:
+                  print(f"  [{char_id}] {name}: no texture found")
+
+              time.sleep(0.3)  # be polite to Mojang API
+
+          import urllib.parse
+          print(f"\nDone: {ok} skins downloaded, {skip} cached")
+          PYEOF
 
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew || true
@@ -67,8 +153,8 @@ jobs:
 
             ### Esta versión incluye
             - 367 personajes (174 waifus + 193 husbandos)
-            - Modelos 3D giratorios con skins de Minecraft
+            - Skins descargadas de Mojang y empaquetadas en el mod
+            - Modelos 3D giratorios
             - Sistema de kakera y cooldowns
-            - Harem persistente por jugador
           files: build/libs/mudaemod-*.jar
           make_latest: true
