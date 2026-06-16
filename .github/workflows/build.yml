@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -32,14 +34,41 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew || true
 
+      - name: Get version
+        id: version
+        run: echo "VERSION=$(grep "^version" build.gradle | head -1 | sed "s/version = '//;s/'//")" >> $GITHUB_OUTPUT
+
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
         env:
           GRADLE_OPTS: "-Xmx3g"
 
-      - name: Upload mod JAR
+      - name: Upload mod JAR (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: mudaemod-jar
           path: build/libs/mudaemod-*.jar
           if-no-files-found: error
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: "Mudae Mod v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## Mudae Mod v${{ steps.version.outputs.VERSION }}
+
+            Colecciona waifus y husbandos de anime en Minecraft!
+
+            ### Instalación
+            1. Instalá **NeoForge 1.21.1**
+            2. Copiá el `.jar` a la carpeta `mods`
+            3. Click derecho en la **Terminal de Mudae** para invocar personajes
+
+            ### Esta versión incluye
+            - 367 personajes (174 waifus + 193 husbandos)
+            - Modelos 3D giratorios con skins de Minecraft
+            - Sistema de kakera y cooldowns
+            - Harem persistente por jugador
+          files: build/libs/mudaemod-*.jar
+          make_latest: true
