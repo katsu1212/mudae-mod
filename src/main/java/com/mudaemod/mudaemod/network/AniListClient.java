@@ -85,7 +85,7 @@ public class AniListClient {
             ? Math.max(20, Math.min(2000, favourites / 10 + 20))
             : (20 + (id % 80));
 
-        return Optional.of(new Character(id, name, anime != null ? anime : "Original", image, kakera));
+        return Optional.of(new Character(id, name, anime != null ? anime : "Original", 1, true, kakera));
     }
 
     private static String extractJson(String json, String startMarker, String endMarker) {
