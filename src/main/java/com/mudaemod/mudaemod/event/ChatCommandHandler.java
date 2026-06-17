@@ -4,6 +4,7 @@ import com.mudaemod.mudaemod.data.CharacterDatabase;
 import com.mudaemod.mudaemod.data.GlobalMudaeData;
 import com.mudaemod.mudaemod.data.MudaeDataManager;
 import com.mudaemod.mudaemod.data.PlayerData;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -21,18 +22,16 @@ public class ChatCommandHandler {
         boolean isRoll   = lower.equals("$w") || lower.equals("$waifu")
                         || lower.equals("$h") || lower.equals("$husbando")
                         || lower.equals("$m") || lower.equals("$mudae");
-        boolean isClaim  = lower.equals("$claim");
         boolean isKakera = lower.equals("$kakera");
         boolean isDebug  = lower.equals("$debug");
         boolean isIm     = lower.startsWith("$im ");
 
-        if (!isRoll && !isClaim && !isKakera && !isDebug && !isIm) return;
+        if (!isRoll && !isKakera && !isDebug && !isIm) return;
 
         event.setCanceled(true);
         ServerPlayer player = event.getPlayer();
 
         if (isRoll)        handleRoll(player);
-        else if (isClaim)  handleClaim(player);
         else if (isKakera) handleKakera(player);
         else if (isDebug)  handleDebug(player);
         else               handleIm(player, msg.substring(4).trim());
@@ -61,7 +60,7 @@ public class ChatCommandHandler {
 
         data.useRoll();
         mgr.savePlayer(player.getUUID());
-        global.setActiveRoll(character, player.getUUID());
+        global.addPendingRoll(character);
 
         broadcastRoll(player.getServer(), player, character);
     }
@@ -72,9 +71,16 @@ public class ChatCommandHandler {
         int rank = c.getRank();
         int ka   = c.kakeraValue();
 
+        // Botón clickeable [CLAIM] que ejecuta /mudaeclaim <id>
+        MutableComponent claimBtn = Component.literal(" ✦ [CLAIM]")
+            .withStyle(s -> s
+                .withColor(0x55FF55)
+                .withBold(true)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "/mudaeclaim " + c.getId())));
+
         switch (rank) {
             case 5 -> {
-                // ⭐ LEGENDARIO — anuncio dramático de 3 líneas
                 broadcast(server, Component.literal("✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦")
                     .withStyle(s -> s.withColor(0xFFD700).withBold(true)));
                 broadcast(server, Component.literal("  ⭐ ¡¡LEGENDARIO!! ⭐  ")
@@ -87,13 +93,13 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0xFFFFAA).withBold(true)))
                     .append(Component.literal(" ✦ " + c.animeName())
                         .withStyle(s -> s.withColor(0xFFD700))));
-                broadcast(server, Component.literal("  💎 " + ka + " kakera  |  Top " + c.getId() + "  ←  $claim")
-                    .withStyle(s -> s.withColor(0xFFAA00).withBold(true)));
+                broadcast(server, Component.literal("  💎 " + ka + " kakera  |  Top " + c.getId())
+                    .withStyle(s -> s.withColor(0xFFAA00).withBold(true))
+                    .append(claimBtn));
                 broadcast(server, Component.literal("✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦")
                     .withStyle(s -> s.withColor(0xFFD700).withBold(true)));
             }
             case 4 -> {
-                // ✨ RARO — una línea destacada en violeta
                 broadcast(server, Component.literal("✨ ¡RARO! ")
                     .withStyle(s -> s.withColor(0xCC44FF).withBold(true))
                     .append(Component.literal(pName)
@@ -104,11 +110,11 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0xFF77FF).withBold(true)))
                     .append(Component.literal(" de " + c.animeName())
                         .withStyle(s -> s.withColor(0xCC44FF)))
-                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId() + "  ←  $claim")
-                        .withStyle(s -> s.withColor(0xAA22DD))));
+                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId())
+                        .withStyle(s -> s.withColor(0xAA22DD)))
+                    .append(claimBtn));
             }
             case 3 -> {
-                // 💫 POCO COMUN — cian, ligeramente diferente
                 broadcast(server, Component.literal("💫 ")
                     .append(Component.literal(pName)
                         .withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
@@ -118,11 +124,11 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0x55FFFF).withBold(true)))
                     .append(Component.literal(" de " + c.animeName())
                         .withStyle(s -> s.withColor(0x55DDDD)))
-                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId() + "  ←  $claim")
-                        .withStyle(s -> s.withColor(0x44BBCC))));
+                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId())
+                        .withStyle(s -> s.withColor(0x44BBCC)))
+                    .append(claimBtn));
             }
             default -> {
-                // Rank 1-2: formato normal
                 broadcast(server, Component.literal("🎲 ")
                     .append(Component.literal(pName)
                         .withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
@@ -132,8 +138,9 @@ public class ChatCommandHandler {
                         .withStyle(s -> s.withColor(0xFFD700).withBold(true)))
                     .append(Component.literal(" de " + c.animeName())
                         .withStyle(s -> s.withColor(0xADD8E6)))
-                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId() + "  ←  $claim")
-                        .withStyle(s -> s.withColor(0xAA55FF))));
+                    .append(Component.literal("  |  💎 " + ka + "  |  Top " + c.getId())
+                        .withStyle(s -> s.withColor(0xAA55FF)))
+                    .append(claimBtn));
             }
         }
     }
@@ -142,55 +149,8 @@ public class ChatCommandHandler {
         server.getPlayerList().broadcastSystemMessage(msg, false);
     }
 
-    // ─── Claim ─────────────────────────────────────────────────────────────
-    private static void handleClaim(ServerPlayer player) {
-        GlobalMudaeData global = GlobalMudaeData.get(player.getServer());
-        if (!global.hasActiveRoll()) {
-            player.sendSystemMessage(Component.literal("❌ No hay ningún personaje disponible para claimear."));
-            return;
-        }
-
-        MudaeDataManager mgr = MudaeDataManager.get();
-        PlayerData data = mgr.getPlayer(player.getUUID());
-
-        if (!data.canClaim()) {
-            long secs = data.getClaimCooldownRemaining() / 1000;
-            player.sendSystemMessage(Component.literal(
-                String.format("💔 Claim en cooldown. Disponible en %dh %dm.", secs / 3600, (secs % 3600) / 60)));
-            return;
-        }
-
-        if (data.hasCharacter(global.getActiveCharId())) {
-            player.sendSystemMessage(Component.literal("❌ Ya tenés a " + global.getActiveCharName() + " en tu harem."));
-            return;
-        }
-
-        int charId = global.getActiveCharId();
-        com.mudaemod.mudaemod.data.Character character = CharacterDatabase.getById(charId);
-        if (character == null) {
-            player.sendSystemMessage(Component.literal("Error: personaje no encontrado en la base de datos."));
-            return;
-        }
-
-        data.claim(character);
-        global.claimCharacter(character.id());
-        global.clearActiveRoll();
-        mgr.savePlayer(player.getUUID());
-
-        broadcast(player.getServer(), Component.literal("💍 ")
-            .append(Component.literal(player.getName().getString())
-                .withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
-            .append(Component.literal(" se casó con ")
-                .withStyle(s -> s.withColor(0xFFFFFF)))
-            .append(Component.literal(character.name())
-                .withStyle(s -> s.withColor(0xFF69B4).withBold(true)))
-            .append(Component.literal(" de " + character.animeName() + "!")
-                .withStyle(s -> s.withColor(0xADD8E6))));
-    }
-
     // ─── $im ───────────────────────────────────────────────────────────────
     private static void handleIm(ServerPlayer player, String raw) {
-        // Soporta: $im "Zero Two"  y  $im Zero Two
         String query = raw.startsWith("\"") && raw.endsWith("\"") && raw.length() > 2
             ? raw.substring(1, raw.length() - 1)
             : raw;
@@ -207,7 +167,6 @@ public class ChatCommandHandler {
             return;
         }
 
-        // Línea 1: nombre y serie
         int rankColor = switch (c.getRank()) {
             case 5 -> 0xFFD700;
             case 4 -> 0xCC44FF;
@@ -224,7 +183,6 @@ public class ChatCommandHandler {
         player.sendSystemMessage(Component.literal("  💎 " + c.kakeraValue() + " kakera   |   Top " + c.getId())
             .withStyle(s -> s.withColor(rankColor)));
 
-        // Estado: ¿reclamado?
         GlobalMudaeData global = GlobalMudaeData.get(player.getServer());
         if (global.getClaimedIds().contains(c.getId())) {
             UUID ownerUuid = MudaeDataManager.get().findOwnerOf(c.getId());

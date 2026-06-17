@@ -3,7 +3,7 @@ plugins {
     id 'java'
 }
 
-version = '3.2'
+version = '3.3'
 group = 'com.mudaemod'
 
 java {

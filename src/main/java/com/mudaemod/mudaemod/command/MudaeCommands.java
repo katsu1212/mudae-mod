@@ -1,10 +1,14 @@
 package com.mudaemod.mudaemod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mudaemod.mudaemod.data.Character;
+import com.mudaemod.mudaemod.data.CharacterDatabase;
+import com.mudaemod.mudaemod.data.GlobalMudaeData;
 import com.mudaemod.mudaemod.data.MudaeDataManager;
 import com.mudaemod.mudaemod.data.PlayerData;
+import com.mudaemod.mudaemod.network.handler.MudaeServerHandler;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -20,8 +24,74 @@ public class MudaeCommands {
 
         dispatcher.register(Commands.literal("kakera")
             .executes(MudaeCommands::showKakera));
+
+        dispatcher.register(Commands.literal("mudaeclaim")
+            .then(Commands.argument("charId", IntegerArgumentType.integer(1))
+                .executes(MudaeCommands::doClaim)));
     }
 
+    // ─── /mudaeclaim <charId> ──────────────────────────────────────────────
+    private static int doClaim(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+
+        int charId = IntegerArgumentType.getInteger(ctx, "charId");
+        GlobalMudaeData global = GlobalMudaeData.get(player.getServer());
+        GlobalMudaeData.PendingRoll roll = global.getPendingRoll(charId);
+
+        if (roll == null) {
+            player.sendSystemMessage(Component.literal(
+                "❌ Ese personaje ya no está disponible (expiró o fue reclamado).")
+                .withStyle(s -> s.withColor(0xFF5555)));
+            return 0;
+        }
+
+        MudaeDataManager mgr = MudaeDataManager.get();
+        PlayerData data = mgr.getPlayer(player.getUUID());
+
+        if (!data.canClaim()) {
+            long secs = data.getClaimCooldownRemaining() / 1000;
+            player.sendSystemMessage(Component.literal(
+                String.format("💔 Claim en cooldown. Disponible en %dh %dm.", secs / 3600, (secs % 3600) / 60))
+                .withStyle(s -> s.withColor(0xFF5555)));
+            return 0;
+        }
+
+        if (data.hasCharacter(charId)) {
+            player.sendSystemMessage(Component.literal(
+                "❌ Ya tenés a " + roll.name() + " en tu harem.")
+                .withStyle(s -> s.withColor(0xFF5555)));
+            return 0;
+        }
+
+        Character character = CharacterDatabase.getById(charId);
+        if (character == null) {
+            player.sendSystemMessage(Component.literal("Error: personaje no encontrado en la base de datos."));
+            return 0;
+        }
+
+        data.claim(character);
+        global.claimCharacter(charId);
+        global.removePendingRoll(charId);
+        mgr.savePlayer(player.getUUID());
+        MudaeServerHandler.applyStats(player, data);
+
+        player.getServer().getPlayerList().broadcastSystemMessage(
+            Component.literal("💍 ")
+                .append(Component.literal(player.getName().getString())
+                    .withStyle(s -> s.withColor(0x00FF7F).withBold(true)))
+                .append(Component.literal(" se casó con ")
+                    .withStyle(s -> s.withColor(0xFFFFFF)))
+                .append(Component.literal(character.name())
+                    .withStyle(s -> s.withColor(0xFF69B4).withBold(true)))
+                .append(Component.literal(" de " + character.animeName() + "!")
+                    .withStyle(s -> s.withColor(0xADD8E6))),
+            false);
+
+        return 1;
+    }
+
+    // ─── /harem ────────────────────────────────────────────────────────────
     private static int showHarem(CommandContext<CommandSourceStack> ctx) {
         ServerPlayer player = ctx.getSource().getPlayer();
         if (player == null) return 0;
@@ -55,6 +125,7 @@ public class MudaeCommands {
         return 1;
     }
 
+    // ─── /kakera ───────────────────────────────────────────────────────────
     private static int showKakera(CommandContext<CommandSourceStack> ctx) {
         ServerPlayer player = ctx.getSource().getPlayer();
         if (player == null) return 0;

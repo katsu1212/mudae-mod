@@ -4,7 +4,7 @@ license = "MIT"
 
 [[mods]]
     modId = "mudaemod"
-    version = "3.2"
+    version = "3.3"
     displayName = "Mudae Mod"
     description = '''
 Colecciona personajes de anime y manga en Minecraft.

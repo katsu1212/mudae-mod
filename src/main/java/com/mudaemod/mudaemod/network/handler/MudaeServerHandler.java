@@ -70,7 +70,8 @@ public class MudaeServerHandler {
             applyStats(player, data);
 
             player.sendSystemMessage(Component.literal(
-                "✨ " + PlayerData.STAT_NAMES[idx] + " subió a nivel " + data.getStatLevels()[idx] + "/5!"));
+                "✨ " + PlayerData.STAT_NAMES[idx] + " subió a nivel "
+                + data.getStatLevels()[idx] + "/" + PlayerData.STAT_MAX[idx] + "!"));
 
             buildAndSendHarem(player);
         });

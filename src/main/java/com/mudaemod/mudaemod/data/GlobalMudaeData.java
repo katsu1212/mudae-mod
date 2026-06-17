@@ -7,22 +7,28 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class GlobalMudaeData extends SavedData {
 
     private static final String NAME = "mudae_global";
-    private static final long CLAIM_WINDOW_MS = 3 * 60 * 1000L;
+    public static final long CLAIM_WINDOW_MS = 30_000L;
 
     private final Set<Integer> claimedIds = new HashSet<>();
 
-    private int activeCharId = -1;
-    private String activeCharName = "";
-    private String activeCharAnime = "";
-    private int activeKakera = 0;
-    private long activeRolledAt = 0;
-    private UUID activeRolledBy = null;
+    // In-memory only — rolls expire in 30s, no need to persist
+    private final Map<Integer, PendingRoll> pendingRolls = new LinkedHashMap<>();
+
+    public record PendingRoll(int id, String name, String anime, int kakera, long rolledAt) {
+        public boolean isExpired() {
+            return System.currentTimeMillis() - rolledAt > CLAIM_WINDOW_MS;
+        }
+        public long secondsLeft() {
+            return Math.max(0, (CLAIM_WINDOW_MS - (System.currentTimeMillis() - rolledAt)) / 1000);
+        }
+    }
 
     public static GlobalMudaeData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
@@ -33,58 +39,42 @@ public class GlobalMudaeData extends SavedData {
     }
 
     public Set<Integer> getClaimedIds() { return claimedIds; }
-
-    public void claimCharacter(int id) { claimedIds.add(id); setDirty(); }
+    public void claimCharacter(int id)   { claimedIds.add(id);    setDirty(); }
     public void unclaimCharacter(int id) { claimedIds.remove(id); setDirty(); }
 
-    public void setActiveRoll(Character character, UUID rolledBy) {
-        this.activeCharId   = character.id();
-        this.activeCharName = character.name();
-        this.activeCharAnime = character.animeName();
-        this.activeKakera   = character.kakeraValue();
-        this.activeRolledAt = System.currentTimeMillis();
-        this.activeRolledBy = rolledBy;
-        setDirty();
+    /** Agrega un personaje al pool de claims pendientes (máx 30s). */
+    public void addPendingRoll(Character c) {
+        purgeExpired();
+        pendingRolls.put(c.id(), new PendingRoll(c.id(), c.name(), c.animeName(), c.kakeraValue(),
+            System.currentTimeMillis()));
     }
 
-    public void clearActiveRoll() {
-        this.activeCharId   = -1;
-        this.activeRolledAt = 0;
-        this.activeRolledBy = null;
-        setDirty();
+    /** Devuelve el roll pendiente si aún no expiró, null si no existe o expiró. */
+    public PendingRoll getPendingRoll(int charId) {
+        PendingRoll r = pendingRolls.get(charId);
+        if (r == null) return null;
+        if (r.isExpired()) { pendingRolls.remove(charId); return null; }
+        return r;
     }
 
-    public boolean hasActiveRoll() { return activeCharId != -1 && !isExpired(); }
-    public boolean isExpired() { return System.currentTimeMillis() - activeRolledAt > CLAIM_WINDOW_MS; }
+    public boolean hasPendingRoll(int charId) { return getPendingRoll(charId) != null; }
 
-    public int    getActiveCharId()    { return activeCharId; }
-    public String getActiveCharName()  { return activeCharName; }
-    public String getActiveCharAnime() { return activeCharAnime; }
-    public int    getActiveKakera()    { return activeKakera; }
-    public UUID   getActiveRolledBy()  { return activeRolledBy; }
+    public void removePendingRoll(int charId) { pendingRolls.remove(charId); }
+
+    private void purgeExpired() {
+        pendingRolls.entrySet().removeIf(e -> e.getValue().isExpired());
+    }
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         int[] ids = claimedIds.stream().mapToInt(Integer::intValue).toArray();
         tag.put("claimedIds", new IntArrayTag(ids));
-        tag.putInt("activeCharId", activeCharId);
-        tag.putString("activeCharName", activeCharName);
-        tag.putString("activeCharAnime", activeCharAnime);
-        tag.putInt("activeKakera", activeKakera);
-        tag.putLong("activeRolledAt", activeRolledAt);
-        if (activeRolledBy != null) tag.putUUID("activeRolledBy", activeRolledBy);
         return tag;
     }
 
     public static GlobalMudaeData load(CompoundTag tag) {
         GlobalMudaeData data = new GlobalMudaeData();
         for (int id : tag.getIntArray("claimedIds")) data.claimedIds.add(id);
-        data.activeCharId   = tag.getInt("activeCharId");
-        data.activeCharName = tag.getString("activeCharName");
-        data.activeCharAnime = tag.getString("activeCharAnime");
-        data.activeKakera   = tag.getInt("activeKakera");
-        data.activeRolledAt = tag.getLong("activeRolledAt");
-        if (tag.contains("activeRolledBy")) data.activeRolledBy = tag.getUUID("activeRolledBy");
         return data;
     }
 }
