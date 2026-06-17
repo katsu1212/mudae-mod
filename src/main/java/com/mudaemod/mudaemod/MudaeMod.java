@@ -3,6 +3,7 @@ package com.mudaemod.mudaemod;
 import com.mudaemod.mudaemod.block.MudaeBlock;
 import com.mudaemod.mudaemod.data.MudaeDataManager;
 import com.mudaemod.mudaemod.data.PlayerData;
+import com.mudaemod.mudaemod.command.MudaeCommands;
 import com.mudaemod.mudaemod.event.ChatCommandHandler;
 import com.mudaemod.mudaemod.gui.MudaeMenu;
 import com.mudaemod.mudaemod.network.MudaeNetworking;
@@ -22,6 +23,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -69,6 +71,9 @@ public class MudaeMod {
             MudaeDataManager.get().init(e.getServer()));
 
         NeoForge.EVENT_BUS.addListener(ChatCommandHandler::onChat);
+
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) ->
+            MudaeCommands.register(e.getDispatcher()));
 
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer sp) {
