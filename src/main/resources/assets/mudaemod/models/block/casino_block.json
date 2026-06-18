@@ -1,0 +1,86 @@
+{
+  "ambientocclusion": true,
+  "textures": {
+    "gold":     "minecraft:block/gold_block",
+    "dark":     "minecraft:block/black_concrete",
+    "felt":     "minecraft:block/lime_concrete",
+    "red":      "minecraft:block/red_concrete",
+    "wood":     "minecraft:block/stripped_oak_log",
+    "iron":     "minecraft:block/iron_block",
+    "particle": "minecraft:block/gold_block"
+  },
+  "elements": [
+    {
+      "comment": "Cuerpo principal",
+      "from": [2, 3, 3], "to": [14, 16, 13],
+      "faces": {
+        "north": { "texture": "#iron", "uv": [0, 0, 12, 13] },
+        "south": { "texture": "#iron", "uv": [0, 0, 12, 13] },
+        "east":  { "texture": "#iron", "uv": [0, 0, 10, 13] },
+        "west":  { "texture": "#iron", "uv": [0, 0, 10, 13] },
+        "up":    { "texture": "#gold", "uv": [0, 0, 12, 10] }
+      }
+    },
+    {
+      "comment": "Tapa dorada",
+      "from": [1, 14, 2], "to": [15, 16, 14],
+      "faces": {
+        "north": { "texture": "#gold", "uv": [0, 0, 14, 2] },
+        "south": { "texture": "#gold", "uv": [0, 0, 14, 2] },
+        "east":  { "texture": "#gold", "uv": [0, 0, 12, 2] },
+        "west":  { "texture": "#gold", "uv": [0, 0, 12, 2] },
+        "up":    { "texture": "#gold", "uv": [0, 0, 14, 12] }
+      }
+    },
+    {
+      "comment": "Panel ventana de ruleta (frente)",
+      "from": [3, 6, 2], "to": [13, 13, 3],
+      "faces": {
+        "north": { "texture": "#felt", "uv": [0, 0, 10, 7] }
+      }
+    },
+    {
+      "comment": "Marco ventana",
+      "from": [2, 5, 2], "to": [14, 14, 3],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 12, 9] }
+      }
+    },
+    {
+      "comment": "Base de madera",
+      "from": [1, 0, 2], "to": [15, 3, 14],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 14, 3] },
+        "south": { "texture": "#wood", "uv": [0, 0, 14, 3] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 12, 3] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 12, 3] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 14, 12] },
+        "down":  { "texture": "#dark", "uv": [0, 0, 14, 12] }
+      }
+    },
+    {
+      "comment": "Alfombra roja base",
+      "from": [0, 0, 1], "to": [16, 1, 15],
+      "faces": {
+        "up":   { "texture": "#red", "uv": [0, 0, 16, 14] },
+        "down": { "texture": "#dark", "uv": [0, 0, 16, 14] }
+      }
+    },
+    {
+      "comment": "Pata izquierda",
+      "from": [2, 0, 4], "to": [4, 3, 12],
+      "faces": {
+        "east": { "texture": "#dark", "uv": [0, 0, 8, 3] },
+        "west": { "texture": "#dark", "uv": [0, 0, 8, 3] }
+      }
+    },
+    {
+      "comment": "Pata derecha",
+      "from": [12, 0, 4], "to": [14, 3, 12],
+      "faces": {
+        "east": { "texture": "#dark", "uv": [0, 0, 8, 3] },
+        "west": { "texture": "#dark", "uv": [0, 0, 8, 3] }
+      }
+    }
+  ]
+}

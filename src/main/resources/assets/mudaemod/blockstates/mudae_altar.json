@@ -1,8 +1,12 @@
 {
   "variants": {
-    "facing=north": { "model": "mudaemod:block/mudae_altar" },
-    "facing=south": { "model": "mudaemod:block/mudae_altar", "y": 180 },
-    "facing=east":  { "model": "mudaemod:block/mudae_altar", "y": 90  },
-    "facing=west":  { "model": "mudaemod:block/mudae_altar", "y": 270 }
+    "facing=north,half=lower": { "model": "mudaemod:block/mudae_altar_lower" },
+    "facing=north,half=upper": { "model": "mudaemod:block/mudae_altar_upper" },
+    "facing=south,half=lower": { "model": "mudaemod:block/mudae_altar_lower", "y": 180 },
+    "facing=south,half=upper": { "model": "mudaemod:block/mudae_altar_upper", "y": 180 },
+    "facing=east,half=lower":  { "model": "mudaemod:block/mudae_altar_lower", "y": 90 },
+    "facing=east,half=upper":  { "model": "mudaemod:block/mudae_altar_upper", "y": 90 },
+    "facing=west,half=lower":  { "model": "mudaemod:block/mudae_altar_lower", "y": 270 },
+    "facing=west,half=upper":  { "model": "mudaemod:block/mudae_altar_upper", "y": 270 }
   }
 }

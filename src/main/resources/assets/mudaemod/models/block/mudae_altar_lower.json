@@ -1,0 +1,66 @@
+{
+  "ambientocclusion": true,
+  "textures": {
+    "body":     "minecraft:block/iron_block",
+    "dark":     "minecraft:block/black_concrete",
+    "screen":   "minecraft:block/cyan_concrete",
+    "keys":     "minecraft:block/light_gray_concrete",
+    "accent":   "minecraft:block/purple_concrete",
+    "anime":    "mudaemod:block/atm_side",
+    "back":     "mudaemod:block/atm_back",
+    "particle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    {
+      "comment": "Cuerpo principal - mitad inferior",
+      "from": [2, 0, 4], "to": [14, 16, 14],
+      "faces": {
+        "north": { "texture": "#body", "uv": [0, 0, 12, 16] },
+        "south": { "texture": "#back", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#anime", "uv": [0, 8, 16, 16] },
+        "west":  { "texture": "#anime", "uv": [0, 8, 16, 16] },
+        "down":  { "texture": "#dark", "uv": [0, 0, 12, 10] }
+      }
+    },
+    {
+      "comment": "Franja de acento inferior",
+      "from": [2, 0, 3], "to": [14, 3, 5],
+      "faces": {
+        "north": { "texture": "#accent", "uv": [0, 0, 12, 3] },
+        "down":  { "texture": "#accent", "uv": [0, 0, 12, 2] },
+        "east":  { "texture": "#accent", "uv": [0, 0, 2, 3] },
+        "west":  { "texture": "#accent", "uv": [0, 0, 2, 3] }
+      }
+    },
+    {
+      "comment": "Ranura dispensadora",
+      "from": [4, 5, 3], "to": [12, 7, 4],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 8, 2] },
+        "up":    { "texture": "#dark", "uv": [0, 0, 8, 1] }
+      }
+    },
+    {
+      "comment": "Ranura tarjeta",
+      "from": [5, 7, 3], "to": [11, 8, 4],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 6, 1] }
+      }
+    },
+    {
+      "comment": "Teclado numerico",
+      "from": [3, 9, 3], "to": [13, 16, 4],
+      "faces": {
+        "north": { "texture": "#keys", "uv": [0, 0, 10, 7] },
+        "up":    { "texture": "#keys", "uv": [0, 0, 10, 1] }
+      }
+    },
+    {
+      "comment": "Botones del teclado",
+      "from": [4, 10, 2], "to": [12, 16, 3],
+      "faces": {
+        "north": { "texture": "#dark", "uv": [0, 0, 8, 6] }
+      }
+    }
+  ]
+}

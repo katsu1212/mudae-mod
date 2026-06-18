@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "WIW",
+    "LLL"
+  ],
+  "key": {
+    "G": { "item": "minecraft:gold_ingot" },
+    "W": { "item": "minecraft:oak_planks" },
+    "I": { "item": "minecraft:iron_ingot" },
+    "L": { "tag": "minecraft:wool" }
+  },
+  "result": {
+    "id": "mudaemod:casino_block",
+    "count": 1
+  }
+}
