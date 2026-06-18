@@ -23,17 +23,15 @@ public class ChatCommandHandler {
                         || lower.equals("$h") || lower.equals("$husbando")
                         || lower.equals("$m") || lower.equals("$mudae");
         boolean isKakera = lower.equals("$kakera");
-        boolean isDebug  = lower.equals("$debug");
         boolean isIm     = lower.startsWith("$im ");
 
-        if (!isRoll && !isKakera && !isDebug && !isIm) return;
+        if (!isRoll && !isKakera && !isIm) return;
 
         event.setCanceled(true);
         ServerPlayer player = event.getPlayer();
 
         if (isRoll)        handleRoll(player);
         else if (isKakera) handleKakera(player);
-        else if (isDebug)  handleDebug(player);
         else               handleIm(player, msg.substring(4).trim());
     }
 
@@ -201,16 +199,6 @@ public class ChatCommandHandler {
         }
         player.sendSystemMessage(Component.literal("─────────────────────────")
             .withStyle(s -> s.withColor(rankColor)));
-    }
-
-    // ─── Debug / Kakera ────────────────────────────────────────────────────
-    private static void handleDebug(ServerPlayer player) {
-        MudaeDataManager mgr = MudaeDataManager.get();
-        PlayerData data = mgr.getPlayer(player.getUUID());
-        data.resetCooldowns();
-        data.addKakera(99999);
-        mgr.savePlayer(player.getUUID());
-        player.sendSystemMessage(Component.literal("[DEBUG] Rolls y claim reseteados. +99999 kakera."));
     }
 
     private static void handleKakera(ServerPlayer player) {

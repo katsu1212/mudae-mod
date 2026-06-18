@@ -21,12 +21,12 @@ public class PlayerData {
     private long lastClaimTime = 0;
     private int rollsRemaining = 16;
 
-    // stat indices: 0=vida, 1=velocidad, 2=fuerza, 3=defensa, 4=vel.minería
-    private int[] statLevels = new int[]{0, 0, 0, 0, 0};
+    // stat indices: 0=vida, 1=velocidad, 2=fuerza, 3=defensa
+    private int[] statLevels = new int[]{0, 0, 0, 0};
 
-    public static final int[] STAT_COSTS  = {400, 500, 700, 450, 300};
-    public static final int[] STAT_MAX    = {10, 10, 5, 5, 10};
-    public static final String[] STAT_NAMES = {"Vida", "Velocidad", "Fuerza", "Defensa", "Vel. Minería"};
+    public static final int[] STAT_COSTS  = {400, 500, 700, 450};
+    public static final int[] STAT_MAX    = {10, 10, 5, 5};
+    public static final String[] STAT_NAMES = {"Vida", "Velocidad", "Fuerza", "Defensa"};
 
     public PlayerData(UUID playerId) {
         this.playerId = playerId;

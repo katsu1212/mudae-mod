@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record HaremPayload(List<HaremEntry> entries, int kakera,
-                           int statVida, int statVel, int statFuerza, int statDef, int statMina)
+                           int statVida, int statVel, int statFuerza, int statDef)
         implements CustomPacketPayload {
 
     public record HaremEntry(int id, String name, String animeName, int kakeraValue) {}
@@ -28,14 +28,14 @@ public record HaremPayload(List<HaremEntry> entries, int kakera,
             for (HaremEntry e : p.entries()) ENTRY_CODEC.encode(buf, e);
             buf.writeInt(p.kakera());
             buf.writeInt(p.statVida()); buf.writeInt(p.statVel());
-            buf.writeInt(p.statFuerza()); buf.writeInt(p.statDef()); buf.writeInt(p.statMina());
+            buf.writeInt(p.statFuerza()); buf.writeInt(p.statDef());
         },
         buf -> {
             int size = buf.readInt();
             List<HaremEntry> entries = new ArrayList<>(size);
             for (int i = 0; i < size; i++) entries.add(ENTRY_CODEC.decode(buf));
             return new HaremPayload(entries, buf.readInt(),
-                buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt());
+                buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt());
         }
     );
 

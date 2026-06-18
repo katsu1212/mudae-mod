@@ -176,16 +176,16 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
     }
 
     private void renderTiendaTab(GuiGraphics g, int x, int y, int mx, int my) {
-        int[] statLevels = new int[]{0, 0, 0, 0, 0};
+        int[] statLevels = new int[]{0, 0, 0, 0};
         if (haremData != null) {
-            statLevels = new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef(), haremData.statMina()};
+            statLevels = new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef()};
         }
 
-        String[] icons = {"❤", "⚡", "⚔", "🛡", "⛏"};
-        String[] descs = {"+1 corazon / nivel", "+0.01 vel / nivel", "+0.5 atk / nivel", "+1 armor / nivel", "+1 vel.mineria / nivel"};
+        String[] icons = {"❤", "⚡", "⚔", "🛡"};
+        String[] descs = {"+1 corazon / nivel", "+0.01 vel / nivel", "+0.5 atk / nivel", "+1 armor / nivel"};
 
         int startY = y + LIST_Y_START;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
             int ry = startY + i * 38;
             int lv = statLevels[i];
             int cost = PlayerData.getStatCost(i, lv);
@@ -276,10 +276,10 @@ public class MudaeScreen extends AbstractContainerScreen<MudaeMenu> {
     private boolean handleTiendaClick(double mx, double my, int x, int y) {
         int startY = y + LIST_Y_START;
         int[] statLevels = haremData != null
-            ? new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef(), haremData.statMina()}
-            : new int[]{0, 0, 0, 0, 0};
+            ? new int[]{haremData.statVida(), haremData.statVel(), haremData.statFuerza(), haremData.statDef()}
+            : new int[]{0, 0, 0, 0};
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
             if (statLevels[i] >= PlayerData.STAT_MAX[i]) continue;
             int ry = startY + i * 38;
             int btnX = x + W - 62;

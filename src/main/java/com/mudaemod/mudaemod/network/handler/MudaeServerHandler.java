@@ -84,7 +84,7 @@ public class MudaeServerHandler {
             .collect(Collectors.toList());
         int[] stats = data.getStatLevels();
         PacketDistributor.sendToPlayer(player,
-            new HaremPayload(entries, data.getKakera(), stats[0], stats[1], stats[2], stats[3], stats[4]));
+            new HaremPayload(entries, data.getKakera(), stats[0], stats[1], stats[2], stats[3]));
     }
 
     public static void applyStats(ServerPlayer player, PlayerData data) {
@@ -110,10 +110,6 @@ public class MudaeServerHandler {
             ResourceLocation.fromNamespaceAndPath("mudaemod", "defensa"),
             lvls[3] * 1.0, AttributeModifier.Operation.ADD_VALUE);
 
-        // +1.0 eficiencia de minería/nivel
-        applyModifier(player, Attributes.MINING_EFFICIENCY,
-            ResourceLocation.fromNamespaceAndPath("mudaemod", "mineria"),
-            lvls[4] * 1.0, AttributeModifier.Operation.ADD_VALUE);
     }
 
     private static void applyModifier(ServerPlayer player,
