@@ -1,5 +1,6 @@
 package com.mudaemod.mudaemod.gui;
 
+import com.mudaemod.mudaemod.data.BlackjackState;
 import com.mudaemod.mudaemod.network.CasinoActionPayload;
 import com.mudaemod.mudaemod.network.CasinoBetPayload;
 import com.mudaemod.mudaemod.network.CasinoResultPayload;
