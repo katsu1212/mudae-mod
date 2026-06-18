@@ -1,5 +1,7 @@
 package com.mudaemod.mudaemod;
 
+import com.mudaemod.mudaemod.gui.CasinoMenu;
+import com.mudaemod.mudaemod.gui.CasinoScreen;
 import com.mudaemod.mudaemod.gui.MudaeMenu;
 import com.mudaemod.mudaemod.gui.MudaeScreen;
 import net.neoforged.api.distmarker.Dist;
@@ -12,6 +14,7 @@ public class MudaeClientEvents {
 
     @SubscribeEvent
     public static void onRegisterScreens(RegisterMenuScreensEvent event) {
-        event.register(MudaeMod.MUDAE_MENU.get(), MudaeScreen::new);
+        event.register(MudaeMod.MUDAE_MENU.get(),   MudaeScreen::new);
+        event.register(MudaeMod.CASINO_MENU.get(), CasinoScreen::new);
     }
 }

@@ -1,6 +1,8 @@
 package com.mudaemod.mudaemod.network.handler;
 
+import com.mudaemod.mudaemod.gui.CasinoScreen;
 import com.mudaemod.mudaemod.gui.MudaeScreen;
+import com.mudaemod.mudaemod.network.CasinoResultPayload;
 import com.mudaemod.mudaemod.network.HaremPayload;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -18,6 +20,15 @@ public class MudaeClientHandler {
             Minecraft mc = Minecraft.getInstance();
             if (mc.screen instanceof MudaeScreen screen) {
                 screen.onHaremReceived(payload);
+            }
+        });
+    }
+
+    public static void handleCasinoResult(CasinoResultPayload payload, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.screen instanceof CasinoScreen screen) {
+                screen.onResult(payload);
             }
         });
     }

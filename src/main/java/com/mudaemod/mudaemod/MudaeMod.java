@@ -1,10 +1,12 @@
 package com.mudaemod.mudaemod;
 
+import com.mudaemod.mudaemod.block.CasinoBlock;
 import com.mudaemod.mudaemod.block.MudaeBlock;
 import com.mudaemod.mudaemod.data.MudaeDataManager;
 import com.mudaemod.mudaemod.data.PlayerData;
 import com.mudaemod.mudaemod.command.MudaeCommands;
 import com.mudaemod.mudaemod.event.ChatCommandHandler;
+import com.mudaemod.mudaemod.gui.CasinoMenu;
 import com.mudaemod.mudaemod.gui.MudaeMenu;
 import com.mudaemod.mudaemod.network.MudaeNetworking;
 import com.mudaemod.mudaemod.network.handler.MudaeServerHandler;
@@ -49,14 +51,23 @@ public class MudaeMod {
     public static final DeferredHolder<Item, BlockItem> MUDAE_ALTAR_ITEM =
         ITEMS.register("mudae_altar", () -> new BlockItem(MUDAE_ALTAR.get(), new Item.Properties()));
 
+    public static final DeferredHolder<Block, CasinoBlock> CASINO_BLOCK =
+        BLOCKS.register("casino_block", CasinoBlock::new);
+
+    public static final DeferredHolder<Item, BlockItem> CASINO_ITEM =
+        ITEMS.register("casino_block", () -> new BlockItem(CASINO_BLOCK.get(), new Item.Properties()));
+
     public static final DeferredHolder<MenuType<?>, MenuType<MudaeMenu>> MUDAE_MENU =
         MENUS.register("mudae_menu", () -> IMenuTypeExtension.create((id, inv, buf) -> new MudaeMenu(id, inv)));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<CasinoMenu>> CASINO_MENU =
+        MENUS.register("casino_menu", () -> IMenuTypeExtension.create((id, inv, buf) -> new CasinoMenu(id, inv)));
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MUDAE_TAB =
         TABS.register("mudae_tab", () -> CreativeModeTab.builder()
             .title(Component.literal("Mudae"))
             .icon(() -> new ItemStack(MUDAE_ALTAR_ITEM.get()))
-            .displayItems((p, o) -> o.accept(MUDAE_ALTAR_ITEM.get()))
+            .displayItems((p, o) -> { o.accept(MUDAE_ALTAR_ITEM.get()); o.accept(CASINO_ITEM.get()); })
             .build());
 
     public MudaeMod(IEventBus modEventBus) {
